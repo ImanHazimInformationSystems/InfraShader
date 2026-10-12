@@ -1,0 +1,74 @@
+# Local setup and operations
+
+Run PowerShell commands from the repository root. This machine has Node 22, uv/Python 3.12, local PostgreSQL/PostGIS, Docker Desktop and WSL installed. **Windows still needs the restart requested by the WSL installation. The agent has not restarted it.** No hosted account or paid service is required for this local setup.
+
+## Run the project now
+
+```powershell
+npm ci
+.\scripts\api.ps1 sync
+.\scripts\local-db.ps1 start
+.\scripts\api.ps1 migrate
+```
+
+In two separate terminals:
+
+```powershell
+.\scripts\api.ps1 dev
+```
+
+```powershell
+npm run dev
+```
+
+Open http://127.0.0.1:5173. API health: http://127.0.0.1:8000/api/v1/health; API docs: http://127.0.0.1:8000/api/docs. Browser Demo works before Auth is configured, with browser-only drafts. It is not evidence of real persistence or authorisation. Real sign-in requires the local Supabase steps below.
+
+The application database runs on 127.0.0.1:54322. Its generated credentials stay in ignored `.local/database.json`; `scripts/api.ps1` loads them automatically unless DATABASE_URL is explicitly supplied in the shell or API environment file. The application role is not a PostgreSQL superuser. A separate `infrashader_test` database is disposable. On a new checkout, `scripts/local-db.ps1 setup` downloads and configures the project-local Windows PostgreSQL/PostGIS distributions. Never copy database credentials into chat or Git.
+
+## After restarting Windows: local Auth and private Storage
+
+1. Open Docker Desktop and wait for its Linux engine to be ready.
+2. Run these commands from the repository root:
+
+```powershell
+.\scripts\supabase.ps1 start
+.\scripts\supabase.ps1 configure
+```
+
+The start command creates an ignored ES256 signing key and starts local containers. Configure writes the browser-safe public key to `apps/web/.env.local` and the server-only Storage key to `apps/api/.env`. It refuses to overwrite existing environment files. Keep the service-role key out of all VITE variables and browser code. This startup path is implemented but has not yet been exercised with a running Docker engine.
+
+If environment files already exist, use local CLI status to inspect values privately and update them manually. The browser needs VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY. The API needs SUPABASE_URL and STORAGE_SERVICE_KEY; DATABASE_URL may be omitted when using the existing portable database. Do not paste CLI secret output into chat.
+
+3. Open local Studio at http://127.0.0.1:54333. Create an email/password Auth user, confirm it locally, and copy its existing user UUID. Public signup is disabled. Local email is captured at http://127.0.0.1:54334; it does not send external messages.
+4. Provision the initial organisation membership:
+
+```powershell
+.\scripts\api.ps1 bootstrap --organisation "Group 19" --user-id "<existing-auth-user-UUID>"
+```
+
+5. Restart the API and frontend terminals, then sign in normally. The bootstrap command creates membership, not an Auth bypass. The API verifies asymmetric tokens using local JWKS and checks current membership for every protected operation.
+
+Supabase uses API port 54331 and its own internal database port 54332; application data stays in the separate PostGIS database on 54322. The configured evidence bucket is private. Uploads pass through the API's tenant checks, content/size validation and metadata stripping; downloads are authenticated API responses. Real Auth, recovery, refresh and Storage checks remain pending until these local services run.
+
+## Checks
+
+```powershell
+npm run lint
+npm run typecheck
+npm test
+npm run build
+.\scripts\api.ps1 lint
+.\scripts\api.ps1 test -q
+npm run test:e2e
+npm run test:e2e:integration
+```
+
+The API test wrapper supplies the disposable local test database. For another database explicitly set TEST_DATABASE_URL to a disposable PostGIS database whose name ends `_test`. Tests migrate isolated schemas. Never use a customer database.
+
+Browser tests use installed Edge. Integration browser tests start a test-only signed identity provider and use real PostGIS; they do not verify Supabase Auth or Storage. Both browser configurations own their preview servers and stop them afterwards. Vite still warns about large lazy map/PDF chunks; build success is not a performance acceptance claim.
+
+## Stop and recovery
+
+Stop API/web with Ctrl+C. Use `scripts/supabase.ps1 stop` for local Supabase and `scripts/local-db.ps1 stop` for portable PostgreSQL. Do not remove their volumes/data directories as a routine shutdown step.
+
+Before live use, approve retention/export/deletion and support policies. Back up the application database, Supabase identity database and private file bytes together; restore to a separate environment and verify linked geometry, rates, estimates, evidence and issued snapshots. No recovery target is accepted until that drill passes. Deployment, hosted services and paid resources require separate user approval.

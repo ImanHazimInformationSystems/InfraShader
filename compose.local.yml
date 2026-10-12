@@ -1,0 +1,19 @@
+# Optional local development dependency. No hosted resources are created.
+services:
+  database:
+    image: postgis/postgis:16-3.5
+    environment:
+      POSTGRES_USER: infrashader
+      POSTGRES_PASSWORD: local-development-only
+      POSTGRES_DB: infrashader
+    ports:
+      - '127.0.0.1:5432:5432'
+    volumes:
+      - infrashader_local_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U infrashader -d infrashader']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+volumes:
+  infrashader_local_pg:
