@@ -37,3 +37,11 @@ Quantities/rates retain four decimals; MYR line totals round HALF_UP to two deci
 ## ADR-009 Field validation and issued outputs
 
 Supported numerical results are modelled ground shade, with source/height uncertainty, night/low-sun states and stale revision checks. Until field validation passes, issued briefs/proposals omit numerical shade claims and explain that omission. Geometry schematics and saved scope remain available. PDF download always uses the immutable snapshot; changing live inputs cannot silently change an issued price.
+
+## ADR-010 Core map and local provider baseline (12 October 2026)
+
+Basic sourced building extrusions are core F03/F05, not dependent on F13 or Three.js. Only entered buildings with known heights are extruded; estimated heights are labelled, unknown heights remain 2D and block affected shade comparison.
+
+The local prototype uses OpenFreeMap Bright vector context, preserving built-in attribution, and explicit-submit Photon place search (five results, timeout, no autocomplete/bulk requests or geolocation). Both endpoints can be replaced or disabled with VITE_MAP_STYLE_URL / VITE_GEOCODER_URL=`offline`. No paid key, account or hosted deployment is created. Photon public service is a demo with reasonable-use limits and no availability promise; production search capacity/provider approval remains open. Project/private data is not sent to search; the entered query and map viewport go to their respective providers. PDF visuals remain original geometry schematics, not provider map captures.
+
+Sources reviewed: https://openfreemap.org/quick_start/ ; https://github.com/hyperknot/openfreemap ; https://github.com/komoot/photon ; https://maplibre.org/maplibre-gl-js/docs/examples/display-buildings-in-3d/ . OpenFreeMap tile-derived render heights may contain defaults, so provider extrusion layers are removed. They are never imported as authoritative building inputs.

@@ -65,6 +65,18 @@ def analyse_workspace(data: dict, timestamp: datetime, target_id: str) -> dict:
     target = next((target for target in data["targets"] if target["id"] == target_id), None)
     if target is None:
         raise ValueError("Select a saved target zone.")
+    unknown = [
+        item["name"]
+        for scenario in data["scenarios"].values()
+        for item in scenario["items"]
+        if item["kind"] == "building" and item.get("height_m") is None
+    ]
+    if unknown:
+        raise ValueError(
+            "Building height unknown: "
+            + ", ".join(sorted(set(unknown)))
+            + ". Supply height and source before comparing shade."
+        )
     boundary = project_wgs84_geometry(data["boundary"], source_crs="EPSG:4326")
     geographic_center = data["boundary"]["coordinates"][0]
     longitude = sum(p[0] for p in geographic_center[:-1]) / (len(geographic_center) - 1)

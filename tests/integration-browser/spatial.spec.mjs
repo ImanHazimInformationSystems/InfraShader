@@ -1,0 +1,77 @@
+import { test, expect } from '@playwright/test'
+import { randomUUID } from 'node:crypto'
+import { mkdir } from 'node:fs/promises'
+const polygon = (w,s,e,n) => ({ type:'Polygon',coordinates:[[[w,s],[e,s],[e,n],[w,n],[w,s]]] })
+test('saved buildings: unknown height, sourced 3D, graphical edit, reload and backend shade', async ({ page, request }) => {
+  test.setTimeout(90000)
+  const login = await request.post('http://127.0.0.1:8000/auth/v1/token', { data:{email:'fixture@example.invalid',password:'fixture-only'} })
+  const headers = { Authorization:`Bearer ${(await login.json()).access_token}` }
+  const session = await request.get('/api/v1/session',{headers})
+  const org = (await session.json()).organisations[0].id
+  const created = await request.post(`/api/v1/organisations/${org}/projects`, {headers,data:{name:'Spatial acceptance fixture',purpose:'developer_decision',stakeholder:'Fixture only',problem:'Test site',intended_users:'Test',desired_outcome:'Test',use_periods:'Noon',site:{bounds:[101.681,3.131,101.683,3.133]}}})
+  expect(created.status()).toBe(201)
+  const project = await created.json(); const endpoint=`/api/v1/organisations/${org}/projects/${project.id}`
+  const building = {id:randomUUID(),name:'Measured building',kind:'building',status:'existing',geometry:polygon(101.6812,3.1312,101.6813,3.1313),height_m:12,height_source:'Measured fixture, not field evidence',source_note:'Controlled fixture',provenance:'measured'}
+  const unknown = {...building,id:randomUUID(),name:'Unknown building',geometry:polygon(101.6815,3.1315,101.6816,3.1316),height_m:null,height_source:''}
+  const data={expected_revision:0,boundary:polygon(101.681,3.131,101.683,3.133),boundary_provenance:'estimated',boundary_source:'Test only',targets:[{id:randomUUID(),name:'Target',geometry:polygon(101.681,3.131,101.683,3.133),provenance:'estimated',source_note:'Test only'}],scenarios:{baseline:{name:'Baseline',items:[building,unknown]},option_a:{name:'Option A',items:[]},option_b:{name:'Option B',items:[]}}}
+  expect((await request.post(`${endpoint}/workspace`,{headers,data})).status()).toBe(200)
+  await page.goto('/')
+  await page.getByLabel('Email address').fill('fixture@example.invalid'); await page.getByLabel('Password',{exact:true}).fill('fixture-only'); await page.getByRole('button',{name:'Sign in',exact:true}).click()
+  await page.getByRole('button',{name:/Spatial acceptance fixture/}).click()
+  await page.getByRole('button',{name:'Open geometry workspace'}).click()
+  const canvasRegion=page.getByRole('region',{name:'Geometry drawing canvas'})
+  await expect(canvasRegion).toHaveAttribute('data-unknown-buildings','1')
+  await page.getByLabel('Date/time with explicit timezone offset').fill('2026-03-21T12:00:00+08:00')
+  await page.getByRole('button',{name:'Calculate all three scenarios'}).click()
+  await expect(page.getByRole('alert').filter({hasText:'Building height unknown'})).toBeVisible()
+  await page.getByRole('button',{name:'Edit Unknown building',exact:true}).click()
+  await page.getByLabel('Height above ground (m)').fill('8')
+  await page.getByLabel('Height source and uncertainty').fill('Estimated fixture height')
+  await page.getByLabel('Provenance',{exact:true}).selectOption('estimated')
+  await page.getByRole('button',{name:'Apply item changes'}).click()
+  await page.getByRole('button',{name:'Validate & save workspace'}).click()
+  await expect(page.getByText('Workspace revision 2 saved.',{exact:false})).toBeVisible()
+  await page.getByRole('button',{name:'3D buildings',exact:true}).click()
+  await expect(canvasRegion).toHaveAttribute('data-view-mode','3d')
+  await expect(canvasRegion).toHaveAttribute('data-rendered-buildings',/^[1-9]/)
+  await mkdir('artifacts',{recursive:true}); await canvasRegion.screenshot({path:'artifacts/spatial-3d-fixture.png'})
+  await page.getByRole('button',{name:'2D plan',exact:true}).click()
+  await page.getByRole('button',{name:'Edit Measured building',exact:true}).click()
+  const field=page.getByLabel('Longitude, latitude coordinates')
+  const before=await field.inputValue()
+  const canvas=canvasRegion.locator('canvas'); await canvas.scrollIntoViewIfNeeded()
+  await page.waitForTimeout(650) // finish the documented camera fit animation
+  const box=await canvas.boundingBox()
+  // This small square fits at the editor's capped zoom 19; Web Mercator world is 512*2^19.
+  const halfWidth=512*2**19/360*0.0001/2
+  const halfHeight=halfWidth/Math.cos(3.13125*Math.PI/180)
+  const x=box.x+box.width/2-halfWidth, y=box.y+box.height/2+halfHeight
+  await page.mouse.move(x,y); await page.mouse.down(); await page.mouse.move(x-18,y+12,{steps:8}); await page.mouse.up()
+  await expect(field).not.toHaveValue(before)
+  await page.getByRole('button',{name:'Apply item changes'}).click()
+  await page.getByRole('button',{name:'Validate & save workspace'}).click()
+  await expect(page.getByText('Workspace revision 3 saved.',{exact:false})).toBeVisible()
+  const saved=await (await request.get(`${endpoint}/workspace`,{headers})).json()
+  expect(saved.data.scenarios.baseline.items[0].geometry).not.toEqual(building.geometry)
+  expect(saved.data.scenarios.baseline.items[0].status).toBe('existing')
+  await page.getByRole('button',{name:'Calculate all three scenarios'}).click()
+  await page.getByRole('button',{name:'Show baseline shade on map'}).click()
+  await expect(canvasRegion).toHaveAttribute('data-rendered-shadows',/^[1-9]/)
+  await canvasRegion.screenshot({path:'artifacts/spatial-shadow-fixture.png'})
+  await page.getByLabel('Decision criteria (one per line)').fill('Ground shade\nField evidence')
+  await page.getByLabel('Review notes', {exact:true}).fill('Need measured site observations before accepting shade accuracy.')
+  await page.getByRole('combobox', {name:'Review status',exact:true}).selectOption('needs_information')
+  await page.getByRole('button', {name:'Save review',exact:true}).click()
+  await expect(page.getByText('Review revision 1 saved.',{exact:true})).toBeVisible()
+  const reviews=await (await request.get(`${endpoint}/reviews`,{headers})).json()
+  expect(reviews.items[0].payload.analysis_id).toBeTruthy()
+  expect(reviews.items[0].payload.criteria).toEqual(['Ground shade','Field evidence'])
+  await page.getByRole('region',{name:'Option comparison and review'}).screenshot({path:'artifacts/saved-review-fixture.png'})
+  await page.reload()
+  await page.getByRole('button',{name:/Spatial acceptance fixture/}).click()
+  await page.getByRole('button',{name:'Open geometry workspace'}).click()
+  await expect(canvasRegion).toHaveAttribute('data-known-buildings','2')
+  await expect(canvasRegion).toHaveAttribute('data-unknown-buildings','0')
+  await expect(page.getByText('Need measured site observations before accepting shade accuracy.',{exact:true})).toBeVisible()
+  await expect(page.getByText('Review 1: needs information / option a',{exact:true})).toBeVisible()
+})

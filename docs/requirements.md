@@ -1,25 +1,42 @@
-# Requirement implementation map
+# Feature acceptance matrix
 
-SRS v0.3 IDs are stable. Status distinguishes code from accepted verification. See [validation.md](validation.md) for executed checks and blockers.
+Updated 12 October 2026; audited against the actual repository and all F/D gaps. One row covers the whole feature: passing a subset does not make it verified working. Current work: [completion-plan.md](completion-plan.md). Migration baseline 0001-0004; new spatial fields use the existing validated Workspace JSONB contract without rewriting historical records.
 
-| Requirement IDs / features | Code or planned module | Evidence / current status |
-|---|---|---|
-| IF-02, APP-19/20, QLT-06/07; D10 | API main/config/errors; web API status; locks/CI/docs | Implemented locally; lint/typecheck/build and health checks pass; hosted CI not run |
-| FR-01–03/57; F01 | Project schemas/repository/routes; web brief | Real PostGIS brief/site/reload and both-purpose browser paths pass; real Supabase Auth pending |
-| FR-58–60, UI-04, IF-03/05/06; F03 | Explore/MapLibre/numeric extent; project site | Rendered extent and numeric selection browser-tested; provider D2 pending |
-| APP-01–05, IF-01, SEC-01/02; D01/D02 | Supabase web session + JWT/membership backend | JWT/current-membership tenant tests pass; real Supabase and management UI pending |
-| APP-06–08/13/14/16, UI-01/02/05; D03/D04/D06/D07 | Dashboard/project editing/archive/conflict | Save/archive/conflict and responsive browser evidence recorded; full session recovery pending |
-| DATA-01/02, SEC-03/07 | Tenant FKs, atomic revision updates, no browser privileged keys | Real DB tenant/revision/revocation tests pass; deployment and live Storage security unverified |
-| FR-08–12, IF-03, QLT-03; F04 | Geometry domain kernel (M2) | Canonical area/length/count, CRS rejection, drawing/save/reload implemented and tested; full field/capacity checks pending |
-| FR-04–07/13–14/61–63; F02/F05/F15 | Workspace and private evidence modules | Targets/opaque buildings/canopies/work items and photo validation implemented; live Storage and evidence links pending |
-| FR-15–25/27, APP-15; F06/F07 | Analysis module | pvlib solar, supported ground projection, union/clip, night/low-sun and stale states tested; field validation and map overlay pending; numerical claims omitted from issued PDFs |
-| FR-26/28/29; F08 | Workspace Baseline/Option A/Option B | Independent saved scenarios and comparison calculations tested; full comparison usability pending |
-| FR-30–48; F09–F11 | Catalogue/estimate/pricing | Dated rates, Decimal estimates, explicit charge editor, duplicate guards and selling methods tested; commercial policy and catalogue management pending |
-| FR-49–56/64–68, IF-07, SEC-06; F12/F14 | Snapshot/output modules | Distinct immutable allowlisted outputs and two-page PDF downloads tested for both purposes; independent review history and full layout/restore matrix pending |
-| APP-09–12/17–18, DATA-03/04, SEC-04/05/08; D05/D09 | Settings/file/lifecycle modules | Private photo proxy/metadata implemented; live Storage, profile/settings, lifecycle and privacy controls incomplete |
-| PERF-01/02, REL-01/02, QLT-01–05; D08 | Browser/limit/load/recovery checks | 18 responsive foundation tests and two real-DB browser workflows pass; physical touch/accessibility/load/recovery acceptance pending |
-| BLD-01–14; F13 | Separate building stages | G9 gated |
-| AI-01–04, PLN-01–04; F16/F17 | Optional narrative/reference adapters | G10 gated |
-| TER-01–06, OBJ-01–04, AST-01–05; F18–F20 | Separate terrain/assets modules | G11 gated independently |
+Status vocabulary: verified working; partially working; missing; blocked by external evidence; intentionally gated. External evidence gates are additional to implementation status.
 
-No row implies completion of a whole requirement from a placeholder, demo, proposed test, or source reference. Maintain the map as each saved workflow is implemented.
+| ID | Feature / status | API and persistence | Code / test evidence | Remaining acceptance |
+|---|---|---|---|---|
+| F01 | Brief: **partially working** | Project; project GET/POST/PATCH | [code](../apps/api/app/projects.py); [tests](../apps/api/tests/test_database_integration.py) | Project type/budget/priorities/constraints, stakeholder records/history missing. |
+| F02 | Evidence: **partially working** | Evidence; project evidence GET/POST/content | [code](../apps/api/app/evidence.py); [tests](../apps/api/tests/test_evidence.py) | Gallery/editing/links/observations/retention missing; live bytes pending. |
+| F03 | Map: **partially working** | Project.site; project endpoints | [code](../apps/web/src/components/SiteMap.tsx); [tests](../tests/browser/foundation.spec.mjs) | Basemap/search/two-corner extent passed responsive and live-provider checks; production provider capacity/terms acceptance remains open. |
+| F04 | Geometry: **partially working** | Workspace JSONB/revision; workspace GET/POST | [code](../apps/api/app/workspace.py); [tests](../apps/api/tests/test_workspace.py) | Saved work-item vertex editing/reload passed real-DB browser check; history, target graphical editing and fine-grained dependencies remain incomplete. |
+| F05 | Buildings: **partially working** | Workspace.items height/source; workspace GET/POST | [code](../apps/web/src/components/DrawingMap.tsx); [tests](../apps/api/tests/test_shade.py) | Entered-height 3D and unknown-height analysis rejection verified; optional building import not implemented. |
+| F06 | Shade: **partially working** | Artifact; analyses POST/artifacts GET | [code](../apps/api/app/domain/shade.py); [tests](../apps/api/tests/test_shade.py) | Stored backend shadow overlay verified; local-time controls, field evidence and capacity benchmark pending. |
+| F07 | Canopy: **partially working** | Workspace/Artifact; workspace/analyses | [code](../apps/api/app/domain/shade.py); [tests](../apps/api/tests/test_shade.py) | Roof projection exists; dimension/rotation editor missing. |
+| F08 | Comparison: **partially working** | Workspace scenarios; artifacts and reviews GET/POST | [code](../apps/web/src/components/ReviewPanel.tsx); [tests](../tests/integration-browser/spatial.spec.mjs) | Same-revision comparison cards and independent saved preferred-option review implemented; matched visual comparison and full tradeoff workflow remain incomplete. |
+| F09 | Catalogue: **partially working** | CatalogueRate; rates GET/POST | [code](../apps/api/app/calculations.py); [tests](../apps/api/tests/test_workflow_integration.py) | Search/category/archive/edit/pagination missing. |
+| F10 | Estimate: **partially working** | Artifact; estimates POST | [code](../apps/api/app/calculations.py); [tests](../apps/api/tests/test_pricing.py) | Full line editor/map links and revision comparison missing. |
+| F11 | Pricing: **partially working** | Artifact; estimates POST | [code](../apps/api/app/domain/pricing.py); [tests](../apps/api/tests/test_pricing.py) | Arithmetic/permissions exist; complete breakdown/explanations and commercial approval pending. |
+| F12 | Proposal: **partially working** | Artifact immutable trigger; proposals POST | [code](../apps/web/src/components/IssuedPdf.tsx); [tests](../tests/integration-browser/workflow.spec.mjs) | Preview/narrative/full visuals/evidence/retained-byte lifecycle missing; no validated shade claims. |
+| F13 | Building surface: **intentionally gated** | No schema/routes | [code](../docs/decisions.md); No feature tests yet | Stage A scope gate; IFC samples/rights for B; explicit later DXF approval. |
+| F14 | Developer review: **partially working** | Artifact; reviews GET/POST and developer-briefs POST | [code](../apps/api/app/reviews.py); [tests](../apps/api/tests/test_reviews.py) | Independent notes/status/preferred-option history implemented with conflict and stale checks; full both-budget issue workflow remains incomplete. |
+| F15 | Basic objects: **partially working** | Workspace.items; workspace GET/POST | [code](../apps/web/src/components/GeometryWorkspace.tsx); [tests](../apps/api/tests/test_workspace.py) | Palette/categories/tree crown metadata/visibility incomplete; no tree shade. |
+| F16 | Explanation: **intentionally gated** | No schema/routes | [code](../docs/decisions.md); No feature tests yet | Templates/model review conditional after core; G10 evidence. |
+| F17 | Plan overlay: **intentionally gated** | No schema/routes | [code](../docs/decisions.md); No feature tests yet | G10 samples/calibration/privacy evidence. |
+| F18 | Terrain/pond: **intentionally gated** | No schema/routes | [code](../docs/decisions.md); No feature tests yet | G11 scope, terrain alignment/limits/undo evidence. |
+| F19 | 3D preset library: **intentionally gated** | No schema/routes | [code](../docs/decisions.md); No feature tests yet | G11 asset rights/dimensions/performance. |
+| F20 | GLB import: **intentionally gated** | No schema/routes | [code](../docs/decisions.md); No feature tests yet | G11 rights/security/resources/units/performance. |
+| D01 | Identity: **partially working** | Supabase Auth; session GET | [code](../apps/web/src/components/AuthPanel.tsx); [tests](../apps/api/tests/test_auth.py) | Real login/refresh/logout passed; recovery/expiry draft preservation pending. |
+| D02 | Membership: **partially working** | Membership; session GET; operator bootstrap | [code](../apps/api/app/projects.py); [tests](../apps/api/tests/test_database_integration.py) | Admin UI/invitations/role edits/revocation/last-admin protections missing. |
+| D03 | Dashboard: **partially working** | Project; projects GET | [code](../apps/web/src/App.tsx); [tests](../tests/browser/foundation.spec.mjs) | Search/sort/stage and URL navigation missing. |
+| D04 | Project controls: **partially working** | Project revision/archive; PATCH | [code](../apps/api/app/projects.py); [tests](../apps/api/tests/test_database_integration.py) | Archive/restore exists; deletion/retention/history incomplete. |
+| D05 | Settings: **missing** | No preference schema/routes | [code](../apps/web/src/App.tsx); No feature tests yet | Profile/organisation/preferences/units/default pricing pages missing. |
+| D06 | Safe editing: **partially working** | Workspace/Project revision; writes | [code](../apps/web/src/components/GeometryWorkspace.tsx); [tests](../apps/api/tests/test_database_integration.py) | Unsaved guards partial; history/recovery/fine-grained invalidation incomplete. |
+| D07 | Errors: **partially working** | Structured API errors | [code](../apps/api/app/errors.py); [tests](../apps/api/tests/test_api.py) | Field-level recovery consistency and avoiding reload repair incomplete. |
+| D08 | Accessibility: **partially working** | Frontend components | [code](../apps/web/src/styles.css); [tests](../tests/browser/foundation.spec.mjs) | 24 responsive browser checks passed; full keyboard/contrast/screenreader/physical touch pending. |
+| D09 | Lifecycle: **partially working** | Evidence/Storage/DB | [code](../apps/api/app/evidence.py); [tests](../apps/api/tests/test_evidence.py) | Request/export/deletion/retention and joint restore drill missing. |
+| D10 | Operations: **partially working** | health/readiness/request IDs | [code](../apps/api/app/main.py); [tests](../apps/api/tests/test_api.py) | Support/monitoring/alerts/throttling/capacity/rollback incomplete. |
+
+## Cross-cutting acceptance
+
+SRS G1-G8 remain open: scope/policy, full tenant/Auth/Storage checks, field shade, independent takeoffs, PDF/review completeness, accessibility/performance, DB+file recovery, and user pilots. G9-G11 govern the staged rows. Hosted CI and deployment have not run. Optional GeoPandas/OSMnx/pybdshadow/Ollama are not missing mandatory dependencies. Existing deterministic tests do not establish field accuracy.

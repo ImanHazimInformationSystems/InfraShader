@@ -52,3 +52,22 @@ def test_saved_target_scenario_clip_and_night():
         data, datetime.fromisoformat("2026-03-21T00:00:00+08:00"), data["targets"][0]["id"]
     )
     assert night["status"] == "night" and night["scenarios"] == {}
+
+
+def test_unknown_building_is_preserved_but_blocks_shade():
+    raw = fixture_workspace()
+    building = raw["scenarios"]["option_a"]["items"][0]
+    building.update(kind="building", height_m=None, height_source="")
+    data = validate_workspace(WorkspaceInput(**raw), [101.68, 3.13, 101.69, 3.14])
+    assert data["scenarios"]["option_a"]["items"][0]["height_m"] is None
+    with pytest.raises(ValueError, match="Building height unknown"):
+        analyse_workspace(
+            data, datetime.fromisoformat("2026-03-21T12:00:00+08:00"), data["targets"][0]["id"]
+        )
+    building.update(height_m=12, height_source="Measured fixture")
+    data = validate_workspace(WorkspaceInput(**raw), [101.68, 3.13, 101.69, 3.14])
+    result = analyse_workspace(
+        data, datetime.fromisoformat("2026-03-21T12:00:00+08:00"), data["targets"][0]["id"]
+    )
+    assert result["status"] == "modeled"
+    assert result["scenarios"]["option_a"]["coverage_percent"] > 0

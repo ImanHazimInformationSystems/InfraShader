@@ -9,6 +9,6 @@ export default defineConfig({
   use: { baseURL: 'http://127.0.0.1:5173', channel: process.env.PLAYWRIGHT_CHANNEL || (process.platform === 'win32' ? 'msedge' : undefined), viewport: { width: 1280, height: 900 }, trace: 'retain-on-failure' },
   webServer: [
     { command: `${uv} run --frozen uvicorn tests.browser_server:app --host 127.0.0.1 --port 8000`, cwd: path.resolve('apps/api'), url: 'http://127.0.0.1:8000/api/v1/health', reuseExistingServer: false, timeout: 60000 },
-    { command: 'npm run dev', url: 'http://127.0.0.1:5173', reuseExistingServer: false, timeout: 60000, env: { VITE_SUPABASE_URL: 'http://127.0.0.1:8000', VITE_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_browser_fixture' } },
+    { command: 'npm run dev', url: 'http://127.0.0.1:5173', reuseExistingServer: false, timeout: 60000, env: { VITE_MAP_STYLE_URL: 'offline', VITE_SUPABASE_URL: 'http://127.0.0.1:8000', VITE_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_browser_fixture' } },
   ],
 })

@@ -1,4 +1,6 @@
-# InfraShader maintained build plan
+# InfraShader earlier build checkpoint
+
+Current work is maintained in [completion-plan.md](completion-plan.md); feature status is in [requirements.md](requirements.md).
 
 Updated 11 October 2026. Branch: `build/ground-site-foundation`.
 
@@ -17,9 +19,9 @@ User requests authorise local implementation and testing. References are require
 
 No partial milestone is a full requirement or release acceptance claim. Browser Demo is local draft storage and never real-service evidence. Test identity fixtures are not evidence that Supabase Auth works.
 
-## Next checkpoint after the user restarts Windows
+## Next checkpoint
 
-1. Start Docker Desktop, verify Linux engine, start local Supabase using `scripts/supabase.ps1 start` and configure ignored local environment files.
+1. Completed 12 October: Linux Docker engine running; local Supabase started, Auth JWKS/private bucket/Studio checks passed, ignored environment files configured. Signing-key bootstrap error corrected.
 2. Provision local test users and organisation memberships; exercise real login/recovery/refresh/sign-out and private Storage access without hosted services.
 3. Complete membership/settings/profile and independently saved review history; finish evidence linking and pricing review. Preserve backend capability boundaries.
 4. Run database-plus-private-file restore, security/limits and full two-purpose browser regression; update requirement evidence.
@@ -29,6 +31,6 @@ No partial milestone is a full requirement or release acceptance claim. Browser 
 
 Local PostgreSQL 17.11/PostGIS 3.6.2 runs from ignored `.local/tools` on 127.0.0.1:54322. Application role is not a database superuser. Application and disposable `_test` databases are separate. Credentials stay in ignored `.local/database.json`.
 
-Docker Desktop 4.94 and WSL 2.7.13 were installed with approval. Windows reports a required restart for VirtualMachinePlatform and WSL features; no restart was initiated. Supabase is configured for separate local ports 54331-54334. No remote project is linked.
+Docker Desktop 4.94 and WSL 2.7.13 were installed with approval. Following the user restart/setup, the Linux engine and local Supabase were verified running on 12 October. Supabase is configured for separate local ports 54331-54334. No remote project is linked.
 
 See [validation.md](validation.md), [requirements.md](requirements.md), [decisions.md](decisions.md) and [technology-stack.md](technology-stack.md).

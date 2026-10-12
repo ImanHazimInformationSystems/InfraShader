@@ -14,7 +14,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from starlette.exceptions import HTTPException
 
-from app import calculations, evidence, projects, workspace
+from app import calculations, evidence, projects, reviews, workspace
 from app.auth import TokenVerifier, current_user, get_verifier
 from app.body_limit import BodyLimit
 from app.config import Settings, get_settings
@@ -317,3 +317,24 @@ def evidence_download(
             "Content-Disposition": f'attachment; filename="evidence-{evidence_id}.jpg"',
         },
     )
+
+
+@app.get("/api/v1/organisations/{organisation_id}/projects/{project_id}/reviews")
+def review_history(
+    organisation_id: UUID,
+    project_id: UUID,
+    user: Annotated[UUID, Depends(current_user)],
+    db: Annotated[Session, Depends(database_session)],
+):
+    return reviews.list_reviews(db, organisation_id, project_id, user)
+
+
+@app.post("/api/v1/organisations/{organisation_id}/projects/{project_id}/reviews", status_code=201)
+def save_option_review(
+    organisation_id: UUID,
+    project_id: UUID,
+    data: reviews.ReviewInput,
+    user: Annotated[UUID, Depends(current_user)],
+    db: Annotated[Session, Depends(database_session)],
+):
+    return reviews.save_review(db, organisation_id, project_id, user, data)

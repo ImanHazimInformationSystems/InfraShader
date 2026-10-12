@@ -44,7 +44,9 @@ enable_signup = false
 enable_anonymous_sign_ins = false
 minimum_password_length = 8
 [auth.email]
-enable_signup = false
+# Enables the email provider (including login). Public signup remains disabled
+# by auth.enable_signup above.
+enable_signup = true
 enable_confirmations = true
 secure_password_change = true
 [realtime]

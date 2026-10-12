@@ -3,6 +3,7 @@
 import argparse
 from uuid import UUID
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.config import get_settings
@@ -26,9 +27,21 @@ def main() -> None:
     if not settings.database_url:
         parser.error("Set DATABASE_URL in the operator environment")
     with Session(engine_for(settings.database_url)) as session, session.begin():
+        existing = session.scalars(
+            select(Organisation.id)
+            .join(Membership)
+            .where(Organisation.name == name, Membership.user_id == args.user_id)
+        ).all()
+        if existing:
+            print(
+                f"Already provisioned: {len(existing)} matching organisation membership(s). "
+                "No changes made; existing roles and access status preserved."
+            )
+            return
         organisation = Organisation(name=name)
         session.add(organisation)
         session.flush()
+        organisation_id = organisation.id
         session.add(
             Membership(
                 organisation_id=organisation.id,
@@ -38,7 +51,7 @@ def main() -> None:
                 active=True,
             )
         )
-    print(f"Provisioned organisation {organisation.id}; existing auth user must sign in normally.")
+    print(f"Provisioned organisation {organisation_id}; existing auth user must sign in normally.")
 
 
 if __name__ == "__main__":

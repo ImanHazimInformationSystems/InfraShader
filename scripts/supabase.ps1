@@ -9,9 +9,18 @@ Push-Location (Join-Path $PSScriptRoot '..')
 try {
     if ($Task -eq 'start') {
         if (-not (Test-Path -LiteralPath 'supabase/signing_keys.json')) {
-            $key = & npx supabase gen signing-key --algorithm ES256
+            # The CLI loads signing_keys_path before generating keys. Bootstrap
+            # with a separate minimal config that does not reference the missing key.
+            $bootstrapRoot = Join-Path $PWD '.local/signing-key-bootstrap'
+            $bootstrapConfig = Join-Path $bootstrapRoot 'supabase'
+            New-Item -ItemType Directory -Force -Path $bootstrapConfig | Out-Null
+            [IO.File]::WriteAllText((Join-Path $bootstrapConfig 'config.toml'), 'project_id = "infrashader-key-bootstrap"')
+            $key = & npx supabase gen signing-key --algorithm ES256 --workdir $bootstrapRoot
             if ($LASTEXITCODE -ne 0) { throw 'Local signing key generation failed.' }
             $parsed = $key | ConvertFrom-Json
+            if (-not $parsed -or @($parsed).Count -ne 1 -or $parsed.kty -ne 'EC' -or $parsed.crv -ne 'P-256' -or -not $parsed.d) {
+                throw 'Local signing key generation returned an unexpected format; no key file was written.'
+            }
             $encoded = ConvertTo-Json -InputObject @($parsed) -Depth 10
             [IO.File]::WriteAllText((Join-Path $PWD 'supabase/signing_keys.json'), $encoded)
         }

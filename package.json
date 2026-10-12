@@ -15,10 +15,12 @@
     "typecheck": "npm run typecheck --workspace apps/web",
     "test": "npm run test --workspace apps/web",
     "test:e2e": "playwright test",
-    "test:e2e:integration": "playwright test --config playwright.integration.config.mjs"
+    "test:e2e:integration": "playwright test --config playwright.integration.config.mjs",
+    "format:check": "prettier --check \"apps/web/src/components/{SiteMap,DrawingMap,PlaceSearch,GeometryWorkspace,CalculationsPanel,ReviewPanel}.tsx\" apps/web/src/services/map.ts apps/web/src/domain/calculations.ts"
   },
   "devDependencies": {
     "@playwright/test": "1.64.0",
+    "prettier": "3.9.10",
     "supabase": "^2.120.0"
   }
 }

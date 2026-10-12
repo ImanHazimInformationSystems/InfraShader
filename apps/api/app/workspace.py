@@ -137,11 +137,13 @@ def validate_workspace(data: WorkspaceInput, site_bounds: tuple | list) -> dict:
                     expected_unit = "m" if kind == "path" else "m2"
                     if quantity.unit != expected_unit:
                         raise GeometryValidationError(f"{kind} requires {expected_unit} geometry.")
-                if kind in ("building", "canopy") and (
-                    not item["height_m"] or not item["height_source"]
+                if (kind == "canopy" and item["height_m"] is None) or (
+                    kind in ("building", "canopy")
+                    and item["height_m"] is not None
+                    and not item["height_source"]
                 ):
                     raise GeometryValidationError(
-                        "Buildings and canopy roofs need height and its source."
+                        "Known heights need a source; canopy roofs require a known height."
                     )
                 active = select_active_quantity(
                     quantity,

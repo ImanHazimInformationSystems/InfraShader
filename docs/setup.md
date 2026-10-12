@@ -1,6 +1,6 @@
 # Local setup and operations
 
-Run PowerShell commands from the repository root. This machine has Node 22, uv/Python 3.12, local PostgreSQL/PostGIS, Docker Desktop and WSL installed. **Windows still needs the restart requested by the WSL installation. The agent has not restarted it.** No hosted account or paid service is required for this local setup.
+Run PowerShell commands from the repository root. This machine has Node 22, uv/Python 3.12, local PostgreSQL/PostGIS, Docker Desktop and WSL installed. Local Docker/Supabase startup was verified on 12 October 2026 after the restart/setup. No hosted account or paid service is required for this local setup.
 
 ## Run the project now
 
@@ -35,7 +35,7 @@ The application database runs on 127.0.0.1:54322. Its generated credentials stay
 .\scripts\supabase.ps1 configure
 ```
 
-The start command creates an ignored ES256 signing key and starts local containers. Configure writes the browser-safe public key to `apps/web/.env.local` and the server-only Storage key to `apps/api/.env`. It refuses to overwrite existing environment files. Keep the service-role key out of all VITE variables and browser code. This startup path is implemented but has not yet been exercised with a running Docker engine.
+The start command creates an ignored ES256 signing key and starts local containers. Configure writes the browser-safe public key to `apps/web/.env.local` and the server-only Storage key to `apps/api/.env`. It refuses to overwrite existing environment files. Keep the service-role key out of all VITE variables and browser code. This startup path has passed first-run and repeated-start checks with the local Docker engine.
 
 If environment files already exist, use local CLI status to inspect values privately and update them manually. The browser needs VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY. The API needs SUPABASE_URL and STORAGE_SERVICE_KEY; DATABASE_URL may be omitted when using the existing portable database. Do not paste CLI secret output into chat.
 
@@ -48,7 +48,7 @@ If environment files already exist, use local CLI status to inspect values priva
 
 5. Restart the API and frontend terminals, then sign in normally. The bootstrap command creates membership, not an Auth bypass. The API verifies asymmetric tokens using local JWKS and checks current membership for every protected operation.
 
-Supabase uses API port 54331 and its own internal database port 54332; application data stays in the separate PostGIS database on 54322. The configured evidence bucket is private. Uploads pass through the API's tenant checks, content/size validation and metadata stripping; downloads are authenticated API responses. Real Auth, recovery, refresh and Storage checks remain pending until these local services run.
+Supabase uses API port 54331 and its own internal database port 54332; application data stays in the separate PostGIS database on 54322. The configured evidence bucket is private. Uploads pass through the API's tenant checks, content/size validation and metadata stripping; downloads are authenticated API responses. Local email login, refresh and logout have passed direct service checks. Browser recovery and private file transfer remain pending acceptance.
 
 ## Checks
 
@@ -72,3 +72,14 @@ Browser tests use installed Edge. Integration browser tests start a test-only si
 Stop API/web with Ctrl+C. Use `scripts/supabase.ps1 stop` for local Supabase and `scripts/local-db.ps1 stop` for portable PostgreSQL. Do not remove their volumes/data directories as a routine shutdown step.
 
 Before live use, approve retention/export/deletion and support policies. Back up the application database, Supabase identity database and private file bytes together; restore to a separate environment and verify linked geometry, rates, estimates, evidence and issued snapshots. No recovery target is accepted until that drill passes. Deployment, hosted services and paid resources require separate user approval.
+
+
+## Current spatial and review workflow
+
+Open a project and choose **Open geometry workspace**. Save a boundary and targets, then add buildings with explicit height/source information. **3D buildings** renders entered known heights; unknown heights remain footprints and prevent shade calculation. Use **2D plan** to edit a saved item: select its Edit button, drag a vertex, Apply item changes, then Validate & save workspace. Numeric coordinates remain available.
+
+Run **Calculate all three scenarios**, then **Show baseline shade on map** (or the selected option). The overlay comes from the stored backend analysis; edits hide stale overlays. Flat-ground model limitations and field-validation gates still apply.
+
+**Compare saved options** displays the same saved analysis across Baseline/A/B and available option estimates. **Save an option review** stores criteria, notes, preferred option and status independently of an issued document. **Reload review history** preserves entered notes when resolving a concurrent-review conflict. Changing the workspace or brief marks older reviews stale.
+
+Explore Map uses OpenFreeMap context and explicit-submit Photon place search. Preserve provider attribution; public service availability is not guaranteed. Set `VITE_MAP_STYLE_URL=offline` and `VITE_GEOCODER_URL=offline` in the ignored web environment file to disable public providers. These services receive viewport/query information; they do not receive project records. The ordinary test suite disables external map tiles; `npx playwright test --config playwright.providers.config.mjs` separately checks actual provider rendering/search.

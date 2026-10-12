@@ -293,7 +293,7 @@ def get_artifacts(session, org_id, project_id, user_id):
     workspace = session.get(Workspace, project_id)
     records = session.scalars(
         select(Artifact)
-        .where(Artifact.project_id == project_id)
+        .where(Artifact.project_id == project_id, Artifact.kind != "review")
         .order_by(Artifact.created_at.desc(), Artifact.id)
         .limit(100)
     ).all()

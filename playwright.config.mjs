@@ -19,6 +19,6 @@ export default defineConfig({
   ],
   webServer: [
     { command: `${uv} run --frozen uvicorn app.main:app --host 127.0.0.1 --port 8000`, cwd: path.resolve('apps/api'), url: 'http://127.0.0.1:8000/api/v1/health', reuseExistingServer: !process.env.CI, timeout: 60000 },
-    { command: 'npm run dev', url: 'http://127.0.0.1:5173', reuseExistingServer: !process.env.CI, timeout: 60000 },
+    { command: 'npm run dev', env: { VITE_MAP_STYLE_URL: 'offline' }, url: 'http://127.0.0.1:5173', reuseExistingServer: !process.env.CI, timeout: 60000 },
   ],
 })
