@@ -30,4 +30,11 @@ No field observations, physical touch device, customer pilots, hosted CI or depl
 
 ## Next exact commands
 
-Continue milestone 3: matched visual comparison, catalogue pagination/search/version management and map-linked itemised takeoff. Add concurrent-review browser recovery coverage. Then proceed through brief/evidence and member/settings slices. Run `scripts/api.ps1 lint`, `scripts/api.ps1 test -q`, frontend lint/typecheck/test/build and relevant browser tests after each slice. Browser configurations own ports 8000/5173 and must run sequentially. Tests using signed fixture identity remain separate from real Supabase acceptance.
+Milestone 3 catalogue search/filter/pagination/version editing is implemented. Continue with catalogue categories/archive, matched visual comparison and map-linked itemised takeoff. Add concurrent-review browser recovery coverage. Then proceed through brief/evidence and member/settings slices. Run `scripts/api.ps1 lint`, `scripts/api.ps1 test -q`, frontend lint/typecheck/test/build and relevant browser tests after each slice. Browser configurations own ports 8000/5173 and must run sequentially. Tests using signed fixture identity remain separate from real Supabase acceptance.
+
+
+## Catalogue checkpoint
+
+Implemented server-side literal code/description search, unit/basis filters, bounded pagination and authorised single-version retrieval. The browser can browse pages, prefill a rate for revision, and save a new immutable-reference version. Assigned IDs are fetched independently of search/pages; creating a version does not silently rebind saved scope. Internal amounts remain omitted for members without pricing capability. No migration or service changes required.
+
+Backend: 146 tests passed, zero skipped; Ruff passed. Frontend: 20 unit tests, lint/typecheck/build/format passed. Real-PostGIS browser catalogue and output regressions are recorded in validation.md. Existing large-bundle warnings remain. F09 is still partial because category/archive/recovery work remains; no core or release gate is claimed complete.

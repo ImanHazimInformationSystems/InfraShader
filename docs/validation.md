@@ -84,3 +84,16 @@ Independent review persistence uses the existing append-only Artifact table, sco
 No migration is needed for the nullable building height already supported in Workspace JSONB or the existing artifact kind storage. Historical records and existing user organisations were preserved. No push, deployment, paid resource, external message or release acceptance occurred.
 
 Remaining: full matched-map comparison, catalogue/takeoff management, structured briefs, evidence gallery/lifecycle, member/settings administration, real Supabase browser recovery/private byte transfer, joint restore drill, accessibility/performance matrix, policy decisions, field observations and representative pilots. F13/F16-F20 remain gated. Public provider styles emitted nonfatal upstream highway-shield filter warnings; public-service SLA and production provider approval remain open.
+
+
+## Catalogue search and immutable-reference version editing - 12 October 2026
+
+- Backend Ruff/format passed; 146 pytest tests passed against disposable PostGIS, zero skipped and no warnings.
+- Frontend lint, typecheck, 20 unit tests, build and incremental formatting passed. Large initial/map/PDF bundle warnings remain.
+- All four real-PostGIS browser workflows passed together: paginated catalogue/filtering, spatial/review, developer PDF, contractor PDF. Fixtures still use signed test identity, not real Supabase.
+- New database checks cover page ordering/total, literal wildcard search, unit/basis filters, fresh-session old-version retrieval, restricted amounts and foreign/unauthorised access.
+- Browser checks seed 21 persisted rates, navigate next/previous pages, filter by unit, search/no-results, revise a copied rate and retain the original assigned version through subsequent estimates and PDFs. Inspected artifacts/catalogue-filtered.png.
+- The first expanded browser run exposed an old test assumption that the organisation had only one rate. The test now selects the explicit version under test, and the complete rerun passed. Frontend lint findings were corrected before final verification.
+- The prior 24 foundation/device checks and two live-provider checks were not repeated for this catalogue-only change. No physical touch, field, pilot, live Supabase recovery/Storage or deployment acceptance was added.
+
+F09 remains partial: categories, archive/restore and unsaved catalogue-form recovery are not implemented. F10-F12, administration/settings and the other open rows remain tracked in requirements.md. No migration was necessary; existing rate and estimate records were preserved. No push, deployment or paid resource use.

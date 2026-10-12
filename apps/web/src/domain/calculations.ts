@@ -15,7 +15,12 @@ export const rateSchema = z.object({
   source_note: z.string(),
   includes: z.array(z.string()),
 })
-export const rateListSchema = z.object({ items: z.array(rateSchema), limit: z.number() })
+export const rateListSchema = z.object({
+  items: z.array(rateSchema),
+  limit: z.number(),
+  offset: z.number(),
+  total: z.number(),
+})
 export type Rate = z.infer<typeof rateSchema>
 const artifactBase = {
   id: z.uuid(),

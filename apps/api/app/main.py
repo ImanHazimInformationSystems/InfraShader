@@ -1,7 +1,7 @@
 import logging
 import re
 from time import perf_counter
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import UUID, uuid4
 
 import jwt
@@ -203,8 +203,24 @@ def workspace_save(
 
 
 @app.get("/api/v1/organisations/{organisation_id}/rates")
-def rates_get(organisation_id: UUID, user: User, db: Database):
-    return calculations.list_rates(db, organisation_id, user)
+def rates_get(
+    organisation_id: UUID,
+    user: User,
+    db: Database,
+    query: Annotated[str, Query(max_length=160)] = "",
+    unit: Literal["m2", "m", "item"] | None = None,
+    basis: Literal["indicative_budget", "cost"] | None = None,
+    offset: Annotated[int, Query(ge=0)] = 0,
+    limit: Annotated[int, Query(ge=1, le=100)] = 50,
+):
+    return calculations.list_rates(
+        db, organisation_id, user, query=query, unit=unit, basis=basis, offset=offset, limit=limit
+    )
+
+
+@app.get("/api/v1/organisations/{organisation_id}/rates/{rate_id}")
+def rate_get(organisation_id: UUID, rate_id: UUID, user: User, db: Database):
+    return calculations.get_rate(db, organisation_id, user, rate_id)
 
 
 @app.post("/api/v1/organisations/{organisation_id}/rates", status_code=201)

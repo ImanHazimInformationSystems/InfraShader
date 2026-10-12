@@ -114,21 +114,52 @@ def rate_data(rate):
     }
 
 
-def list_rates(session, org_id, user_id):
+def visible_rate(rate, membership):
+    item = rate_data(rate)
+    if item["basis"] == "cost" and not allowed(membership, "internal_pricing"):
+        del item["amount"]
+    return item
+
+
+def get_rate(session, org_id, user_id, rate_id):
     membership = require_membership(session, org_id, user_id)
+    rate = session.scalar(
+        select(CatalogueRate).where(
+            CatalogueRate.id == rate_id, CatalogueRate.organisation_id == org_id
+        )
+    )
+    if rate is None:
+        raise not_found()
+    return visible_rate(rate, membership)
+
+
+def list_rates(session, org_id, user_id, *, query="", unit=None, basis=None, offset=0, limit=50):
+    membership = require_membership(session, org_id, user_id)
+    filters = [CatalogueRate.organisation_id == org_id]
+    if query.strip():
+        # Literal substring matching: SQL wildcards in user input are escaped.
+        filters.append(
+            CatalogueRate.code.icontains(query.strip(), autoescape=True)
+            | CatalogueRate.description.icontains(query.strip(), autoescape=True)
+        )
+    if unit:
+        filters.append(CatalogueRate.unit == unit)
+    if basis:
+        filters.append(CatalogueRate.basis == basis)
+    total = session.scalar(select(func.count()).select_from(CatalogueRate).where(*filters))
     rates = session.scalars(
         select(CatalogueRate)
-        .where(CatalogueRate.organisation_id == org_id)
-        .order_by(CatalogueRate.code, CatalogueRate.version.desc())
-        .limit(500)
+        .where(*filters)
+        .order_by(CatalogueRate.code, CatalogueRate.version.desc(), CatalogueRate.id)
+        .offset(offset)
+        .limit(limit)
     ).all()
-    result = []
-    for rate in rates:
-        item = rate_data(rate)
-        if item["basis"] == "cost" and not allowed(membership, "internal_pricing"):
-            del item["amount"]
-        result.append(item)
-    return {"items": result, "limit": 500}
+    return {
+        "items": [visible_rate(rate, membership) for rate in rates],
+        "limit": limit,
+        "offset": offset,
+        "total": total,
+    }
 
 
 def create_rate(session, org_id, user_id, data: RateInput):

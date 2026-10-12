@@ -83,3 +83,8 @@ Run **Calculate all three scenarios**, then **Show baseline shade on map** (or t
 **Compare saved options** displays the same saved analysis across Baseline/A/B and available option estimates. **Save an option review** stores criteria, notes, preferred option and status independently of an issued document. **Reload review history** preserves entered notes when resolving a concurrent-review conflict. Changing the workspace or brief marks older reviews stale.
 
 Explore Map uses OpenFreeMap context and explicit-submit Photon place search. Preserve provider attribution; public service availability is not guaranteed. Set `VITE_MAP_STYLE_URL=offline` and `VITE_GEOCODER_URL=offline` in the ignored web environment file to disable public providers. These services receive viewport/query information; they do not receive project records. The ordinary test suite disables external map tiles; `npx playwright test --config playwright.providers.config.mjs` separately checks actual provider rendering/search.
+
+
+## Browse and revise rates
+
+Within the geometry workspace, **Browse rate versions** searches code/description and filters units for the project's pricing basis. Use Previous/Next rate page for catalogues exceeding 20 results. Displayed versions become available in the rate assignment selectors; saved assignments remain visible even when excluded by the search. **Revise [code] v[number]** opens the dated-rate form with copied values. Saving creates another version; it never replaces the version bound to existing scope. Assign the new version explicitly and save the workspace when appropriate. Category/archive controls remain pending.

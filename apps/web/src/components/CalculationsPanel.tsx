@@ -13,6 +13,7 @@ import {
 import { request } from '../services/api'
 import { Button } from './ui/button'
 import ReviewPanel from './ReviewPanel'
+import CatalogueBrowser from './CatalogueBrowser'
 
 const chargeCategories = ['labour', 'transport', 'overhead', 'fixed'] as const
 type ChargeDraft = {
@@ -43,9 +44,63 @@ export default function CalculationsPanel({
   onShowShadows,
   onReviewDirty,
 }: Props) {
-  const [rates, setRates] = useState<Rate[]>([])
-  const [artifacts, setArtifacts] = useState<Artifact[]>([])
   const [error, setError] = useState('')
+  const [rates, setRates] = useState<Rate[]>([])
+  const [catalogueRevision, setCatalogueRevision] = useState(0)
+  const rateForm = useRef<HTMLFormElement>(null)
+  const mergeRates = useCallback((incoming: Rate[]) => {
+    setRates((previous) => [
+      ...new Map([...previous, ...incoming].map((rate) => [rate.id, rate])).values(),
+    ])
+  }, [])
+  useEffect(() => {
+    let active = true
+    const ids = [
+      ...new Set(
+        Object.values(data.scenarios).flatMap((value) =>
+          value.items.flatMap((item) => (item.rate_id ? [item.rate_id] : [])),
+        ),
+      ),
+    ]
+    Promise.all(
+      ids.map((id) =>
+        request(`/api/v1/organisations/${project.organisation_id}/rates/${id}`, rateSchema, token),
+      ),
+    )
+      .then((result) => {
+        if (active) mergeRates(result)
+      })
+      .catch((reason) => {
+        if (active)
+          setError(reason instanceof Error ? reason.message : 'Assigned rate unavailable.')
+      })
+    return () => {
+      active = false
+    }
+  }, [data, project.organisation_id, token, mergeRates])
+  function reviseRate(rate: Rate) {
+    const form = rateForm.current
+    if (!form) return
+    for (const key of [
+      'code',
+      'description',
+      'unit',
+      'amount',
+      'effective_date',
+      'source_note',
+    ] as const) {
+      const input = form.elements.namedItem(key) as HTMLInputElement | HTMLSelectElement
+      input.value = String(rate[key] ?? '')
+    }
+    form.querySelectorAll<HTMLInputElement>('input[name="includes"]').forEach((input) => {
+      input.checked = rate.includes.includes(input.value)
+    })
+    const details = form.closest('details')
+    if (details) details.open = true
+    form.scrollIntoView({ block: 'center' })
+    ;(form.elements.namedItem('amount') as HTMLInputElement).focus()
+  }
+  const [artifacts, setArtifacts] = useState<Artifact[]>([])
   const [busy, setBusy] = useState(false)
   const [timestamp, setTimestamp] = useState(new Date().toISOString())
   const [target, setTarget] = useState('')
@@ -68,9 +123,9 @@ export default function CalculationsPanel({
       request(`${orgEndpoint}/rates`, rateListSchema, token),
       request(`${endpoint}/artifacts`, artifactListSchema, token),
     ])
-    setRates(catalogue.items)
+    mergeRates(catalogue.items)
     setArtifacts(records.items)
-  }, [orgEndpoint, endpoint, token])
+  }, [orgEndpoint, endpoint, token, mergeRates])
   useEffect(() => {
     let active = true
     Promise.all([
@@ -79,7 +134,7 @@ export default function CalculationsPanel({
     ])
       .then(([catalogue, records]) => {
         if (active) {
-          setRates(catalogue.items)
+          mergeRates(catalogue.items)
           setArtifacts(records.items)
         }
       })
@@ -90,7 +145,7 @@ export default function CalculationsPanel({
     return () => {
       active = false
     }
-  }, [orgEndpoint, endpoint, token, revision])
+  }, [orgEndpoint, endpoint, token, revision, mergeRates])
   async function perform(action: () => Promise<unknown>) {
     setBusy(true)
     setError('')
@@ -108,7 +163,7 @@ export default function CalculationsPanel({
     const form = event.currentTarget
     const values = new FormData(form)
     await perform(async () => {
-      await request(`${orgEndpoint}/rates`, rateSchema, token, {
+      const created = await request(`${orgEndpoint}/rates`, rateSchema, token, {
         method: 'POST',
         body: JSON.stringify({
           code: values.get('code'),
@@ -122,6 +177,8 @@ export default function CalculationsPanel({
           includes: values.getAll('includes'),
         }),
       })
+      mergeRates([created])
+      setCatalogueRevision((value) => value + 1)
       form.reset()
     })
   }
@@ -209,9 +266,18 @@ export default function CalculationsPanel({
       <Button variant="outline" disabled={busy} onClick={() => void perform(async () => {})}>
         Refresh saved calculations
       </Button>
+      <CatalogueBrowser
+        endpoint={orgEndpoint}
+        token={token}
+        basis={developer ? 'indicative_budget' : 'cost'}
+        refresh={catalogueRevision}
+        onRates={mergeRates}
+        onEdit={reviseRate}
+      />
       <details className="my-5 rounded-lg border border-stone-300 p-4">
         <summary>Catalogue: add an explicit dated rate</summary>
         <form
+          ref={rateForm}
           onSubmit={(event) => void createRate(event)}
           className="grid gap-3 py-4 md:grid-cols-2"
         >
@@ -277,6 +343,11 @@ export default function CalculationsPanel({
                 onData(next)
               }}
             >
+              {item.rate_id && !rates.some((rate) => rate.id === item.rate_id) && (
+                <option value={item.rate_id}>
+                  Assigned version unavailable - retry loading catalogue
+                </option>
+              )}
               <option value="">Unpriced — select a rate</option>
               {rates
                 .filter((rate) => rate.basis === (developer ? 'indicative_budget' : 'cost'))
