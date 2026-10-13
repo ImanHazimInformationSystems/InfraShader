@@ -33,8 +33,8 @@ No field observations, physical touch device, customer pilots, hosted CI or depl
 Current migrations: 0009, applied to the local application database. The 13 October checkpoint below supersedes earlier missing-feature notes in this plan.
 
 1. Retained PDF/file lifecycle, richer scope/evidence output visuals, privacy export/deletion/retention with approved policy, and a joint application/Auth/private-file restore drill.
-2. Dashboard URL/stage navigation; general editing undo and catalogue/review/evidence/settings form recovery; forced-expiry/multi-tab recovery acceptance.
-3. Basic-object palette/categories/tree crown metadata/visibility, estimate revision comparison and remaining pricing explanations. Trees remain excluded from shade.
+2. Dashboard URL/stage navigation; catalogue/review/evidence/settings form recovery; forced-expiry/multi-tab recovery acceptance.
+3. Estimate revision comparison, richer object map representations and remaining pricing explanations. Basic object grouping/categories/crown metadata/map visibility and applied-edit undo/redo are implemented. Trees remain excluded from shade.
 4. Representative accessibility/physical touch/capacity checks, support/monitoring/throttling and rollback evidence. Field observations, commercial/provider decisions and user pilots remain external gates.
 
 Keep F13/F16-F20 gated. Run relevant regression checks after each slice and update requirements.md. Browser configurations own ports 8000/5173 and run sequentially. Signed fixture identity, Browser Demo, live local Supabase and public provider evidence remain distinct.
@@ -55,3 +55,8 @@ Real local Supabase browser acceptance now covers email/password login, JWT refr
 Migrations 0005-0009 add the above state without deleting existing application data. The local application database has been upgraded. Geometry history cannot reconstruct versions before its migration. Provider 3D heights never become analysis inputs. Generated PDF bytes are still download-time artifacts, not a retained-file lifecycle.
 
 Actual checks and remaining release gates are recorded in validation.md. The core MVP remains partial: the next-work list above is implementation work still owed, in addition to external field/pilot/policy gates. No remote write, deployment or paid service was used.
+
+
+### Basic objects and workspace undo follow-up
+
+Added grouped geometry/object choices, editable categories, optional tree-crown diameter with sourced metadata, and persisted per-item editor-map visibility. Visibility never removes an item from authoritative quantities, pricing, comparison or shade; crown metadata never enables tree shade. Up to 50 applied workspace edits support undo/redo in the current tab; saving/restoring starts a new undo stack. Existing JSONB records receive backward-compatible defaults on validation; no additional migration is needed.

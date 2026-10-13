@@ -110,3 +110,6 @@ npx playwright test --config playwright.providers.config.mjs
 ```
 
 Live tests require local Supabase on 54331 and local PostGIS. They create temporary local users, a disposable schema and private test photos, then remove those owned fixtures. Recovery mail stays in local Mailpit. The provider suite makes real public map/search requests; its results depend on those services.
+
+
+Basic object controls group structures, surfaces/circulation, vegetation/furniture and manual quantities. Trees accept optional crown diameter with a source note; tree shade remains excluded. **Hide/Show** affects the editor map only and requires workspace save; hidden items still count in calculations and outputs. **Undo workspace edit / Redo workspace edit** covers up to 50 applied changes in the current tab. Saving or restoring resets that stack; saved revisions remain accessible through history.

@@ -54,6 +54,15 @@ class WorkItem(StrictModel):
     provenance: Provenance
     source_note: Text
     rate_id: UUID | None = None
+    category: Annotated[str, Field(min_length=1, max_length=80)] = "General"
+    visible: bool = True
+    crown_diameter_m: Annotated[float, Field(gt=0, le=100)] | None = None
+
+    @model_validator(mode="after")
+    def tree_metadata(self):
+        if self.crown_diameter_m is not None and self.kind != "tree":
+            raise ValueError("Crown diameter applies only to trees; tree shade is excluded.")
+        return self
 
 
 class Scenario(StrictModel):

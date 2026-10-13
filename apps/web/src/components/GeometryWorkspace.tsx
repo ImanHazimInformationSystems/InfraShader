@@ -46,6 +46,10 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
   const [height, setHeight] = useState('')
   const [heightSource, setHeightSource] = useState('')
   const [count, setCount] = useState('1')
+  const [category, setCategory] = useState('General')
+  const [crown, setCrown] = useState('')
+  const [undo, setUndo] = useState<WorkspaceData[]>([])
+  const [redo, setRedo] = useState<WorkspaceData[]>([])
   const [override, setOverride] = useState('')
   const [shadow, setShadow] = useState<{ revision: number; features: Feature[] } | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -73,6 +77,8 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
           data,
           form: {
             scenario,
+            category,
+            crown,
             kind,
             name,
             source,
@@ -112,6 +118,8 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
     provenance,
     editingId,
     pendingForm,
+    category,
+    crown,
   ])
   const identity = `${demo ? 'demo' : project.organisation_id}/${project.id}`
   const current = useRef({ token, identity })
@@ -170,6 +178,8 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
     setHeight(form.height)
     setHeightSource(form.heightSource)
     setCount(form.count)
+    setCategory(form.category)
+    setCrown(form.crown)
     setOverride(form.override)
     setProvenance(form.provenance)
     setEditingId(form.editingId)
@@ -188,6 +198,8 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
     setNotice('')
   }
   function change(next: WorkspaceData) {
+    if (data) setUndo((previous) => [...previous.slice(-49), structuredClone(data)])
+    setRedo([])
     setData(next)
     markChanged()
   }
@@ -203,6 +215,18 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
     setHeight(next === 'canopy' ? '3' : '')
     setHeightSource('')
     setKind(next)
+    setCategory(
+      next === 'tree'
+        ? 'Vegetation'
+        : next === 'bench'
+          ? 'Furniture'
+          : ['building', 'canopy'].includes(next)
+            ? 'Structures'
+            : next === 'path'
+              ? 'Circulation'
+              : 'General',
+    )
+    setCrown('')
     setName(next === 'boundary' ? 'Site boundary' : '')
     setCoordinates(next === 'boundary' && data ? coordinateText(data.boundary) : '')
     setSource(next === 'boundary' && data ? data.boundary_source : '')
@@ -247,6 +271,9 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
           throw new Error('An override needs a positive value and its own non-calculated source.')
         const previous = next.scenarios[scenario].items.find((item) => item.id === editingId)
         const item: WorkItem = {
+          category: category.trim() || 'General',
+          visible: previous?.visible ?? true,
+          crown_diameter_m: kind === 'tree' && crown ? Number(crown) : null,
           id: editingId ?? crypto.randomUUID(),
           name,
           kind,
@@ -286,6 +313,8 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
     setHeight(String(item.height_m ?? ''))
     setHeightSource(item.height_source)
     setCount(String(item.count))
+    setCategory(item.category)
+    setCrown(item.crown_diameter_m === null ? '' : String(item.crown_diameter_m))
     setOverride(item.quantity_override ?? '')
     setEditingId(item.id)
   }
@@ -324,6 +353,8 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
       if (!mounted.current || current.current.identity !== identity) return
       setSaved(result)
       setData(result.data)
+      setUndo([])
+      setRedo([])
       if (recoveryKey) sessionStorage.removeItem(recoveryKey)
       setRecoverable(null)
       setDirty(false)
@@ -356,7 +387,7 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
               },
             })),
             ...data.scenarios[scenario].items
-              .filter((item) => item.geometry)
+              .filter((item) => item.geometry && item.visible)
               .map((item) => ({
                 type: 'Feature' as const,
                 geometry: item.geometry!,
@@ -527,26 +558,24 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
                 value={kind}
                 onChange={(event) => selectKind(event.target.value as Kind)}
               >
-                {(
-                  [
-                    'boundary',
-                    'target',
-                    'area',
-                    'path',
-                    'building',
-                    'canopy',
-                    'tree',
-                    'bench',
-                    'manual',
-                  ] as const
-                ).map((entry) => (
-                  <option key={entry} value={entry}>
-                    {entry === 'canopy'
-                      ? 'Elevated canopy roof'
-                      : entry === 'manual'
-                        ? 'Manual count item'
-                        : entry}
-                  </option>
+                {Object.entries({
+                  'Site definition': ['boundary', 'target'],
+                  Structures: ['building', 'canopy'],
+                  'Surfaces and circulation': ['area', 'path'],
+                  'Vegetation and furniture': ['tree', 'bench'],
+                  'Other quantities': ['manual'],
+                }).map(([group, kinds]) => (
+                  <optgroup key={group} label={group}>
+                    {kinds.map((entry) => (
+                      <option key={entry} value={entry}>
+                        {entry === 'canopy'
+                          ? 'Elevated canopy roof'
+                          : entry === 'manual'
+                            ? 'Manual count item'
+                            : entry}
+                      </option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
             </div>
@@ -594,6 +623,38 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
                     }}
                   />
                 </div>
+                {!['boundary', 'target'].includes(kind) && (
+                  <div className="field">
+                    <label htmlFor="object-category">Object category</label>
+                    <input
+                      id="object-category"
+                      maxLength={80}
+                      value={category}
+                      onChange={(event) => {
+                        setCategory(event.target.value)
+                        markFormChanged()
+                      }}
+                    />
+                  </div>
+                )}
+                {kind === 'tree' && (
+                  <div className="field">
+                    <label htmlFor="tree-crown">Tree crown diameter (m, optional)</label>
+                    <input
+                      id="tree-crown"
+                      type="number"
+                      min="0.01"
+                      max="100"
+                      step="0.01"
+                      value={crown}
+                      onChange={(event) => {
+                        setCrown(event.target.value)
+                        markFormChanged()
+                      }}
+                    />
+                    <p>Record the source and uncertainty below. This does not enable tree shade.</p>
+                  </div>
+                )}
                 {kind !== 'manual' && (
                   <div className="field">
                     <label htmlFor="geometry-coordinates">
@@ -773,6 +834,11 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
             ))}
           </ul>
           <h3>{data.scenarios[scenario].name} work items</h3>
+          <p className="text-sm">
+            Visibility affects the editor map only. Hidden items remain in quantities, pricing,
+            comparisons and shade calculations. Tree crowns are descriptive metadata; tree shade is
+            excluded.
+          </p>
           {data.scenarios[scenario].items.length === 0 ? (
             <p>No work items in this scenario yet.</p>
           ) : (
@@ -793,6 +859,11 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
                         {item.name}
                         <br />
                         {item.kind} · {item.status}
+                        <br />
+                        {item.category}
+                        {item.crown_diameter_m
+                          ? ` / Crown diameter ${item.crown_diameter_m} m`
+                          : ''}
                       </td>
                       <td className="p-2">
                         {dirty
@@ -805,6 +876,22 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
                         {item.provenance}: {item.source_note}
                       </td>
                       <td className="flex flex-wrap gap-2 p-2">
+                        <Button
+                          variant="outline"
+                          disabled={busy || project.archived}
+                          onClick={() => {
+                            const next = structuredClone(data)
+                            next.scenarios[scenario].items = next.scenarios[scenario].items.map(
+                              (value) =>
+                                value.id === item.id
+                                  ? { ...value, visible: !value.visible }
+                                  : value,
+                            )
+                            change(next)
+                          }}
+                        >
+                          {item.visible ? 'Hide' : 'Show'} {item.name}
+                        </Button>
                         <Button
                           variant="outline"
                           disabled={busy || project.archived}
@@ -833,6 +920,48 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
             </div>
           )}
           <div className="flex flex-wrap gap-3 border-t border-stone-200 pt-4">
+            <Button
+              variant="outline"
+              disabled={busy || project.archived || !undo.length}
+              onClick={() => {
+                if (
+                  pendingForm &&
+                  !window.confirm(
+                    'Discard unapplied form changes and undo the last workspace edit?',
+                  )
+                )
+                  return
+                if (data) setRedo((previous) => [...previous, structuredClone(data)])
+                setData(undo[undo.length - 1])
+                setUndo((previous) => previous.slice(0, -1))
+                setPendingForm(false)
+                setEditingId(null)
+                setShadow(null)
+                markChanged()
+              }}
+            >
+              Undo workspace edit
+            </Button>
+            <Button
+              variant="outline"
+              disabled={busy || project.archived || !redo.length}
+              onClick={() => {
+                if (
+                  pendingForm &&
+                  !window.confirm('Discard unapplied form changes and redo the workspace edit?')
+                )
+                  return
+                if (data) setUndo((previous) => [...previous, structuredClone(data)])
+                setData(redo[redo.length - 1])
+                setRedo((previous) => previous.slice(0, -1))
+                setPendingForm(false)
+                setEditingId(null)
+                setShadow(null)
+                markChanged()
+              }}
+            >
+              Redo workspace edit
+            </Button>
             <Button
               disabled={busy || !dirty || pendingForm || project.archived}
               onClick={() => void save()}
@@ -870,6 +999,8 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
               onRestore={(result) => {
                 setSaved(result)
                 setData(result.data)
+                setUndo([])
+                setRedo([])
                 setDirty(false)
                 setPendingForm(false)
                 setEditingId(null)

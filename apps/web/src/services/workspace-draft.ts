@@ -6,6 +6,8 @@ export const workspaceDraftSchema = z.object({
   revision: z.number().int().nonnegative(),
   data: workspaceDataSchema,
   form: z.object({
+    category: z.string().default('General'),
+    crown: z.string().default(''),
     scenario: z.enum(['baseline', 'option_a', 'option_b']),
     kind: z.enum([
       'boundary',

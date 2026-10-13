@@ -97,3 +97,34 @@ def test_injected_calculated_quantity_rejected():
     data["scenarios"]["option_a"]["items"][0]["quantity"] = {"value": 9999}
     with pytest.raises(ValidationError):
         WorkspaceInput(**data)
+
+
+def test_tree_metadata_and_hidden_objects_preserve_quantities_and_shade():
+    from datetime import datetime
+
+    from app.domain.shade import analyse_workspace
+
+    draft = fixture_workspace()
+    tree = {
+        "id": str(uuid4()),
+        "name": "Existing tree",
+        "kind": "tree",
+        "geometry": {"type": "Point", "coordinates": [101.68125, 3.13125]},
+        "source_note": "Estimated crown from fixture",
+        "provenance": "estimated",
+        "category": "Vegetation",
+        "visible": False,
+        "crown_diameter_m": 8,
+    }
+    draft["scenarios"]["option_a"]["items"].append(tree)
+    saved = validate_workspace(WorkspaceInput(**draft), [101.68, 3.13, 101.69, 3.14])
+    assert saved["scenarios"]["option_a"]["items"][1]["quantity"]["value"] == 1
+    timestamp = datetime.fromisoformat("2026-03-21T12:00:00+08:00")
+    first = analyse_workspace(saved, timestamp, saved["targets"][0]["id"])
+    saved["scenarios"]["option_a"]["items"][0]["visible"] = False
+    second = analyse_workspace(saved, timestamp, saved["targets"][0]["id"])
+    assert first == second
+    assert tree["name"] in second["scenarios"]["option_a"]["excluded_trees"]
+    draft["scenarios"]["option_a"]["items"][0]["crown_diameter_m"] = 8
+    with pytest.raises(ValidationError, match="only to trees"):
+        WorkspaceInput(**draft)
