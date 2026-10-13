@@ -1,5 +1,6 @@
 import math
 from datetime import datetime
+from decimal import Decimal
 from typing import Literal
 from uuid import UUID
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
@@ -37,7 +38,22 @@ class Site(Contract):
         return value
 
 
+class Stakeholder(Contract):
+    name: str = Field(min_length=1, max_length=160)
+    role: str = Field(default="", max_length=160)
+    needs: str = Field(default="", max_length=2000)
+
+
+class BriefDetails(Contract):
+    project_type: str = Field(default="", max_length=160)
+    budget: Decimal | None = Field(default=None, ge=0, max_digits=14, decimal_places=2)
+    priorities: str = Field(default="", max_length=4000)
+    constraints: str = Field(default="", max_length=4000)
+    stakeholders: list[Stakeholder] = Field(default_factory=list, max_length=30)
+
+
 class ProjectCreate(Contract):
+    details: BriefDetails = Field(default_factory=BriefDetails)
     name: str = Field(min_length=1, max_length=160)
     purpose: Purpose
     stakeholder: str = Field(min_length=1, max_length=160)
@@ -60,6 +76,7 @@ class ProjectCreate(Contract):
 
 
 class ProjectUpdate(Contract):
+    details: BriefDetails | None = None
     expected_revision: int = Field(ge=1)
     name: str | None = Field(default=None, min_length=1, max_length=160)
     purpose: Purpose | None = None
@@ -94,6 +111,7 @@ class ProjectResponse(ProjectCreate):
     archived: bool
     revision: int
     updated_at: datetime
+    created_at: datetime | None = None
 
 
 class ProjectList(Contract):

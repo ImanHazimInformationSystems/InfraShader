@@ -4,8 +4,9 @@ from datetime import UTC, date, datetime
 from decimal import Decimal
 from typing import Annotated, Literal
 from uuid import UUID
+from zoneinfo import ZoneInfo
 
-from pydantic import AwareDatetime, Field, model_validator
+from pydantic import AwareDatetime, Field, NaiveDatetime, model_validator
 from sqlalchemy import func, select
 
 from app.domain.pricing import calculate_estimate
@@ -19,6 +20,7 @@ Money = Annotated[Decimal, Field(ge=0, max_digits=14, decimal_places=4)]
 
 
 class RateInput(StrictModel):
+    category: Annotated[str, Field(min_length=1, max_length=80)] = "General"
     code: Annotated[str, Field(min_length=1, max_length=80)]
     description: Annotated[str, Field(min_length=1, max_length=500)]
     unit: Literal["m2", "m", "item"]
@@ -36,8 +38,33 @@ class CalculationInput(StrictModel):
 
 
 class AnalysisInput(CalculationInput):
-    timestamp: AwareDatetime
+    timestamp: AwareDatetime | None = None
+    local_timestamp: NaiveDatetime | None = None
     target_id: UUID
+
+    @model_validator(mode="after")
+    def one_time(self):
+        if (self.timestamp is None) == (self.local_timestamp is None):
+            raise ValueError("Supply exactly one local time or time with explicit offset.")
+        return self
+
+
+def analysis_time(data: AnalysisInput, timezone: str):
+    if data.timestamp is not None:
+        return data.timestamp
+    zone = ZoneInfo(timezone)
+    candidates = {}
+    for fold in (0, 1):
+        candidate = data.local_timestamp.replace(tzinfo=zone, fold=fold)
+        utc = candidate.astimezone(UTC)
+        if utc.astimezone(zone).replace(tzinfo=None) == data.local_timestamp:
+            candidates[utc] = candidate
+    if len(candidates) != 1:
+        raise ValueError(
+            "This local time is ambiguous or does not exist because of a clock change. "
+            "Use an explicit timezone offset."
+        )
+    return next(iter(candidates.values()))
 
 
 class Charge(StrictModel):
@@ -101,6 +128,9 @@ def rate_data(rate):
         for key, value in {
             "id": str(rate.id),
             "code": rate.code,
+            "category": rate.category,
+            "archived": rate.archived,
+            "metadata_revision": rate.metadata_revision,
             "version": rate.version,
             "description": rate.description,
             "unit": rate.unit,
@@ -133,9 +163,23 @@ def get_rate(session, org_id, user_id, rate_id):
     return visible_rate(rate, membership)
 
 
-def list_rates(session, org_id, user_id, *, query="", unit=None, basis=None, offset=0, limit=50):
+def list_rates(
+    session,
+    org_id,
+    user_id,
+    *,
+    query="",
+    unit=None,
+    basis=None,
+    offset=0,
+    limit=50,
+    category="",
+    archived=False,
+):
     membership = require_membership(session, org_id, user_id)
-    filters = [CatalogueRate.organisation_id == org_id]
+    filters = [CatalogueRate.organisation_id == org_id, CatalogueRate.archived == archived]
+    if category.strip():
+        filters.append(CatalogueRate.category.icontains(category.strip(), autoescape=True))
     if query.strip():
         # Literal substring matching: SQL wildcards in user input are escaped.
         filters.append(
@@ -210,6 +254,35 @@ def artifact_response(artifact, workspace_revision, project_revision, *, interna
         payload["label"] = (
             "Indicative budget" if artifact.payload["method"] == "indicative" else "Selling price"
         )
+    if artifact.kind == "estimate":
+        payload = dict(payload)
+        payload["takeoff"] = []
+        for line in artifact.payload.get("lines", []):
+            item = {
+                key: line[key]
+                for key in (
+                    "item_id",
+                    "description",
+                    "quantity",
+                    "unit",
+                    "quantity_source",
+                    "wastage_percent",
+                )
+            }
+            item.update(
+                rate_code=line["rate"]["code"],
+                rate_version=line["rate"]["version"],
+                effective_date=line["rate"]["effective_date"],
+            )
+            if internal or artifact.payload["method"] == "indicative":
+                item.update(
+                    unit_price=line["rate"]["amount"],
+                    line_total=line["cost_total"],
+                    price_basis="indicative"
+                    if artifact.payload["method"] == "indicative"
+                    else "internal cost",
+                )
+            payload["takeoff"].append(item)
     return {
         "id": str(artifact.id),
         "kind": artifact.kind,
@@ -254,7 +327,9 @@ def run_analysis(session, org_id, project_id, user_id, data: AnalysisInput):
     if previous:
         return artifact_response(previous, workspace.revision, project.revision)
     try:
-        payload = analyse_workspace(workspace.data, data.timestamp, str(data.target_id))
+        payload = analyse_workspace(
+            workspace.data, analysis_time(data, project.timezone), str(data.target_id)
+        )
     except ValueError as exc:
         raise APIError(422, "analysis_input", str(exc)) from exc
     return save_artifact(
@@ -342,7 +417,9 @@ def get_artifacts(session, org_id, project_id, user_id):
     }
 
 
-def issue_snapshot(session, org_id, project_id, user_id, data: IssueInput, kind: str):
+def issue_snapshot(
+    session, org_id, project_id, user_id, data: IssueInput, kind: str, *, preview=False
+):
     project = project_for_workspace(session, org_id, project_id, user_id, write=True)
     require_capability(
         session,
@@ -354,7 +431,7 @@ def issue_snapshot(session, org_id, project_id, user_id, data: IssueInput, kind:
         raise APIError(422, "output_purpose", "Choose the output matching this project purpose.")
     workspace = session.get(Workspace, project_id)
     previous = prior_request(session, project_id, kind, data.request_key)
-    if previous:
+    if previous and not preview:
         return artifact_response(previous, workspace.revision if workspace else 0, project.revision)
     if project.revision != data.expected_project_revision:
         raise APIError(409, "stale_brief", "Reload and review the current project brief.")
@@ -421,6 +498,7 @@ def issue_snapshot(session, org_id, project_id, user_id, data: IssueInput, kind:
         "desired_outcome": project.desired_outcome,
         "use_periods": project.use_periods,
         "timezone": project.timezone,
+        "brief_details": project.details,
         "preferred_option": data.preferred_option,
         "baseline": scope("baseline"),
         "selected_scope": scope(data.preferred_option),
@@ -442,6 +520,35 @@ def issue_snapshot(session, org_id, project_id, user_id, data: IssueInput, kind:
         "source_project_revision": project.revision,
     }
     if kind == "developer_brief":
+        budgets = {}
+        for option in ("option_a", "option_b"):
+            candidate = (
+                estimate
+                if option == data.preferred_option
+                else session.scalar(
+                    select(Artifact)
+                    .where(
+                        Artifact.project_id == project_id,
+                        Artifact.kind == "estimate",
+                        Artifact.workspace_revision == workspace.revision,
+                        Artifact.project_revision == project.revision,
+                        Artifact.payload["scenario"].astext == option,
+                    )
+                    .order_by(Artifact.created_at.desc(), Artifact.id)
+                    .limit(1)
+                )
+            )
+            budgets[option] = {
+                "status": "unavailable"
+                if candidate is None
+                else "complete"
+                if candidate.payload["complete"]
+                else "partial"
+            }
+            if candidate is not None:
+                budgets[option]["estimate_id"] = str(candidate.id)
+                if candidate.payload["complete"]:
+                    budgets[option]["total"] = candidate.payload["selling_total"]
         payload.update(
             title="Developer decision brief",
             criteria=data.criteria,
@@ -451,9 +558,38 @@ def issue_snapshot(session, org_id, project_id, user_id, data: IssueInput, kind:
             indicative_budget=estimate.payload["selling_total"],
             option_a=scope("option_a"),
             option_b=scope("option_b"),
+            option_budgets=budgets,
         )
     else:
         payload.update(
             title="Contractor client proposal", selling_total=estimate.payload["selling_total"]
         )
+    if preview:
+        payload["draft"] = True
+        return payload
     return save_artifact(session, project, workspace, user_id, kind, data.request_key, payload)
+
+
+class RateArchiveInput(StrictModel):
+    expected_revision: Annotated[int, Field(ge=1)]
+    archived: bool
+
+
+def archive_rate(session, org_id, user_id, rate_id, data: RateArchiveInput):
+    require_capability(session, org_id, user_id, "change_catalogue")
+    rate = session.scalar(
+        select(CatalogueRate)
+        .where(CatalogueRate.organisation_id == org_id, CatalogueRate.id == rate_id)
+        .with_for_update()
+    )
+    if rate is None:
+        raise not_found()
+    if rate.basis == "cost":
+        require_capability(session, org_id, user_id, "internal_pricing")
+    if rate.metadata_revision != data.expected_revision:
+        raise APIError(409, "rate_conflict", "Rate archive state changed. Reload the catalogue.")
+    rate.archived = data.archived
+    rate.metadata_revision += 1
+    result = rate_data(rate)
+    session.commit()
+    return result

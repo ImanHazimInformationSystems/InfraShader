@@ -29,7 +29,7 @@ export const api = {
   health: () => request('/api/v1/health', healthSchema),
   readiness: () => request('/api/v1/readiness', readinessSchema),
   session: (token: string) => request('/api/v1/session', sessionSchema, token),
-  projects: (org: string, token: string, archived = false, offset = 0) => request(`/api/v1/organisations/${org}/projects?limit=100&offset=${offset}&archived=${archived}`, projectListSchema, token),
+  projects: (org: string, token: string, archived = false, offset = 0, query = '', sort = 'updated') => request(`/api/v1/organisations/${org}/projects?limit=100&offset=${offset}&archived=${archived}&query=${encodeURIComponent(query)}&sort=${sort}`, projectListSchema, token),
   project: (org: string, id: string, token: string) => request(`/api/v1/organisations/${org}/projects/${id}`, projectSchema, token),
   create: (org: string, input: ProjectInput, token: string) => request(`/api/v1/organisations/${org}/projects`, projectSchema, token, { method: 'POST', body: JSON.stringify(input) }),
   update: (org: string, id: string, patch: Partial<ProjectInput> & { expected_revision: number; archived?: boolean }, token: string) => request(`/api/v1/organisations/${org}/projects/${id}`, projectSchema, token, { method: 'PATCH', body: JSON.stringify(patch) }),

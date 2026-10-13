@@ -18,7 +18,7 @@ export class DemoStore {
     catch { throw new Error('Browser Demo data could not be read. Export or clear this browser’s Demo storage before continuing.') }
   }
   create(input: ProjectInput): Project {
-    const project = projectSchema.parse({ ...projectInputSchema.parse(input), id: crypto.randomUUID(), organisation_id: DEMO_ORGANISATION_ID, archived: false, revision: 1, updated_at: new Date().toISOString() })
+    const project = projectSchema.parse({ ...projectInputSchema.parse(input), id: crypto.randomUUID(), organisation_id: DEMO_ORGANISATION_ID, archived: false, revision: 1, created_at: new Date().toISOString(), updated_at: new Date().toISOString() })
     this.write([...this.list(), project])
     return project
   }

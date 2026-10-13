@@ -1,10 +1,10 @@
 from uuid import UUID
 
-from sqlalchemy import func, select, update
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.orm import Session
 
 from app.errors import APIError, not_found
-from app.models import Membership, Organisation, Project
+from app.models import Membership, Organisation, Project, ProjectRevision
 from app.schemas import (
     OrganisationResponse,
     ProjectCreate,
@@ -69,16 +69,26 @@ def list_projects(
     archived: bool,
     limit: int,
     offset: int,
+    query: str = "",
+    sort: str = "updated",
 ) -> ProjectList:
     require_membership(session, organisation_id, user_id)
-    conditions = (Project.organisation_id == organisation_id, Project.archived == archived)
+    conditions = [Project.organisation_id == organisation_id, Project.archived == archived]
+    if query.strip():
+        conditions.append(
+            or_(
+                Project.name.icontains(query.strip(), autoescape=True),
+                Project.stakeholder.icontains(query.strip(), autoescape=True),
+            )
+        )
+    order = {
+        "updated": Project.updated_at.desc(),
+        "name": func.lower(Project.name),
+        "created": Project.created_at.desc(),
+    }[sort]
     total = session.scalar(select(func.count()).select_from(Project).where(*conditions)) or 0
     projects = session.scalars(
-        select(Project)
-        .where(*conditions)
-        .order_by(Project.updated_at.desc(), Project.id)
-        .offset(offset)
-        .limit(limit)
+        select(Project).where(*conditions).order_by(order, Project.id).offset(offset).limit(limit)
     ).all()
     return ProjectList(
         items=[ProjectResponse.model_validate(project) for project in projects],
@@ -101,6 +111,14 @@ def create_project(
     session.add(project)
     session.flush()
     response = ProjectResponse.model_validate(project)
+    session.add(
+        ProjectRevision(
+            project_id=project.id,
+            revision=project.revision,
+            payload=response.model_dump(mode="json"),
+            changed_by=user_id,
+        )
+    )
     session.commit()
     return response
 
@@ -152,5 +170,52 @@ def update_project(
     # Capture the accepted row while the UPDATE lock is held. A later writer must not change
     # the response to this write after commit releases the lock.
     response = ProjectResponse.model_validate(project)
+    session.add(
+        ProjectRevision(
+            project_id=project.id,
+            revision=project.revision,
+            payload=response.model_dump(mode="json"),
+            changed_by=user_id,
+        )
+    )
     session.commit()
     return response
+
+
+def project_history(session, org_id, project_id, user_id, offset=0):
+    get_project(session, org_id, project_id, user_id)
+    rows = session.scalars(
+        select(ProjectRevision)
+        .where(ProjectRevision.project_id == project_id)
+        .order_by(ProjectRevision.revision.desc())
+        .offset(offset)
+        .limit(50)
+    ).all()
+    return {
+        "items": [
+            {
+                "revision": row.revision,
+                "changed_by": str(row.changed_by),
+                "created_at": row.created_at.isoformat(),
+                "project": row.payload,
+            }
+            for row in rows
+        ],
+        "offset": offset,
+        "limit": 50,
+    }
+
+
+def restore_project(session, org_id, project_id, user_id, revision, expected_revision):
+    get_project(session, org_id, project_id, user_id)
+    row = session.get(ProjectRevision, (project_id, revision))
+    if row is None:
+        raise not_found()
+    fields = {key: value for key, value in row.payload.items() if key in ProjectCreate.model_fields}
+    return update_project(
+        session,
+        org_id,
+        project_id,
+        user_id,
+        ProjectUpdate(**fields, expected_revision=expected_revision),
+    )

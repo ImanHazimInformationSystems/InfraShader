@@ -97,3 +97,30 @@ Remaining: full matched-map comparison, catalogue/takeoff management, structured
 - The prior 24 foundation/device checks and two live-provider checks were not repeated for this catalogue-only change. No physical touch, field, pilot, live Supabase recovery/Storage or deployment acceptance was added.
 
 F09 remains partial: categories, archive/restore and unsaved catalogue-form recovery are not implemented. F10-F12, administration/settings and the other open rows remain tracked in requirements.md. No migration was necessary; existing rate and estimate records were preserved. No push, deployment or paid resource use.
+
+
+## Core briefs, administration, evidence and recovery checkpoint - 13 October 2026
+
+Local branch: `build/core-spatial-completion`. No push, deployment, paid service or external message. Application migrations 0005 through 0009 applied successfully after disposable-schema validation; existing local data retained.
+
+| Check | Actual result |
+|---|---|
+| Backend Ruff / format | Passed, 51 files |
+| PostgreSQL/PostGIS pytest | 158 passed, zero skipped |
+| Frontend ESLint / typecheck / build | Passed; existing large initial/map/PDF chunk warnings remain |
+| Vitest | 23 passed, including recovery account isolation, expiry and scoped discard |
+| Incremental Prettier | Passed |
+| PostGIS browser integration | 5 passed together: brief/settings, catalogue, spatial/history/recovery/local time, both output previews and issued PDFs |
+| Responsive foundation | 24 passed across desktop/tablet/phone after fixing map-control overlap on phone |
+| Real local Supabase browser | 2 passed: login/refresh/logout/private-photo editing/download/foreign denial; local Mailpit recovery/new-password login/old-password rejection |
+| Live provider browser | 2 passed: rendered OpenFreeMap/attribution/Explore 3D and Photon search on desktop/tablet |
+| PDF extraction | Latest developer PDF: 3 pages; contractor PDF: 2 pages. Audience/limitation text checks passed; issued files contain no draft watermark, profit or cost-base labels. |
+| UI inspection | Inspected actual settings/history and matched comparison/review screenshots plus provider 3D screenshots. Corrected checkbox row layout and phone map selection overlap. |
+
+Coverage added: structured briefs/stakeholders, CAS brief history restore, immutable history updates rejected, settings/profile tenant rules, concurrent last-administrator protection, catalogue category/archive CAS, rectangle projected quantity, private evidence observation/target links and metadata conflict, safe takeoff price redaction, draft preview with no artifact mutation, both-option current budget snapshot selection, workspace restore/recalculation/stale outputs, literal project search/sort/pagination, local-time conversion including DST gaps/ambiguity and account-scoped tab recovery.
+
+The first expanded budget test incorrectly assumed an empty option was a complete zero-priced scope; the backend correctly returned partial. The fixture now supplies a separately identified, rated Option B and the full suite passes. The first responsive run exposed real phone selection-control overlap (23 passed / 1 failed); compact controls fixed it and all 24 passed on rerun. Formatting findings were fixed before final checks.
+
+The live harness uses temporary confirmed local users and a disposable PostGIS schema, real asymmetric JWKS validation and real private Storage bytes. A generated local PNG is sanitised to JPEG; downloaded bytes match stored digest and private/public/foreign access checks pass. Recovery mail stays in local Mailpit and is removed with its owned fixtures. The credential fixture file was absent after teardown. No existing user account or project was used for these tests.
+
+Not accepted: full core completion, retained issued PDF bytes/evidence lifecycle, full undo/form recovery/forced expiry, URL/stage dashboard navigation, object metadata/visibility, estimate revision comparison, request/export/deletion/retention, joint DB+Auth+file restore, load/throttling/operational monitoring, physical-touch/full assistive-technology acceptance, commercial/provider policy approval, field shade accuracy or representative customer pilots. Public provider styles still emit nonfatal missing-sprite/highway-shield warnings. G1-G8 remain open; F13/F16-F20 retain their separate gates. See requirements.md for feature-level status.

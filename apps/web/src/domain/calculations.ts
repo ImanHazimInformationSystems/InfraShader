@@ -1,8 +1,12 @@
 import { z } from 'zod'
 import { geometrySchema } from './workspace'
+import { projectInputSchema } from './projects'
 
 const money = z.string().regex(/^\d+(\.\d+)?$/)
 export const rateSchema = z.object({
+  category: z.string().default('General'),
+  archived: z.boolean().default(false),
+  metadata_revision: z.number().default(1),
   id: z.uuid(),
   code: z.string(),
   version: z.number().int(),
@@ -40,6 +44,18 @@ const scopeItem = z.object({
   provenance: z.string(),
 })
 export const snapshotSchema = z.object({
+  draft: z.boolean().optional(),
+  brief_details: projectInputSchema.shape.details,
+  option_budgets: z
+    .record(
+      z.string(),
+      z.object({
+        status: z.enum(['complete', 'partial', 'unavailable']),
+        total: money.optional(),
+        estimate_id: z.uuid().optional(),
+      }),
+    )
+    .optional(),
   version: z.number().int(),
   issued_at: z.string(),
   title: z.string(),
@@ -109,6 +125,24 @@ const estimateSchema = z.object({
   kind: z.literal('estimate'),
   payload: z.object({
     scenario: z.enum(['baseline', 'option_a', 'option_b']),
+    takeoff: z
+      .array(
+        z.object({
+          item_id: z.uuid(),
+          description: z.string(),
+          quantity: money,
+          unit: z.string(),
+          quantity_source: z.string(),
+          wastage_percent: money,
+          rate_code: z.string(),
+          rate_version: z.number(),
+          effective_date: z.string(),
+          unit_price: money.optional(),
+          line_total: money.optional(),
+          price_basis: z.string().optional(),
+        }),
+      )
+      .default([]),
     currency: z.string(),
     complete: z.boolean(),
     missing_rates: z.array(z.object({ item_id: z.uuid(), name: z.string(), reason: z.string() })),

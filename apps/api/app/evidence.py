@@ -3,17 +3,18 @@
 import hashlib
 import warnings
 from io import BytesIO
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import httpx
 from PIL import Image, UnidentifiedImageError
+from pydantic import Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.config import Settings
 from app.errors import APIError, not_found, unavailable
-from app.models import Evidence
-from app.workspace import project_for_workspace
+from app.models import Evidence, Workspace
+from app.workspace import StrictModel, project_for_workspace
 
 MAX_BYTES = 10 * 1024 * 1024
 MAX_PIXELS = 16_000_000
@@ -106,6 +107,9 @@ class PrivateStorage:
 def metadata(record):
     return {
         "id": str(record.id),
+        "revision": record.revision,
+        "observations": record.observations,
+        "target_ids": record.target_ids,
         "description": record.description,
         "source_note": record.source_note,
         "content_type": record.content_type,
@@ -187,3 +191,39 @@ def download(session, org_id, project_id, user_id, evidence_id, storage: Private
     if hashlib.sha256(content).hexdigest() != record.sha256:
         raise unavailable("Photo integrity verification failed. Contact the operator.")
     return content, record.content_type
+
+
+class EvidenceUpdate(StrictModel):
+    expected_revision: int = Field(ge=1)
+    description: str = Field(min_length=1, max_length=2000)
+    source_note: str = Field(min_length=1, max_length=2000)
+    observations: str = Field(default="", max_length=8000)
+    target_ids: list[UUID] = Field(default_factory=list, max_length=20)
+
+
+def update_metadata(session, org_id, project_id, user_id, evidence_id, data: EvidenceUpdate):
+    project_for_workspace(session, org_id, project_id, user_id, write=True)
+    record = session.scalar(
+        select(Evidence)
+        .where(Evidence.project_id == project_id, Evidence.id == evidence_id)
+        .with_for_update()
+    )
+    if record is None:
+        raise not_found()
+    if record.revision != data.expected_revision:
+        raise APIError(409, "evidence_conflict", "Evidence changed. Reload before editing again.")
+    workspace = session.get(Workspace, project_id)
+    known = {target["id"] for target in workspace.data["targets"]} if workspace else set()
+    links = sorted({str(key) for key in data.target_ids})
+    if not set(links).issubset(known):
+        raise APIError(
+            409, "evidence_target", "A linked target is unavailable. Reload the workspace."
+        )
+    record.description = data.description
+    record.source_note = data.source_note
+    record.observations = data.observations
+    record.target_ids = links
+    record.revision += 1
+    response = metadata(record)
+    session.commit()
+    return response

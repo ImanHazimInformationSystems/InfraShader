@@ -68,3 +68,53 @@ def test_private_metadata_tenant_checks_and_integrity(database):
         storage.objects[next(iter(storage.objects))] = b"changed bytes"
         with pytest.raises(APIError, match="integrity"):
             evidence.download(session, org, project_id, member, saved["id"], storage)
+
+
+@pytest.mark.integration
+def test_evidence_metadata_conflict_and_invalid_target_preserve_saved_notes(database):
+    from app import workspace
+    from tests.test_workspace import fixture_workspace
+
+    org, project, actor, _, _ = initialise(database, "developer_decision")
+
+    class Storage:
+        def put(self, *args):
+            pass
+
+        def delete(self, *args):
+            pass
+
+    with Session(database) as session:
+        saved_workspace = workspace.save_workspace(
+            session, org, project, actor, workspace.WorkspaceInput(**fixture_workspace())
+        )
+        target = saved_workspace["data"]["targets"][0]["id"]
+        photo_record = evidence.upload(
+            session, org, project, actor, photo(), "Fixture", "Generated pixels", Storage()
+        )
+        data = evidence.EvidenceUpdate(
+            expected_revision=1,
+            description="Updated",
+            source_note="Test",
+            observations="Observed fixture",
+            target_ids=[target],
+        )
+        saved = evidence.update_metadata(session, org, project, actor, photo_record["id"], data)
+        assert saved["revision"] == 2 and saved["target_ids"] == [target]
+        with pytest.raises(APIError):
+            evidence.update_metadata(session, org, project, actor, photo_record["id"], data)
+        session.rollback()
+        with pytest.raises(APIError):
+            evidence.update_metadata(
+                session,
+                org,
+                project,
+                actor,
+                photo_record["id"],
+                data.model_copy(update={"expected_revision": 2, "target_ids": [uuid4()]}),
+            )
+        session.rollback()
+        assert (
+            evidence.list_evidence(session, org, project, actor)["items"][0]["observations"]
+            == "Observed fixture"
+        )

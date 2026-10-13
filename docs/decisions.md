@@ -45,3 +45,14 @@ Basic sourced building extrusions are core F03/F05, not dependent on F13 or Thre
 The local prototype uses OpenFreeMap Bright vector context, preserving built-in attribution, and explicit-submit Photon place search (five results, timeout, no autocomplete/bulk requests or geolocation). Both endpoints can be replaced or disabled with VITE_MAP_STYLE_URL / VITE_GEOCODER_URL=`offline`. No paid key, account or hosted deployment is created. Photon public service is a demo with reasonable-use limits and no availability promise; production search capacity/provider approval remains open. Project/private data is not sent to search; the entered query and map viewport go to their respective providers. PDF visuals remain original geometry schematics, not provider map captures.
 
 Sources reviewed: https://openfreemap.org/quick_start/ ; https://github.com/hyperknot/openfreemap ; https://github.com/komoot/photon ; https://maplibre.org/maplibre-gl-js/docs/examples/display-buildings-in-3d/ . OpenFreeMap tile-derived render heights may contain defaults, so provider extrusion layers are removed. They are never imported as authoritative building inputs.
+
+
+## ADR-011 Explore context, administration and recovery (13 October 2026)
+
+Supersedes ADR-010's prohibition on provider extrusion for Explore only: explicitly labelled provider heights may be shown for navigation. They never enter project geometry, quantities or shade analysis. Authoritative project-building extrusions still require entered heights with sources. PDFs remain original schematics, with no third-party map captures.
+
+Administrators manage existing memberships under an organisation row lock, with a concurrent last-active-administrator guard and immutable change audit. Profile edits are self-only. Organisation defaults apply to new inputs; existing saved prices/times do not change silently. Initial/new-user provisioning remains an operator task, without external invitations.
+
+Project and workspace restore append new revisions and revalidate against current project bounds. Tab-local workspace recovery is scoped by user, organisation and project and expires after eight hours; automatic recovery cannot overwrite a changed server revision. No credentials are placed in the recovery record. This limited recovery does not constitute a full lifecycle/backup or forced-expiry acceptance claim.
+
+Draft PDF preview shares issuance permission/readiness checks but does not save an Artifact or consume an issue version. Both-budget developer snapshots use the selected preferred estimate and latest same-revision other-option estimate, explicitly labelling incomplete or unavailable budgets. Issuance remains separate and requires confirmation.

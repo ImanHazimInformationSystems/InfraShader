@@ -1,5 +1,6 @@
 """Organisation-scoped, revisioned ground geometry and independent scenarios."""
 
+from copy import deepcopy
 from dataclasses import asdict
 from decimal import Decimal
 from typing import Annotated, Any, Literal
@@ -19,7 +20,7 @@ from app.domain.geometry import (
     select_active_quantity,
 )
 from app.errors import APIError, not_found
-from app.models import Project, Workspace
+from app.models import Project, Workspace, WorkspaceRevision
 from app.projects import require_membership
 
 ScenarioKey = Literal["baseline", "option_a", "option_b"]
@@ -197,5 +198,94 @@ def save_workspace(
     else:
         saved.data, saved.revision, saved.updated_by = canonical, revision + 1, user_id
     response = {"revision": revision + 1, "data": canonical}
+    session.add(
+        WorkspaceRevision(
+            project_id=project_id, revision=revision + 1, payload=canonical, changed_by=user_id
+        )
+    )
     session.commit()
     return response
+
+
+def workspace_history(session, org_id, project_id, user_id, offset=0):
+    project_for_workspace(session, org_id, project_id, user_id)
+    rows = session.scalars(
+        select(WorkspaceRevision)
+        .where(WorkspaceRevision.project_id == project_id)
+        .order_by(WorkspaceRevision.revision.desc())
+        .limit(20)
+        .offset(offset)
+    ).all()
+    return {
+        "items": [
+            {
+                "revision": row.revision,
+                "created_at": row.created_at,
+                "changed_by": str(row.changed_by),
+                "data": row.payload,
+            }
+            for row in rows
+        ],
+        "offset": offset,
+        "limit": 20,
+    }
+
+
+def restore_workspace(session, org_id, project_id, user_id, revision, expected_revision):
+    project_for_workspace(session, org_id, project_id, user_id, write=True)
+    previous = session.get(WorkspaceRevision, (project_id, revision))
+    if previous is None:
+        raise not_found()
+    draft = deepcopy(previous.payload)
+    draft.pop("metric_crs", None)
+    for target in draft["targets"]:
+        target.pop("area_m2", None)
+    for scenario in draft["scenarios"].values():
+        for item in scenario["items"]:
+            item.pop("quantity", None)
+    draft["expected_revision"] = expected_revision
+    return save_workspace(session, org_id, project_id, user_id, WorkspaceInput(**draft))
+
+
+class RectangleInput(StrictModel):
+    longitude: Annotated[float, Field(ge=-180, le=180)]
+    latitude: Annotated[float, Field(ge=-80, le=84)]
+    width_m: Annotated[float, Field(gt=0, le=1000)]
+    length_m: Annotated[float, Field(gt=0, le=1000)]
+    rotation_deg: Annotated[float, Field(ge=0, lt=360)] = 0
+
+
+def rectangle_preview(session, org_id, project_id, user_id, data: RectangleInput):
+    from math import cos, floor, radians, sin
+
+    from pyproj import Transformer
+
+    project_for_workspace(session, org_id, project_id, user_id)
+    zone = min(60, max(1, floor((data.longitude + 180) / 6) + 1))
+    crs = f"EPSG:{(32600 if data.latitude >= 0 else 32700) + zone}"
+    forward = Transformer.from_crs("EPSG:4326", crs, always_xy=True)
+    inverse = Transformer.from_crs(crs, "EPSG:4326", always_xy=True)
+    cx, cy = forward.transform(data.longitude, data.latitude)
+    angle = radians(data.rotation_deg)
+    coordinates = []
+    for x, y in [
+        (-data.width_m / 2, -data.length_m / 2),
+        (data.width_m / 2, -data.length_m / 2),
+        (data.width_m / 2, data.length_m / 2),
+        (-data.width_m / 2, data.length_m / 2),
+    ]:
+        coordinates.append(
+            list(
+                inverse.transform(
+                    cx + x * cos(angle) + y * sin(angle), cy - x * sin(angle) + y * cos(angle)
+                )
+            )
+        )
+    coordinates.append(coordinates[0])
+    geometry = {"type": "Polygon", "coordinates": [coordinates]}
+    checked = project_wgs84_geometry(geometry, source_crs="EPSG:4326")
+    return {
+        "geometry": geometry,
+        "metric_crs": checked.metric_crs,
+        "rotation_reference": "Clockwise from projected grid north",
+    }

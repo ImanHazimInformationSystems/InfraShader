@@ -14,7 +14,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from starlette.exceptions import HTTPException
 
-from app import calculations, evidence, projects, reviews, workspace
+from app import administration, calculations, evidence, projects, reviews, workspace
 from app.auth import TokenVerifier, current_user, get_verifier
 from app.body_limit import BodyLimit
 from app.config import Settings, get_settings
@@ -155,10 +155,12 @@ def project_list(
     user: User,
     db: Database,
     archived: bool = False,
+    query: Annotated[str, Query(max_length=160)] = "",
+    sort: Literal["updated", "name", "created"] = "updated",
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
     offset: Annotated[int, Query(ge=0)] = 0,
 ):
-    return projects.list_projects(db, organisation_id, user, archived, limit, offset)
+    return projects.list_projects(db, organisation_id, user, archived, limit, offset, query, sort)
 
 
 @app.post(
@@ -191,6 +193,33 @@ def workspace_get(organisation_id: UUID, project_id: UUID, user: User, db: Datab
     return workspace.get_workspace(db, organisation_id, project_id, user)
 
 
+@app.get("/api/v1/organisations/{organisation_id}/projects/{project_id}/workspace/history")
+def workspace_history_get(
+    organisation_id: UUID,
+    project_id: UUID,
+    user: User,
+    db: Database,
+    offset: Annotated[int, Query(ge=0, le=100000)] = 0,
+):
+    return workspace.workspace_history(db, organisation_id, project_id, user, offset)
+
+
+@app.post(
+    "/api/v1/organisations/{organisation_id}/projects/{project_id}/workspace/history/{revision}/restore"
+)
+def workspace_history_restore(
+    organisation_id: UUID,
+    project_id: UUID,
+    revision: int,
+    user: User,
+    db: Database,
+    expected_revision: Annotated[int, Query(ge=0)],
+):
+    return workspace.restore_workspace(
+        db, organisation_id, project_id, user, revision, expected_revision
+    )
+
+
 @app.post("/api/v1/organisations/{organisation_id}/projects/{project_id}/workspace")
 def workspace_save(
     organisation_id: UUID,
@@ -208,13 +237,24 @@ def rates_get(
     user: User,
     db: Database,
     query: Annotated[str, Query(max_length=160)] = "",
+    category: Annotated[str, Query(max_length=80)] = "",
+    archived: bool = False,
     unit: Literal["m2", "m", "item"] | None = None,
     basis: Literal["indicative_budget", "cost"] | None = None,
     offset: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
 ):
     return calculations.list_rates(
-        db, organisation_id, user, query=query, unit=unit, basis=basis, offset=offset, limit=limit
+        db,
+        organisation_id,
+        user,
+        query=query,
+        unit=unit,
+        basis=basis,
+        offset=offset,
+        limit=limit,
+        category=category,
+        archived=archived,
     )
 
 
@@ -276,6 +316,20 @@ def proposal_create(
     organisation_id: UUID, project_id: UUID, data: calculations.IssueInput, user: User, db: Database
 ):
     return calculations.issue_snapshot(db, organisation_id, project_id, user, data, "proposal")
+
+
+@app.post("/api/v1/organisations/{organisation_id}/projects/{project_id}/output-preview")
+def output_preview(
+    organisation_id: UUID,
+    project_id: UUID,
+    data: calculations.IssueInput,
+    kind: Literal["developer_brief", "proposal"],
+    user: User,
+    db: Database,
+):
+    return calculations.issue_snapshot(
+        db, organisation_id, project_id, user, data, kind, preview=True
+    )
 
 
 @app.get("/api/v1/organisations/{organisation_id}/projects/{project_id}/evidence")
@@ -354,3 +408,110 @@ def save_option_review(
     db: Annotated[Session, Depends(database_session)],
 ):
     return reviews.save_review(db, organisation_id, project_id, user, data)
+
+
+@app.get("/api/v1/organisations/{organisation_id}/projects/{project_id}/history")
+def brief_history(
+    organisation_id: UUID,
+    project_id: UUID,
+    user: User,
+    db: Database,
+    offset: Annotated[int, Query(ge=0)] = 0,
+):
+    return projects.project_history(db, organisation_id, project_id, user, offset)
+
+
+@app.post(
+    "/api/v1/organisations/{organisation_id}/projects/{project_id}/history/{revision}/restore"
+)
+def brief_restore(
+    organisation_id: UUID,
+    project_id: UUID,
+    revision: int,
+    user: User,
+    db: Database,
+    expected_revision: Annotated[int, Query(ge=1)],
+):
+    return projects.restore_project(
+        db, organisation_id, project_id, user, revision, expected_revision
+    )
+
+
+@app.get("/api/v1/profile")
+def profile_get(user: User, db: Database):
+    return administration.get_profile(db, user)
+
+
+@app.put("/api/v1/profile")
+def profile_save(data: administration.ProfileInput, user: User, db: Database):
+    return administration.save_profile(db, user, data)
+
+
+@app.get("/api/v1/organisations/{organisation_id}/settings")
+def organisation_settings(organisation_id: UUID, user: User, db: Database):
+    return administration.get_settings(db, organisation_id, user)
+
+
+@app.put("/api/v1/organisations/{organisation_id}/settings")
+def organisation_settings_save(
+    organisation_id: UUID, data: administration.OrganisationInput, user: User, db: Database
+):
+    return administration.save_settings(db, organisation_id, user, data)
+
+
+@app.get("/api/v1/organisations/{organisation_id}/members")
+def members_get(organisation_id: UUID, user: User, db: Database):
+    return administration.list_members(db, organisation_id, user)
+
+
+@app.patch("/api/v1/organisations/{organisation_id}/members/{member_id}")
+def member_update(
+    organisation_id: UUID,
+    member_id: UUID,
+    data: administration.MemberInput,
+    user: User,
+    db: Database,
+):
+    return administration.update_member(db, organisation_id, user, member_id, data)
+
+
+@app.get("/api/v1/organisations/{organisation_id}/administration-history")
+def admin_history(organisation_id: UUID, user: User, db: Database):
+    return administration.events(db, organisation_id, user)
+
+
+@app.post("/api/v1/organisations/{organisation_id}/projects/{project_id}/rectangle-preview")
+def rectangle_preview(
+    organisation_id: UUID,
+    project_id: UUID,
+    data: workspace.RectangleInput,
+    user: User,
+    db: Database,
+):
+    try:
+        return workspace.rectangle_preview(db, organisation_id, project_id, user, data)
+    except ValueError as error:
+        raise APIError(422, "rectangle_input", str(error)) from error
+
+
+@app.patch("/api/v1/organisations/{organisation_id}/projects/{project_id}/evidence/{evidence_id}")
+def evidence_edit(
+    organisation_id: UUID,
+    project_id: UUID,
+    evidence_id: UUID,
+    data: evidence.EvidenceUpdate,
+    user: User,
+    db: Database,
+):
+    return evidence.update_metadata(db, organisation_id, project_id, user, evidence_id, data)
+
+
+@app.patch("/api/v1/organisations/{organisation_id}/rates/{rate_id}")
+def rate_archive(
+    organisation_id: UUID,
+    rate_id: UUID,
+    data: calculations.RateArchiveInput,
+    user: User,
+    db: Database,
+):
+    return calculations.archive_rate(db, organisation_id, user, rate_id, data)

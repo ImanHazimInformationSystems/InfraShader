@@ -77,6 +77,11 @@ def test_real_saved_geometry_analysis_estimate_issue_and_audience(database, purp
         )
         draft = fixture_workspace()
         draft["scenarios"]["option_a"]["items"][0]["rate_id"] = rate["id"]
+        if developer:
+            draft["scenarios"]["option_b"]["items"] = deepcopy(
+                draft["scenarios"]["option_a"]["items"]
+            )
+            draft["scenarios"]["option_b"]["items"][0]["id"] = str(uuid4())
         saved = workspace.save_workspace(
             session, org, project_id, admin, workspace.WorkspaceInput(**draft)
         )
@@ -124,6 +129,12 @@ def test_real_saved_geometry_analysis_estimate_issue_and_audience(database, purp
             if item["kind"] == "estimate"
         )
         assert "cost_base" not in safe["payload"] and "profit" not in safe["payload"]
+        assert safe["payload"]["takeoff"][0]["description"]
+        if not developer:
+            assert "unit_price" not in safe["payload"]["takeoff"][0]
+            assert "line_total" not in safe["payload"]["takeoff"][0]
+        else:
+            assert safe["payload"]["takeoff"][0]["price_basis"] == "indicative"
         kind = "developer_brief" if developer else "proposal"
         issue = calculations.IssueInput(
             request_key=uuid4(),
@@ -138,6 +149,17 @@ def test_real_saved_geometry_analysis_estimate_issue_and_audience(database, purp
         )
         with pytest.raises(APIError):
             calculations.issue_snapshot(session, org, project_id, member, issue, kind)
+        session.rollback()
+        before_preview = calculations.get_artifacts(session, org, project_id, admin)["items"]
+        preview = calculations.issue_snapshot(
+            session, org, project_id, admin, issue, kind, preview=True
+        )
+        assert preview["draft"] is True
+        assert (
+            calculations.get_artifacts(session, org, project_id, admin)["items"] == before_preview
+        )
+        with pytest.raises(APIError):
+            calculations.issue_snapshot(session, org, project_id, member, issue, kind, preview=True)
         session.rollback()
         issued = calculations.issue_snapshot(session, org, project_id, admin, issue, kind)
         retry = calculations.issue_snapshot(session, org, project_id, admin, issue, kind)
@@ -163,7 +185,39 @@ def test_real_saved_geometry_analysis_estimate_issue_and_audience(database, purp
                     yield from keys(child)
 
         assert forbidden.isdisjoint(keys(issued["payload"]))
+        assert forbidden.isdisjoint(keys(preview))
+        assert "draft" not in issued["payload"]
+        assert preview["version"] == issued["payload"]["version"]
         assert issued["payload"]["shade"]["status"] == "omitted"
+        if developer:
+            budgets = issued["payload"]["option_budgets"]
+            assert budgets["option_a"]["total"] == estimate["payload"]["selling_total"]
+            assert budgets["option_b"] == {"status": "unavailable"}
+            other = calculations.run_estimate(
+                session,
+                org,
+                project_id,
+                admin,
+                calculations.EstimateInput(
+                    expected_revision=1,
+                    request_key=uuid4(),
+                    scenario="option_b",
+                    method="indicative",
+                ),
+            )
+            both = calculations.issue_snapshot(
+                session,
+                org,
+                project_id,
+                admin,
+                issue.model_copy(update={"request_key": uuid4()}),
+                kind,
+            )
+            assert (
+                both["payload"]["option_budgets"]["option_b"]["total"]
+                == other["payload"]["selling_total"]
+            )
+            assert both["payload"]["option_budgets"]["option_b"]["estimate_id"] == other["id"]
         original = deepcopy(issued["payload"])
         draft["expected_revision"] = 1
         draft["scenarios"]["option_a"]["items"][0]["height_m"] = 4

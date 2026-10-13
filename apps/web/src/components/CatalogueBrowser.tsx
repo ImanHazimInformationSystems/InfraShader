@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { rateListSchema, type Rate } from '../domain/calculations'
+import { rateListSchema, rateSchema, type Rate } from '../domain/calculations'
 import { request } from '../services/api'
 import { Button } from './ui/button'
 
@@ -20,7 +20,16 @@ export default function CatalogueBrowser({
 }) {
   const [query, setQuery] = useState('')
   const [unit, setUnit] = useState('')
-  const [filter, setFilter] = useState({ query: '', unit: '', offset: 0 })
+  const [category, setCategory] = useState('')
+  const [archived, setArchived] = useState(false)
+  const [changing, setChanging] = useState(false)
+  const [filter, setFilter] = useState({
+    query: '',
+    unit: '',
+    category: '',
+    archived: false,
+    offset: 0,
+  })
   const [page, setPage] = useState<{ items: Rate[]; total: number; offset: number } | null>(null)
   const [settled, setSettled] = useState('')
   const [error, setError] = useState('')
@@ -31,6 +40,8 @@ export default function CatalogueBrowser({
     let active = true
     const params = new URLSearchParams({
       query: filter.query,
+      category: filter.category,
+      archived: String(filter.archived),
       basis,
       offset: String(filter.offset),
       limit: '20',
@@ -54,9 +65,34 @@ export default function CatalogueBrowser({
       active = false
     }
   }, [endpoint, token, basis, filter, refresh, onRates, retry, requestKey])
+  async function archive(rate: Rate) {
+    if (
+      !window.confirm(
+        `${rate.archived ? 'Restore' : 'Archive'} ${rate.code} v${rate.version}? Existing assignments and issued prices remain unchanged.`,
+      )
+    )
+      return
+    setChanging(true)
+    setError('')
+    try {
+      const saved = await request(`${endpoint}/rates/${rate.id}`, rateSchema, token, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          expected_revision: rate.metadata_revision,
+          archived: !rate.archived,
+        }),
+      })
+      onRates([saved])
+      setRetry((value) => value + 1)
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Archive update failed.')
+    } finally {
+      setChanging(false)
+    }
+  }
   function search(event: FormEvent) {
     event.preventDefault()
-    setFilter({ query: query.trim(), unit, offset: 0 })
+    setFilter({ query: query.trim(), unit, category: category.trim(), archived, offset: 0 })
   }
   return (
     <section
@@ -78,7 +114,23 @@ export default function CatalogueBrowser({
             <option value="item">Items</option>
           </select>
         </label>
-        <Button type="submit" disabled={busy}>
+        <label>
+          Filter rate category
+          <input
+            maxLength={80}
+            value={category}
+            onChange={(event) => setCategory(event.target.value)}
+          />
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            checked={archived}
+            onChange={(event) => setArchived(event.target.checked)}
+          />{' '}
+          Show archived rate versions
+        </label>
+        <Button type="submit" disabled={busy || changing}>
           Search catalogue
         </Button>
       </form>
@@ -113,7 +165,9 @@ export default function CatalogueBrowser({
                   : `MYR ${rate.amount}/${rate.unit}`}{' '}
                 | effective {rate.effective_date}
               </p>
-              <p>{rate.source_note}</p>
+              <p>
+                {rate.category} / {rate.source_note}
+              </p>
               <Button
                 type="button"
                 variant="outline"
@@ -121,6 +175,14 @@ export default function CatalogueBrowser({
                 onClick={() => onEdit(rate)}
               >
                 Revise {rate.code} v{rate.version}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={changing || busy || rate.amount === undefined}
+                onClick={() => void archive(rate)}
+              >
+                {rate.archived ? 'Restore' : 'Archive'} {rate.code} v{rate.version}
               </Button>
             </article>
           ))}

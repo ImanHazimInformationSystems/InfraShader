@@ -23,6 +23,8 @@ class Base(DeclarativeBase):
 
 
 class Organisation(Base):
+    settings: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
+    revision: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
     __tablename__ = "organisations"
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     name: Mapped[str] = mapped_column(String(160))
@@ -30,6 +32,7 @@ class Organisation(Base):
 
 
 class Membership(Base):
+    revision: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
     __tablename__ = "memberships"
     __table_args__ = (
         UniqueConstraint("organisation_id", "user_id"),
@@ -48,6 +51,7 @@ class Membership(Base):
 
 
 class Project(Base):
+    details: Mapped[dict] = mapped_column(JSONB, default=dict, server_default="{}")
     __tablename__ = "projects"
     __table_args__ = (
         CheckConstraint(
@@ -93,7 +97,21 @@ class Workspace(Base):
     )
 
 
+class WorkspaceRevision(Base):
+    __tablename__ = "workspace_revisions"
+    project_id: Mapped[UUID] = mapped_column(
+        ForeignKey("projects.id", ondelete="CASCADE"), primary_key=True
+    )
+    revision: Mapped[int] = mapped_column(Integer, primary_key=True)
+    payload: Mapped[dict] = mapped_column(JSONB)
+    changed_by: Mapped[UUID] = mapped_column()
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class CatalogueRate(Base):
+    category: Mapped[str] = mapped_column(String(80), default="General", server_default="General")
+    archived: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    metadata_revision: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
     __tablename__ = "catalogue_rates"
     __table_args__ = (UniqueConstraint("organisation_id", "code", "version"),)
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
@@ -129,6 +147,9 @@ class Artifact(Base):
 
 
 class Evidence(Base):
+    revision: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
+    observations: Mapped[str] = mapped_column(String(8000), default="", server_default="")
+    target_ids: Mapped[list] = mapped_column(JSONB, default=list, server_default="[]")
     __tablename__ = "evidence"
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     project_id: Mapped[UUID] = mapped_column(
@@ -141,4 +162,33 @@ class Evidence(Base):
     description: Mapped[str] = mapped_column(String(2000))
     source_note: Mapped[str] = mapped_column(String(2000))
     created_by: Mapped[UUID] = mapped_column()
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class ProjectRevision(Base):
+    __tablename__ = "project_revisions"
+    project_id: Mapped[UUID] = mapped_column(
+        ForeignKey("projects.id", ondelete="CASCADE"), primary_key=True
+    )
+    revision: Mapped[int] = mapped_column(Integer, primary_key=True)
+    payload: Mapped[dict] = mapped_column(JSONB)
+    changed_by: Mapped[UUID] = mapped_column()
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class UserProfile(Base):
+    __tablename__ = "user_profiles"
+    user_id: Mapped[UUID] = mapped_column(primary_key=True)
+    display_name: Mapped[str] = mapped_column(String(160), default="")
+    revision: Mapped[int] = mapped_column(Integer, default=1)
+
+
+class AdministrationEvent(Base):
+    __tablename__ = "administration_events"
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    organisation_id: Mapped[UUID] = mapped_column(
+        ForeignKey("organisations.id", ondelete="CASCADE")
+    )
+    actor_id: Mapped[UUID] = mapped_column()
+    payload: Mapped[dict] = mapped_column(JSONB)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

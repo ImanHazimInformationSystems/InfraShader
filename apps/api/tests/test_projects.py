@@ -22,6 +22,9 @@ class IsolatedSession:
         self.statements.append(statement)
         return next(self.results)
 
+    def add(self, record):
+        self.statements.append(record)
+
     def commit(self):
         self.commits += 1
 

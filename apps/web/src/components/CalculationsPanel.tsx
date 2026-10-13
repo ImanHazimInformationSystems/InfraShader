@@ -7,13 +7,17 @@ import {
   artifactSchema,
   rateListSchema,
   rateSchema,
+  snapshotSchema,
+  type Snapshot,
   type Artifact,
   type Rate,
 } from '../domain/calculations'
 import { request } from '../services/api'
 import { Button } from './ui/button'
 import ReviewPanel from './ReviewPanel'
+import { settingsSchema } from '../domain/settings'
 import CatalogueBrowser from './CatalogueBrowser'
+import OutputPreview from './OutputPreview'
 
 const chargeCategories = ['labour', 'transport', 'overhead', 'fixed'] as const
 type ChargeDraft = {
@@ -29,6 +33,7 @@ type Props = {
   revision: number
   dirty: boolean
   scenario: ScenarioKey
+  onInspect: (scenario: ScenarioKey, itemId: string) => void
   onReviewDirty: (dirty: boolean) => void
   onData: (data: WorkspaceData) => void
   onShowShadows: (features: Feature[], revision: number) => void
@@ -43,8 +48,10 @@ export default function CalculationsPanel({
   onData,
   onShowShadows,
   onReviewDirty,
+  onInspect,
 }: Props) {
   const [error, setError] = useState('')
+  const [preview, setPreview] = useState<Snapshot | null>(null)
   const [rates, setRates] = useState<Rate[]>([])
   const [catalogueRevision, setCatalogueRevision] = useState(0)
   const rateForm = useRef<HTMLFormElement>(null)
@@ -83,6 +90,7 @@ export default function CalculationsPanel({
     if (!form) return
     for (const key of [
       'code',
+      'category',
       'description',
       'unit',
       'amount',
@@ -103,9 +111,23 @@ export default function CalculationsPanel({
   const [artifacts, setArtifacts] = useState<Artifact[]>([])
   const [busy, setBusy] = useState(false)
   const [timestamp, setTimestamp] = useState(new Date().toISOString())
+  const [timeMode, setTimeMode] = useState('offset')
+  const [localTime, setLocalTime] = useState('')
   const [target, setTarget] = useState('')
   const [method, setMethod] = useState('markup')
   const [percent, setPercent] = useState('0')
+  const percentEdited = useRef(false)
+  useEffect(() => {
+    let active = true
+    request(`/api/v1/organisations/${project.organisation_id}/settings`, settingsSchema, token)
+      .then((value) => {
+        if (active && !percentEdited.current) setPercent(value.settings.default_markup)
+      })
+      .catch(() => {})
+    return () => {
+      active = false
+    }
+  }, [project.organisation_id, token])
   const [wastage, setWastage] = useState('0')
   const [fixedPrice, setFixedPrice] = useState('')
   const [charges, setCharges] = useState<ChargeDraft[]>([])
@@ -167,6 +189,7 @@ export default function CalculationsPanel({
         method: 'POST',
         body: JSON.stringify({
           code: values.get('code'),
+          category: values.get('category'),
           description: values.get('description'),
           unit: values.get('unit'),
           currency: 'MYR',
@@ -188,7 +211,7 @@ export default function CalculationsPanel({
         ? {
             expected_revision: revision,
             request_key: crypto.randomUUID(),
-            timestamp,
+            ...(timeMode === 'local' ? { local_timestamp: localTime } : { timestamp }),
             target_id: target || data.targets[0]?.id,
           }
         : {
@@ -208,12 +231,13 @@ export default function CalculationsPanel({
       }),
     )
   }
-  function issue() {
+  function issue(draft = false) {
     if (scenario === 'baseline') {
       setError('Select Option A or B before issuing.')
       return
     }
     if (
+      !draft &&
       !window.confirm(
         `Issue an immutable ${developer ? 'developer decision brief' : 'contractor client proposal'} from the saved inputs?`,
       )
@@ -233,6 +257,21 @@ export default function CalculationsPanel({
       confirmed: true,
     }
     const fingerprint = JSON.stringify(body)
+    if (draft) {
+      void perform(async () => {
+        const snapshot = await request(
+          `${endpoint}/output-preview?kind=${developer ? 'developer_brief' : 'proposal'}`,
+          snapshotSchema,
+          token,
+          {
+            method: 'POST',
+            body: JSON.stringify({ ...body, request_key: crypto.randomUUID() }),
+          },
+        )
+        setPreview(snapshot)
+      })
+      return
+    }
     if (!pendingIssue.current || pendingIssue.current.fingerprint !== fingerprint)
       pendingIssue.current = { fingerprint, key: crypto.randomUUID() }
     const requestKey = pendingIssue.current.key
@@ -284,6 +323,10 @@ export default function CalculationsPanel({
           <label>
             Rate code
             <input name="code" required maxLength={80} />
+          </label>
+          <label>
+            Rate category
+            <input name="category" required maxLength={80} defaultValue="General" />
           </label>
           <label>
             Description
@@ -350,7 +393,11 @@ export default function CalculationsPanel({
               )}
               <option value="">Unpriced — select a rate</option>
               {rates
-                .filter((rate) => rate.basis === (developer ? 'indicative_budget' : 'cost'))
+                .filter(
+                  (rate) =>
+                    rate.basis === (developer ? 'indicative_budget' : 'cost') &&
+                    (!rate.archived || rate.id === item.rate_id),
+                )
                 .map((rate) => (
                   <option key={rate.id} value={rate.id}>
                     {rate.code} v{rate.version} · {rate.description} · {rate.amount ?? 'restricted'}{' '}
@@ -378,14 +425,41 @@ export default function CalculationsPanel({
             </select>
           </div>
           <div className="field">
-            <label htmlFor="analysis-time">Date/time with explicit timezone offset</label>
-            <input
-              id="analysis-time"
-              value={timestamp}
-              onChange={(event) => setTimestamp(event.target.value)}
-              placeholder="2026-10-11T12:00:00+08:00"
-            />
+            <label htmlFor="analysis-time-mode">Time entry</label>
+            <select
+              id="analysis-time-mode"
+              value={timeMode}
+              onChange={(event) => setTimeMode(event.target.value)}
+            >
+              <option value="offset">Explicit timezone offset</option>
+              <option value="local">Project local time ({project.timezone})</option>
+            </select>
           </div>
+          {timeMode === 'local' ? (
+            <div className="field">
+              <label htmlFor="analysis-local-time">Local date and time ({project.timezone})</label>
+              <input
+                id="analysis-local-time"
+                type="datetime-local"
+                value={localTime}
+                onChange={(event) => setLocalTime(event.target.value)}
+              />
+              <p>
+                The backend uses the saved project timezone. Clock-change ambiguities require an
+                explicit offset.
+              </p>
+            </div>
+          ) : (
+            <div className="field">
+              <label htmlFor="analysis-time">Date/time with explicit timezone offset</label>
+              <input
+                id="analysis-time"
+                value={timestamp}
+                onChange={(event) => setTimestamp(event.target.value)}
+                placeholder="2026-10-11T12:00:00+08:00"
+              />
+            </div>
+          )}
           <Button disabled={blocked || !data.targets.length} onClick={() => calculate('analyses')}>
             Calculate all three scenarios
           </Button>
@@ -435,11 +509,13 @@ export default function CalculationsPanel({
                         : '9999999999.9999'
                   }
                   value={method === 'fixed_selling' ? fixedPrice : percent}
-                  onChange={(event) =>
-                    method === 'fixed_selling'
-                      ? setFixedPrice(event.target.value)
-                      : setPercent(event.target.value)
-                  }
+                  onChange={(event) => {
+                    if (method === 'fixed_selling') setFixedPrice(event.target.value)
+                    else {
+                      setPercent(event.target.value)
+                      percentEdited.current = true
+                    }
+                  }}
                 />
               </div>
             </>
@@ -541,6 +617,7 @@ export default function CalculationsPanel({
         </form>
       </div>
       <ReviewPanel
+        data={data}
         project={project}
         token={token}
         revision={revision}
@@ -602,6 +679,66 @@ export default function CalculationsPanel({
                     : 'INCOMPLETE — priced scope only'}
                   : {item.payload.currency} {item.payload.selling_total}
                 </p>
+                <details>
+                  <summary>Itemised takeoff for {item.payload.scenario}</summary>
+                  <div className="overflow-x-auto">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Scope</th>
+                          <th>Quantity</th>
+                          <th>Rate version</th>
+                          <th>Wastage</th>
+                          <th>Line amount</th>
+                          <th>Geometry</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {item.payload.takeoff.map((line) => (
+                          <tr key={line.item_id}>
+                            <td>
+                              {line.description}
+                              <br />
+                              {line.quantity_source}
+                            </td>
+                            <td>
+                              {line.quantity} {line.unit}
+                            </td>
+                            <td>
+                              {line.rate_code} v{line.rate_version}
+                              <br />
+                              {line.effective_date}
+                              <br />
+                              {line.unit_price
+                                ? `MYR ${line.unit_price}/${line.unit}`
+                                : 'Price restricted'}
+                            </td>
+                            <td>{line.wastage_percent}%</td>
+                            <td>
+                              {line.line_total
+                                ? `MYR ${line.line_total} (${line.price_basis})`
+                                : 'Price restricted'}
+                            </td>
+                            <td>
+                              <Button
+                                variant="outline"
+                                disabled={dirty || item.stale}
+                                onClick={() => onInspect(item.payload.scenario, line.item_id)}
+                              >
+                                Inspect {line.description}
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <p>
+                    Backend quantities and prices from this saved estimate. Inspect opens the
+                    current source item; edits require saving and recalculation. Existing items and
+                    unpriced scope are excluded from priced rows.
+                  </p>
+                </details>
                 {item.payload.cost_base && (
                   <p>
                     Internal cost base {item.payload.cost_base} ·{' '}
@@ -697,10 +834,31 @@ export default function CalculationsPanel({
             !assumptions.trim() ||
             !exclusions.trim()
           }
-          onClick={issue}
+          onClick={() => issue(false)}
         >
           Confirm and issue new version
         </Button>
+        <Button
+          variant="outline"
+          disabled={
+            blocked ||
+            !estimateId ||
+            !criteria.trim() ||
+            !notes.trim() ||
+            !assumptions.trim() ||
+            !exclusions.trim()
+          }
+          onClick={() => issue(true)}
+        >
+          Preview draft PDF
+        </Button>
+        {preview && (
+          <OutputPreview
+            snapshot={preview}
+            kind={developer ? 'developer_brief' : 'proposal'}
+            onClose={() => setPreview(null)}
+          />
+        )}
       </details>
       <h3>Issued outputs</h3>
       {artifacts

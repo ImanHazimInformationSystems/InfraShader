@@ -23,6 +23,9 @@ export default function SiteMap({ bounds, onViewport, onSelect, readOnly = false
   const selectRef = useRef(onSelect)
   const selecting = useRef(false)
   const firstCorner = useRef<[number, number] | null>(null)
+  const [threeD, setThreeD] = useState(false)
+  const [context3D, setContext3D] = useState(false)
+  const [renderedBuildings, setRenderedBuildings] = useState(0)
   const [selectionMessage, setSelectionMessage] = useState('')
   const [basemap, setBasemap] = useState(false)
   const [unavailable, setUnavailable] = useState(false)
@@ -52,14 +55,50 @@ export default function SiteMap({ bounds, onViewport, onSelect, readOnly = false
               (boundsRef.current[1] + boundsRef.current[3]) / 2,
             ],
             zoom: 14,
-            maxPitch: 0,
+            maxPitch: 65,
             attributionControl: { compact: false },
           })
           const active = view
           map.current = active
-          active.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right')
+          active.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right')
           active.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-left')
           active.on('load', () => {
+            const buildingLayer = style.layers.find(
+              (layer) =>
+                'source-layer' in layer &&
+                layer['source-layer'] === 'building' &&
+                'source' in layer,
+            )
+            if (buildingLayer && 'source' in buildingLayer && 'source-layer' in buildingLayer) {
+              active.addLayer({
+                id: 'explore-buildings-3d',
+                type: 'fill-extrusion',
+                source: buildingLayer.source,
+                'source-layer': buildingLayer['source-layer'],
+                minzoom: 14,
+                layout: { visibility: 'none' },
+                filter: [
+                  '>',
+                  ['to-number', ['coalesce', ['get', 'render_height'], ['get', 'height']], 0],
+                  0,
+                ],
+                paint: {
+                  'fill-extrusion-color': '#b8afa1',
+                  'fill-extrusion-height': [
+                    'min',
+                    1000,
+                    [
+                      'max',
+                      0,
+                      ['to-number', ['coalesce', ['get', 'render_height'], ['get', 'height']], 0],
+                    ],
+                  ],
+                  'fill-extrusion-base': ['max', 0, ['to-number', ['get', 'render_min_height'], 0]],
+                  'fill-extrusion-opacity': 0.85,
+                },
+              })
+              setContext3D(true)
+            }
             active.addSource('selected-site', {
               type: 'geojson',
               data: boundsPolygon(boundsRef.current),
@@ -122,6 +161,10 @@ export default function SiteMap({ bounds, onViewport, onSelect, readOnly = false
           })
           active.on('error', () => setUnavailable(true))
           active.on('idle', () => {
+            if (active.getLayer('explore-buildings-3d'))
+              setRenderedBuildings(
+                active.queryRenderedFeatures({ layers: ['explore-buildings-3d'] }).length,
+              )
             setContextFeatures(
               active.queryRenderedFeatures().filter((feature) => feature.source !== 'selected-site')
                 .length,
@@ -165,19 +208,49 @@ export default function SiteMap({ bounds, onViewport, onSelect, readOnly = false
       className="site-map"
       data-map-status={unavailable ? 'unavailable' : loaded ? 'ready' : 'loading'}
       data-rendered-site-features={renderedFeatures}
+      data-view-mode={threeD ? '3d' : '2d'}
+      data-rendered-buildings={renderedBuildings}
       data-rendered-context-features={contextFeatures}
       aria-label={readOnly ? 'Saved site extent map' : 'Explore site map'}
     >
       <div ref={container} className="map-canvas" />
       <div className="map-chip">
-        <Compass size={15} /> {readOnly ? 'Site Plan · 2D' : 'Explore Map · 2D'}
+        <Compass size={15} />{' '}
+        {readOnly ? 'Site Plan / 2D' : threeD ? 'Explore Map / 3D context' : 'Explore Map / 2D'}
       </div>
       {!readOnly && (
         <div className="map-selection-tools">
           <button
             className="button secondary compact"
+            disabled={!loaded || !context3D}
+            aria-pressed={threeD}
+            onClick={() => {
+              const next = !threeD
+              setThreeD(next)
+              map.current?.setLayoutProperty(
+                'explore-buildings-3d',
+                'visibility',
+                next ? 'visible' : 'none',
+              )
+              map.current?.easeTo({
+                pitch: next ? 55 : 0,
+                bearing: next ? -20 : 0,
+                zoom: next ? Math.max(16, map.current.getZoom()) : map.current.getZoom(),
+                duration: 450,
+              })
+            }}
+          >
+            {threeD ? 'Return to 2D' : 'Explore in 3D'}
+          </button>
+          <button
+            className="button secondary compact"
             disabled={!loaded}
             onClick={() => {
+              if (threeD) {
+                setThreeD(false)
+                map.current?.setLayoutProperty('explore-buildings-3d', 'visibility', 'none')
+                map.current?.jumpTo({ pitch: 0, bearing: 0 })
+              }
               selecting.current = !selecting.current
               firstCorner.current = null
               if (map.current)
@@ -202,7 +275,9 @@ export default function SiteMap({ bounds, onViewport, onSelect, readOnly = false
             : !loaded
               ? 'Loading map...'
               : basemap
-                ? 'Basemap context only - verify boundaries on site'
+                ? threeD
+                  ? 'Provider 3D context: heights may be estimated or missing. Not used in shade, quantities or project geometry.'
+                  : 'Basemap context only - verify boundaries on site'
                 : 'Basemap unavailable/offline - coordinate canvas remains usable'}
         </span>
       </div>

@@ -1,5 +1,7 @@
 # InfraShader earlier build checkpoint
 
+13 October continuation: migrations 0005-0009, core feature changes and current test evidence are recorded in the continuation documents. This older table is historical.
+
 Current work is maintained in [completion-plan.md](completion-plan.md); feature status is in [requirements.md](requirements.md).
 
 Updated 11 October 2026. Branch: `build/ground-site-foundation`.

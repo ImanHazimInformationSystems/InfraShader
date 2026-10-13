@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { z } from 'zod'
+import ScenarioComparison from './ScenarioComparison'
+import type { WorkspaceData } from '../domain/workspace'
 import type { Project } from '../domain/projects'
 import type { Artifact } from '../domain/calculations'
 import { request } from '../services/api'
@@ -25,6 +27,7 @@ const reviewSchema = z.object({
 const listSchema = z.object({ items: z.array(reviewSchema), limit: z.number() })
 type Review = z.infer<typeof reviewSchema>
 type Props = {
+  data: WorkspaceData
   project: Project
   token?: string
   revision: number
@@ -34,6 +37,7 @@ type Props = {
 }
 
 export default function ReviewPanel({
+  data,
   project,
   token,
   revision,
@@ -138,6 +142,13 @@ export default function ReviewPanel({
       className="my-6 rounded-lg border border-stone-300 p-4"
     >
       <h3>Compare saved options</h3>
+      <ScenarioComparison data={data} />
+      {dirty && (
+        <p>
+          Geometry diagrams include unsaved edits. Saved calculation comparisons are unavailable
+          until you save and recalculate.
+        </p>
+      )}
       <p>
         Same saved workspace and analysis time. Missing or stale results are unavailable; modeled
         shade is not field validation.

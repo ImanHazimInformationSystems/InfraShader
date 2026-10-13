@@ -51,3 +51,64 @@ def test_catalogue_pages_literal_search_versions_and_restricted_access(database)
             calculations.get_rate(session, org, foreign, first["id"])
         with pytest.raises(APIError):
             calculations.create_rate(session, org, member, original)
+
+
+@pytest.mark.integration
+def test_archive_hides_selection_without_changing_old_rate_and_checks_revision(database):
+    org, _, actor, member, _ = initialise(database, "contractor_proposal")
+    with Session(database) as session:
+        rate = calculations.create_rate(
+            session,
+            org,
+            actor,
+            calculations.RateInput(
+                code="ARCHIVE",
+                category="Canopies",
+                description="Fixture",
+                unit="m2",
+                basis="cost",
+                amount="12.50",
+                effective_date=date(2026, 10, 13),
+                source_note="Test",
+            ),
+        )
+        with pytest.raises(APIError):
+            calculations.archive_rate(
+                session,
+                org,
+                member,
+                rate["id"],
+                calculations.RateArchiveInput(expected_revision=1, archived=True),
+            )
+        session.rollback()
+        archived = calculations.archive_rate(
+            session,
+            org,
+            actor,
+            rate["id"],
+            calculations.RateArchiveInput(expected_revision=1, archived=True),
+        )
+        assert archived["metadata_revision"] == 2
+        assert calculations.list_rates(session, org, actor)["total"] == 0
+        assert (
+            calculations.list_rates(session, org, actor, archived=True, category="canop")["total"]
+            == 1
+        )
+        assert calculations.get_rate(session, org, actor, rate["id"])["amount"] == "12.5000"
+        with pytest.raises(APIError):
+            calculations.archive_rate(
+                session,
+                org,
+                actor,
+                rate["id"],
+                calculations.RateArchiveInput(expected_revision=1, archived=False),
+            )
+        session.rollback()
+        calculations.archive_rate(
+            session,
+            org,
+            actor,
+            rate["id"],
+            calculations.RateArchiveInput(expected_revision=2, archived=False),
+        )
+        assert calculations.list_rates(session, org, actor)["total"] == 1

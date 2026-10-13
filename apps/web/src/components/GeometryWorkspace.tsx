@@ -17,16 +17,24 @@ import { request } from '../services/api'
 import DrawingMap from './DrawingMap'
 import { Button } from './ui/button'
 import CalculationsPanel from './CalculationsPanel'
+import RectangleBuilder from './RectangleBuilder'
 import EvidencePanel from './EvidencePanel'
+import WorkspaceHistory from './WorkspaceHistory'
+import {
+  readWorkspaceDraft,
+  workspaceDraftKey,
+  type WorkspaceDraft,
+} from '../services/workspace-draft'
 
 type Props = {
   project: Project
   token: string | undefined
   demo: boolean
   onDirty: (dirty: boolean) => void
+  userId?: string
 }
 type Kind = 'boundary' | 'target' | WorkItem['kind']
-export default function GeometryWorkspace({ project, token, demo, onDirty }: Props) {
+export default function GeometryWorkspace({ project, token, demo, onDirty, userId }: Props) {
   const [saved, setSaved] = useState<SavedWorkspace>({ revision: 0, data: null })
   const [data, setData] = useState<WorkspaceData | null>(null)
   const [scenario, setScenario] = useState<ScenarioKey>('baseline')
@@ -42,14 +50,69 @@ export default function GeometryWorkspace({ project, token, demo, onDirty }: Pro
   const [shadow, setShadow] = useState<{ revision: number; features: Feature[] } | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [dirty, setDirty] = useState(false)
+  const [evidenceDirty, setEvidenceDirty] = useState(false)
   const [reviewDirty, setReviewDirty] = useState(false)
   useEffect(() => {
-    onDirty(dirty || reviewDirty)
-  }, [dirty, reviewDirty, onDirty])
+    onDirty(dirty || reviewDirty || evidenceDirty)
+  }, [dirty, reviewDirty, evidenceDirty, onDirty])
   const [pendingForm, setPendingForm] = useState(false)
   const [busy, setBusy] = useState(true)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const [recoverable, setRecoverable] = useState<WorkspaceDraft | null>(null)
+  const recoveryKey =
+    !demo && userId ? workspaceDraftKey(userId, project.organisation_id, project.id) : null
+  useEffect(() => {
+    if (!recoveryKey || !dirty || !data || busy) return
+    try {
+      sessionStorage.setItem(
+        recoveryKey,
+        JSON.stringify({
+          savedAt: Date.now(),
+          revision: saved.revision,
+          data,
+          form: {
+            scenario,
+            kind,
+            name,
+            source,
+            coordinates,
+            height,
+            heightSource,
+            count,
+            override,
+            provenance,
+            editingId,
+            pendingForm,
+          },
+        }),
+      )
+    } catch {
+      // Surface failure of an external storage write; editing and API save remain available.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setError(
+        'Tab recovery storage is unavailable. Keep this tab open and save your workspace to the API.',
+      )
+    }
+  }, [
+    recoveryKey,
+    dirty,
+    data,
+    busy,
+    saved.revision,
+    scenario,
+    kind,
+    name,
+    source,
+    coordinates,
+    height,
+    heightSource,
+    count,
+    override,
+    provenance,
+    editingId,
+    pendingForm,
+  ])
   const identity = `${demo ? 'demo' : project.organisation_id}/${project.id}`
   const current = useRef({ token, identity })
   const mounted = useRef(true)
@@ -80,6 +143,7 @@ export default function GeometryWorkspace({ project, token, demo, onDirty }: Pro
           setSaved(result)
           setData(result.data)
           setDirty(false)
+          if (recoveryKey) setRecoverable(readWorkspaceDraft(recoveryKey))
         }
       } catch (reason) {
         if (active)
@@ -92,7 +156,28 @@ export default function GeometryWorkspace({ project, token, demo, onDirty }: Pro
     return () => {
       active = false
     }
-  }, [demo, endpoint, storageKey, onDirty])
+  }, [demo, endpoint, storageKey, onDirty, recoveryKey])
+
+  function recoverDraft() {
+    if (!recoverable || recoverable.revision !== saved.revision) return
+    const form = recoverable.form
+    setData(recoverable.data)
+    setScenario(form.scenario)
+    setKind(form.kind)
+    setName(form.name)
+    setSource(form.source)
+    setCoordinates(form.coordinates)
+    setHeight(form.height)
+    setHeightSource(form.heightSource)
+    setCount(form.count)
+    setOverride(form.override)
+    setProvenance(form.provenance)
+    setEditingId(form.editingId)
+    setPendingForm(form.pendingForm)
+    setDirty(true)
+    setRecoverable(null)
+    setNotice('Recovered this tab draft. Apply pending form edits, then validate and save.')
+  }
 
   function markFormChanged() {
     setPendingForm(true)
@@ -191,7 +276,7 @@ export default function GeometryWorkspace({ project, token, demo, onDirty }: Pro
     }
   }
   function edit(item: WorkItem) {
-    if (pendingForm && !window.confirm('Discard unapplied form changes?')) return
+    if (pendingForm && !window.confirm('Discard unapplied form changes?')) return false
     setPendingForm(false)
     setKind(item.kind)
     setName(item.name)
@@ -203,6 +288,16 @@ export default function GeometryWorkspace({ project, token, demo, onDirty }: Pro
     setCount(String(item.count))
     setOverride(item.quantity_override ?? '')
     setEditingId(item.id)
+  }
+  function editTarget(target: WorkspaceData['targets'][number]) {
+    if (pendingForm && !window.confirm('Discard unapplied form changes?')) return
+    setPendingForm(false)
+    setKind('target')
+    setName(target.name)
+    setSource(target.source_note)
+    setProvenance(target.provenance)
+    setCoordinates(coordinateText(target.geometry))
+    setEditingId(target.id)
   }
   async function save() {
     if (!data || pendingForm) return
@@ -229,6 +324,8 @@ export default function GeometryWorkspace({ project, token, demo, onDirty }: Pro
       if (!mounted.current || current.current.identity !== identity) return
       setSaved(result)
       setData(result.data)
+      if (recoveryKey) sessionStorage.removeItem(recoveryKey)
+      setRecoverable(null)
       setDirty(false)
       setNotice(
         demo
@@ -250,7 +347,13 @@ export default function GeometryWorkspace({ project, token, demo, onDirty }: Pro
             ...data.targets.map((target) => ({
               type: 'Feature' as const,
               geometry: target.geometry,
-              properties: { color: '#d8a638' },
+              id: target.id,
+              properties: {
+                color: '#d8a638',
+                item_id: target.id,
+                kind: 'target',
+                name: target.name,
+              },
             })),
             ...data.scenarios[scenario].items
               .filter((item) => item.geometry)
@@ -273,6 +376,15 @@ export default function GeometryWorkspace({ project, token, demo, onDirty }: Pro
     [data, scenario, dirty, shadow, saved.revision],
   )
   const selectedFeature = useMemo<Feature | undefined>(() => {
+    const target =
+      kind === 'target' ? data?.targets.find((target) => target.id === editingId) : undefined
+    if (target)
+      return {
+        type: 'Feature',
+        id: target.id,
+        geometry: target.geometry,
+        properties: { name: target.name, provenance: target.provenance },
+      }
     const item = data?.scenarios[scenario].items.find((item) => item.id === editingId)
     return item?.geometry
       ? {
@@ -287,7 +399,7 @@ export default function GeometryWorkspace({ project, token, demo, onDirty }: Pro
           },
         }
       : undefined
-  }, [data, scenario, editingId])
+  }, [data, scenario, editingId, kind])
   return (
     <section className="paper mt-6 p-5" aria-label="Ground geometry workspace">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -304,6 +416,55 @@ export default function GeometryWorkspace({ project, token, demo, onDirty }: Pro
           {dirty ? 'Unsaved workspace' : `Workspace revision ${saved.revision}`}
         </span>
       </div>
+      {recoverable && (
+        <div className="notice" role="status">
+          <div>
+            <strong>An unsaved workspace draft is available in this tab.</strong>
+            <p>
+              {recoverable.revision === saved.revision
+                ? 'Recover the geometry and pending item form, or discard the local draft.'
+                : 'The server revision changed. Automatic recovery is blocked to prevent overwriting newer work. Download the draft for manual reconciliation.'}
+            </p>
+            <Button
+              disabled={busy || recoverable.revision !== saved.revision}
+              onClick={recoverDraft}
+            >
+              Recover workspace draft
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                const url = URL.createObjectURL(
+                  new Blob([JSON.stringify(recoverable, null, 2)], { type: 'application/json' }),
+                )
+                const link = document.createElement('a')
+                link.href = url
+                link.download = 'infrashader-unsaved-workspace.json'
+                link.click()
+                setTimeout(() => URL.revokeObjectURL(url), 1000)
+              }}
+            >
+              Download unsaved draft
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (recoveryKey) sessionStorage.removeItem(recoveryKey)
+                setRecoverable(null)
+              }}
+            >
+              Discard recovered draft
+            </Button>
+          </div>
+        </div>
+      )}
+      {!demo && (
+        <p className="text-sm">
+          Unsaved geometry and item forms are kept in this tab for up to eight hours, scoped to your
+          account. Explicit sign-out or discarding changes clears them. Review, pricing and evidence
+          forms require separate saves.
+        </p>
+      )}
       {error && (
         <div className="notice error" role="alert">
           {error}
@@ -389,6 +550,16 @@ export default function GeometryWorkspace({ project, token, demo, onDirty }: Pro
                 ))}
               </select>
             </div>
+            {kind === 'canopy' && !demo && (
+              <RectangleBuilder
+                project={project}
+                token={token}
+                onGeometry={(geometry) => {
+                  setCoordinates(coordinateText(geometry))
+                  markFormChanged()
+                }}
+              />
+            )}
             <DrawingMap
               bounds={project.site.bounds}
               features={features}
@@ -396,6 +567,11 @@ export default function GeometryWorkspace({ project, token, demo, onDirty }: Pro
               selected={selectedFeature}
               disabled={busy || project.archived}
               onSelect={(id) => {
+                const target = data.targets.find((target) => target.id === id)
+                if (target) {
+                  editTarget(target)
+                  return
+                }
                 const item = data.scenarios[scenario].items.find((item) => item.id === id)
                 if (item) edit(item)
               }}
@@ -577,14 +753,7 @@ export default function GeometryWorkspace({ project, token, demo, onDirty }: Pro
                 <Button
                   variant="outline"
                   disabled={busy || project.archived}
-                  onClick={() => {
-                    setKind('target')
-                    setName(target.name)
-                    setSource(target.source_note)
-                    setProvenance(target.provenance)
-                    setCoordinates(coordinateText(target.geometry))
-                    setEditingId(target.id)
-                  }}
+                  onClick={() => editTarget(target)}
                 >
                   Edit target
                 </Button>
@@ -678,8 +847,10 @@ export default function GeometryWorkspace({ project, token, demo, onDirty }: Pro
               variant="outline"
               disabled={busy}
               onClick={() => {
-                if (!dirty || window.confirm('Discard unsaved workspace changes and reload?'))
+                if (!dirty || window.confirm('Discard unsaved workspace changes and reload?')) {
+                  if (recoveryKey) sessionStorage.removeItem(recoveryKey)
                   window.location.reload()
+                }
               }}
             >
               Reload saved workspace
@@ -691,6 +862,25 @@ export default function GeometryWorkspace({ project, token, demo, onDirty }: Pro
             source. Geometry edits make dependent analyses and estimates stale.
           </p>
           {!demo && (
+            <WorkspaceHistory
+              endpoint={endpoint}
+              token={token}
+              revision={saved.revision}
+              blocked={busy || dirty || reviewDirty || evidenceDirty || project.archived}
+              onRestore={(result) => {
+                setSaved(result)
+                setData(result.data)
+                setDirty(false)
+                setPendingForm(false)
+                setEditingId(null)
+                setShadow(null)
+                setNotice(
+                  `Workspace revision ${result.revision} restored. Recalculate and review before issuing.`,
+                )
+              }}
+            />
+          )}
+          {!demo && (
             <CalculationsPanel
               project={project}
               token={token}
@@ -698,12 +888,29 @@ export default function GeometryWorkspace({ project, token, demo, onDirty }: Pro
               revision={saved.revision}
               dirty={dirty}
               scenario={scenario}
+              onInspect={(option, itemId) => {
+                const item = data.scenarios[option].items.find((value) => value.id === itemId)
+                if (item && edit(item) !== false) {
+                  setScenario(option)
+                  setShadow(null)
+                  document
+                    .querySelector('[aria-label="Geometry drawing canvas"]')
+                    ?.scrollIntoView({ block: 'center' })
+                }
+              }}
               onReviewDirty={setReviewDirty}
               onData={change}
               onShowShadows={(features, revision) => setShadow({ features, revision })}
             />
           )}
-          {!demo && <EvidencePanel project={project} token={token} />}
+          {!demo && (
+            <EvidencePanel
+              project={project}
+              token={token}
+              targets={data.targets}
+              onDirty={setEvidenceDirty}
+            />
+          )}
         </>
       )}
     </section>

@@ -1,27 +1,295 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { z } from 'zod'
 import type { Project } from '../domain/projects'
+import type { WorkspaceData } from '../domain/workspace'
 import { request } from '../services/api'
 import { Button } from './ui/button'
-const evidenceSchema = z.object({ id: z.uuid(), description: z.string(), source_note: z.string(), content_type: z.string(), size_bytes: z.number(), sha256: z.string(), created_at: z.string() })
+const evidenceSchema = z.object({
+  id: z.uuid(),
+  description: z.string(),
+  source_note: z.string(),
+  content_type: z.string(),
+  size_bytes: z.number(),
+  sha256: z.string(),
+  created_at: z.string(),
+  revision: z.number(),
+  observations: z.string(),
+  target_ids: z.array(z.uuid()),
+})
 const listSchema = z.object({ items: z.array(evidenceSchema), limit: z.number() })
-export default function EvidencePanel({ project, token }: { project: Project; token: string | undefined }) {
-  const [items,setItems]=useState<z.infer<typeof evidenceSchema>[]>([])
-  const [error,setError]=useState('')
-  const [busy,setBusy]=useState(false)
-  const endpoint=`/api/v1/organisations/${project.organisation_id}/projects/${project.id}/evidence`
-  useEffect(() => { let active=true; request(endpoint,listSchema,token).then(result=>{if(active)setItems(result.items)}).catch(reason=>{if(active)setError(reason.message)}); return ()=>{active=false} },[endpoint,token])
+type Evidence = z.infer<typeof evidenceSchema>
+export default function EvidencePanel({
+  project,
+  token,
+  targets,
+  onDirty,
+}: {
+  project: Project
+  token?: string
+  targets: WorkspaceData['targets']
+  onDirty: (dirty: boolean) => void
+}) {
+  const [items, setItems] = useState<Evidence[]>([])
+  const [error, setError] = useState(''),
+    [busy, setBusy] = useState(false),
+    [refresh, setRefresh] = useState(0)
+  const [editing, setEditing] = useState<string | null>(null),
+    [changed, setChanged] = useState(false)
+  const [photos, setPhotos] = useState<Record<string, string>>({})
+  const urls = useRef(new Set<string>()),
+    mounted = useRef(true)
+  const endpoint = `/api/v1/organisations/${project.organisation_id}/projects/${project.id}/evidence`
+  useEffect(() => {
+    mounted.current = true
+    const owned = urls.current
+    return () => {
+      mounted.current = false
+      owned.forEach((url) => URL.revokeObjectURL(url))
+      owned.clear()
+    }
+  }, [])
+  useEffect(() => {
+    let active = true
+    request(endpoint, listSchema, token)
+      .then((result) => {
+        if (active) {
+          setItems(result.items)
+          setError('')
+        }
+      })
+      .catch((reason) => {
+        if (active) setError(reason.message)
+      })
+    return () => {
+      active = false
+    }
+  }, [endpoint, token, refresh])
   async function upload(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault(); const form=event.currentTarget; setBusy(true); setError('')
-    try { const saved=await request(endpoint,evidenceSchema,token,{method:'POST',body:new FormData(form)}); setItems(previous=>[saved,...previous]); form.reset() }
-    catch(reason){setError(reason instanceof Error?reason.message:'Upload failed; retry with the photo and its source.')}
-    finally{setBusy(false)}
+    event.preventDefault()
+    const form = event.currentTarget
+    setBusy(true)
+    setError('')
+    try {
+      const saved = await request(endpoint, evidenceSchema, token, {
+        method: 'POST',
+        body: new FormData(form),
+      })
+      if (mounted.current) {
+        setItems((previous) => [saved, ...previous])
+        form.reset()
+      }
+    } catch (reason) {
+      if (mounted.current) setError(reason instanceof Error ? reason.message : 'Upload failed.')
+    } finally {
+      if (mounted.current) setBusy(false)
+    }
   }
-  async function download(id:string) {
-    setBusy(true);setError('')
-    try { const response=await fetch(`${import.meta.env.VITE_API_BASE_URL??''}${endpoint}/${id}/content`,{headers:{Authorization:`Bearer ${token}`},signal:AbortSignal.timeout(30000)}); if(!response.ok)throw new Error('Private photo unavailable or access denied. Retry after checking your session.'); const url=URL.createObjectURL(await response.blob());const link=document.createElement('a');link.href=url;link.download=`evidence-${id}.jpg`;link.click();setTimeout(()=>URL.revokeObjectURL(url),60000) }
-    catch(reason){setError(reason instanceof Error?reason.message:'Download failed.')}
-    finally{setBusy(false)}
+  async function content(item: Evidence, preview: boolean) {
+    setBusy(true)
+    setError('')
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL ?? ''}${endpoint}/${item.id}/content`,
+        { headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(30000) },
+      )
+      if (!response.ok)
+        throw new Error('Private photo unavailable or access denied. Check your session and retry.')
+      const blob = await response.blob()
+      if (!mounted.current) return
+      const url = URL.createObjectURL(blob)
+      urls.current.add(url)
+      if (preview) setPhotos((previous) => ({ ...previous, [item.id]: url }))
+      else {
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `evidence-${item.id}.jpg`
+        link.click()
+      }
+    } catch (reason) {
+      if (mounted.current) setError(reason instanceof Error ? reason.message : 'Photo unavailable.')
+    } finally {
+      if (mounted.current) setBusy(false)
+    }
   }
-  return <details className="my-6 rounded-lg border border-stone-300 p-4"><summary>Private site evidence</summary><p>PNG/JPEG photos, up to 10 MiB and 16 million pixels. Photos are re-encoded to remove embedded EXIF/GPS metadata. Record location and source explicitly where needed.</p>{error&&<p className="notice error" role="alert">{error}</p>}<form onSubmit={event=>void upload(event)} className="grid gap-3"><label>Photo<input name="photo" type="file" accept="image/png,image/jpeg" required /></label><label>Photo description<input name="description" maxLength={2000} required /></label><label>Source, date and permission note<input name="source_note" maxLength={2000} required /></label><label><input name="rights_confirmed" type="checkbox" value="true" required /> I have permission to store and use this photo.</label><Button disabled={busy||project.archived}>Upload private photo</Button></form>{items.map(item=><article key={item.id} className="border-t border-stone-200 py-3"><strong>{item.description}</strong><p>{item.source_note} · {item.created_at}</p><Button variant="outline" disabled={busy} onClick={()=>void download(item.id)}>Download photo</Button></article>)}</details>
+  async function save(event: FormEvent<HTMLFormElement>, item: Evidence) {
+    event.preventDefault()
+    const form = new FormData(event.currentTarget)
+    setBusy(true)
+    setError('')
+    try {
+      const saved = await request(`${endpoint}/${item.id}`, evidenceSchema, token, {
+        method: 'PATCH',
+        body: JSON.stringify({
+          expected_revision: item.revision,
+          description: form.get('description'),
+          source_note: form.get('source_note'),
+          observations: form.get('observations'),
+          target_ids: form.getAll('target_ids'),
+        }),
+      })
+      setItems((previous) => previous.map((value) => (value.id === saved.id ? saved : value)))
+      setEditing(null)
+      setChanged(false)
+      onDirty(false)
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Save failed; your notes are preserved.')
+    } finally {
+      setBusy(false)
+    }
+  }
+  function discard() {
+    if (changed && !window.confirm('Discard unsaved evidence notes?')) return false
+    setChanged(false)
+    onDirty(false)
+    return true
+  }
+  return (
+    <details className="my-6 rounded-lg border border-stone-300 p-4">
+      <summary>Private site evidence</summary>
+      <p>
+        PNG/JPEG photos up to 10 MiB and 16 million pixels. Photos are re-encoded to remove embedded
+        EXIF/GPS metadata. Record date, location and permissions explicitly.
+      </p>
+      {error && <p role="alert">{error}</p>}
+      <Button
+        type="button"
+        variant="outline"
+        disabled={busy}
+        onClick={() => {
+          if (discard()) {
+            setEditing(null)
+            setRefresh((value) => value + 1)
+          }
+        }}
+      >
+        Reload evidence
+      </Button>
+      <form onSubmit={(event) => void upload(event)} className="grid gap-3 my-4">
+        <fieldset disabled={busy || project.archived || Boolean(editing)}>
+          <label>
+            Photo
+            <input name="photo" type="file" accept="image/png,image/jpeg" required />
+          </label>
+          <label>
+            Photo description
+            <input name="description" maxLength={2000} required />
+          </label>
+          <label>
+            Source, date and permission note
+            <input name="source_note" maxLength={2000} required />
+          </label>
+          <label>
+            <input name="rights_confirmed" type="checkbox" value="true" required /> I have
+            permission to store and use this photo.
+          </label>
+          <Button>Upload private photo</Button>
+        </fieldset>
+      </form>
+      <div className="grid gap-4 md:grid-cols-2">
+        {items.map((item) => (
+          <article key={item.id} className="rounded border border-stone-300 p-3">
+            <h3>{item.description}</h3>
+            <p>{item.source_note}</p>
+            <p>
+              {item.created_at} / revision {item.revision}
+            </p>
+            {photos[item.id] ? (
+              <img
+                src={photos[item.id]}
+                alt={item.description}
+                className="max-h-80 w-full object-contain"
+              />
+            ) : (
+              <Button variant="outline" disabled={busy} onClick={() => void content(item, true)}>
+                Preview photo {item.description}
+              </Button>
+            )}
+            <p className="whitespace-pre-wrap">{item.observations}</p>
+            <p>
+              Linked targets:{' '}
+              {item.target_ids
+                .map(
+                  (id) => targets.find((target) => target.id === id)?.name ?? 'Unavailable target',
+                )
+                .join(', ') || 'None'}
+            </p>
+            <Button variant="outline" disabled={busy} onClick={() => void content(item, false)}>
+              Download photo {item.description}
+            </Button>
+            <Button
+              variant="outline"
+              disabled={busy || project.archived}
+              onClick={() => {
+                if (discard()) setEditing(item.id)
+              }}
+            >
+              Edit evidence {item.description}
+            </Button>
+            {editing === item.id && (
+              <form
+                onSubmit={(event) => void save(event, item)}
+                onChange={() => {
+                  setChanged(true)
+                  onDirty(true)
+                }}
+              >
+                <fieldset disabled={busy}>
+                  <label>
+                    Edit photo description
+                    <input
+                      name="description"
+                      defaultValue={item.description}
+                      required
+                      maxLength={2000}
+                    />
+                  </label>
+                  <label>
+                    Edit photo source
+                    <input
+                      name="source_note"
+                      defaultValue={item.source_note}
+                      required
+                      maxLength={2000}
+                    />
+                  </label>
+                  <label>
+                    Site observations
+                    <textarea
+                      name="observations"
+                      defaultValue={item.observations}
+                      maxLength={8000}
+                    />
+                  </label>
+                  <fieldset>
+                    <legend>Link saved target zones</legend>
+                    {targets.map((target) => (
+                      <label key={target.id}>
+                        <input
+                          type="checkbox"
+                          name="target_ids"
+                          value={target.id}
+                          defaultChecked={item.target_ids.includes(target.id)}
+                        />
+                        {target.name}
+                      </label>
+                    ))}
+                  </fieldset>
+                  <Button>Save evidence notes</Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      if (discard()) setEditing(null)
+                    }}
+                  >
+                    Cancel evidence edit
+                  </Button>
+                </fieldset>
+              </form>
+            )}
+          </article>
+        ))}
+      </div>
+    </details>
+  )
 }
