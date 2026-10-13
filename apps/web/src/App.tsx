@@ -1,3 +1,7 @@
+import BriefReadiness from './components/BriefReadiness'
+import { DisplayUnitsContext, type DisplayUnits } from './services/display-units'
+import { useBlocker, useLocation, useNavigate } from 'react-router-dom'
+import { parseRoute, screenPath, type Screen } from './services/routes'
 import { clearWorkspaceDrafts } from "./services/workspace-draft"
 import SettingsPage from './components/SettingsPage'
 import { settingsSchema } from './domain/settings'
@@ -15,7 +19,6 @@ import { api, ApiError } from './services/api'
 import { DemoStore, DEMO_ORGANISATION_ID } from './services/demo'
 import { supabase } from './services/auth'
 
-type Screen = 'settings' | 'projects' | 'explore' | 'create' | 'project' | 'edit'
 type UnsavedDraft = { input: ProjectInput; project: Project | null; screen: 'create' | 'edit'; orgId: string; userId: string }
 const demoStore = new DemoStore()
 const SiteMap = lazy(() => import('./components/SiteMap'))
@@ -30,12 +33,16 @@ function displayError(reason: unknown): string {
 
 export default function App() {
   const [defaultTimezone,setDefaultTimezone] = useState('Asia/Kuala_Lumpur')
+  const [displayUnits, setDisplayUnits] = useState<DisplayUnits>('metric')
   const [session, setSession] = useState<Session | null>(null)
   const [authLoading, setAuthLoading] = useState(Boolean(supabase))
   const [recovery, setRecovery] = useState(false)
   const [expired, setExpired] = useState(false)
   const [demo, setDemo] = useState(false)
-  const [screen, setScreen] = useState<Screen>('projects')
+  const [screen, setScreenState] = useState<Screen>('projects')
+  const location = useLocation()
+  const routeNavigate = useNavigate()
+  const handledRoute = useRef('')
   const [organisations, setOrganisations] = useState<Organisation[]>([])
   const [orgId, setOrgId] = useState('')
   const [projects, setProjects] = useState<Project[]>([])
@@ -45,6 +52,7 @@ export default function App() {
   const [projectQuery, setProjectQuery] = useState('')
   const [searchText, setSearchText] = useState('')
   const [projectSort, setProjectSort] = useState('updated')
+  const [projectStage, setProjectStage] = useState('')
   const [project, setProject] = useState<Project | null>(null)
   const [bounds, setBounds] = useState<Bounds>(initialBounds)
   const [viewport, setViewport] = useState<Bounds>()
@@ -59,12 +67,20 @@ export default function App() {
   const [ready, setReady] = useState(false)
   const token = session?.access_token
   const organisation = demo ? demoOrganisation : organisations.find((item) => item.id === orgId)
-  useEffect(()=>{let active=true;if(!demo&&orgId&&token) request(`/api/v1/organisations/${orgId}/settings`,settingsSchema,token).then(value=>{if(active)setDefaultTimezone(value.settings.timezone)}).catch(()=>{});return()=>{active=false}},[demo,orgId,token,organisations])
-  const requestContext = useRef({ demo, token, orgId, archived, offset, projectQuery, projectSort })
+  useEffect(()=>{let active=true;if(!demo&&orgId&&token) request(`/api/v1/organisations/${orgId}/settings`,settingsSchema,token).then(value=>{if(active){setDefaultTimezone(value.settings.timezone);setDisplayUnits(value.settings.units)}}).catch(()=>{});return()=>{active=false}},[demo,orgId,token,organisations])
+  const requestContext = useRef({ demo, token, orgId, archived, offset, projectQuery, projectSort, projectStage })
   const navigationEpoch = useRef(0)
   const identityEpoch = useRef(0)
   const authUserId = useRef<string | null>(null)
-  useLayoutEffect(() => { requestContext.current = { demo, token, orgId, archived, offset, projectQuery, projectSort } }, [demo, token, orgId, archived, offset, projectQuery, projectSort])
+  const routeContext = useRef({ project, demo })
+  useLayoutEffect(() => { routeContext.current = { project, demo } }, [project, demo])
+  const setScreen = useCallback((next: Screen, selected: Project | null = routeContext.current.project) => {
+    setScreenState(next)
+    const path = screenPath(next, selected, routeContext.current.demo)
+    if (path !== window.location.pathname) void routeNavigate(path)
+  }, [routeNavigate])
+
+  useLayoutEffect(() => { requestContext.current = { demo, token, orgId, archived, offset, projectQuery, projectSort, projectStage } }, [demo, token, orgId, archived, offset, projectQuery, projectSort, projectStage])
 
   useEffect(() => {
     if (!supabase) return
@@ -79,7 +95,7 @@ export default function App() {
       const nextUserId = nextSession?.user.id ?? null
       if (authUserId.current !== nextUserId) {
         identityEpoch.current += 1; navigationEpoch.current += 1
-        setProject(null); setProjects([]); setOrganisations([]); setOrgId(''); setScreen('projects'); setDirty(false)
+        setProject(null); setProjects([]); setOrganisations([]); setOrgId(''); setScreenState('projects'); setDirty(false)
         if (nextUserId) setUnsavedDraft((current) => current?.userId === nextUserId ? current : null)
         authUserId.current = nextUserId
       }
@@ -89,7 +105,7 @@ export default function App() {
       if (event === 'SIGNED_IN') setExpired(false)
     })
     return () => { active = false; subscription.unsubscribe() }
-  }, [])
+  }, [setScreen])
 
   const checkHealth = useCallback(async () => {
     setHealth('checking'); setReady(false)
@@ -100,10 +116,10 @@ export default function App() {
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { void checkHealth() }, [checkHealth])
 
-  function report(reason: unknown) {
+  const report = useCallback((reason: unknown) => {
     setError(displayError(reason))
     if (reason instanceof ApiError && reason.status === 401) { setExpired(true); setProject(null); setProjects([]); setDirty(false); setScreen('projects') }
-  }
+  }, [setScreen])
 
   const loadSession = useCallback(async () => {
     if (demo || !token) return
@@ -116,7 +132,7 @@ export default function App() {
       setOrgId((current) => info.organisations.some((item) => item.id === current) ? current : info.organisations[0]?.id ?? '')
     } catch (reason) { if (stillCurrent()) report(reason) }
     finally { if (stillCurrent()) setLoading(false) }
-  }, [demo, token])
+  }, [demo, token, report])
   // Session changes require an external membership lookup; loading is explicit.
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { void loadSession() }, [loadSession])
@@ -125,15 +141,15 @@ export default function App() {
     if (!demo && (!token || !orgId)) return
     const stillCurrent = () => {
       const context = requestContext.current
-      return context.demo === demo && context.token === token && context.orgId === orgId && context.archived === archived && context.offset === offset && context.projectQuery === projectQuery && context.projectSort === projectSort
+      return context.demo === demo && context.token === token && context.orgId === orgId && context.archived === archived && context.offset === offset && context.projectQuery === projectQuery && context.projectSort === projectSort && context.projectStage === projectStage
     }
     setLoading(true); setError('')
     try {
-      if (demo) { const items = demoStore.list().filter((item) => item.archived === archived && `${item.name} ${item.stakeholder}`.toLowerCase().includes(projectQuery.toLowerCase())).sort((a, b) => projectSort === 'name' ? a.name.localeCompare(b.name) : projectSort === 'created' ? (b.created_at ?? b.updated_at).localeCompare(a.created_at ?? a.updated_at) : b.updated_at.localeCompare(a.updated_at)); setProjects(items.slice(offset, offset + 100)); setTotal(items.length) }
-      else { const result = await api.projects(orgId, token!, archived, offset, projectQuery, projectSort); if (!stillCurrent()) return; setProjects(result.items); setTotal(result.total) }
+      if (demo) { const items = demoStore.list().filter((item) => item.archived === archived && (!projectStage || item.stage === projectStage) && `${item.name} ${item.stakeholder}`.toLowerCase().includes(projectQuery.toLowerCase())).sort((a, b) => projectSort === 'name' ? a.name.localeCompare(b.name) : projectSort === 'created' ? (b.created_at ?? b.updated_at).localeCompare(a.created_at ?? a.updated_at) : b.updated_at.localeCompare(a.updated_at)); setProjects(items.slice(offset, offset + 100)); setTotal(items.length) }
+      else { const result = await api.projects(orgId, token!, archived, offset, projectQuery, projectSort, projectStage); if (!stillCurrent()) return; setProjects(result.items); setTotal(result.total) }
     } catch (reason) { if (stillCurrent()) { setProjects([]); report(reason) } }
     finally { if (stillCurrent()) setLoading(false) }
-  }, [demo, token, orgId, archived, offset, projectQuery, projectSort])
+  }, [demo, token, orgId, archived, offset, projectQuery, projectSort, projectStage, report])
   // Tenant/filter changes load external records (or the separate Demo store).
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { void loadProjects() }, [loadProjects])
@@ -143,6 +159,44 @@ export default function App() {
     window.addEventListener('beforeunload', warn)
     return () => window.removeEventListener('beforeunload', warn)
   }, [dirty])
+
+  const blocker = useBlocker(({ historyAction, currentLocation, nextLocation }) => historyAction === 'POP' && (dirty || saving) && currentLocation.pathname !== nextLocation.pathname)
+  useEffect(() => {
+    if (blocker.state !== 'blocked') return
+    if (!saving && window.confirm('You have unsaved changes. Discard them and continue?')) {
+      if (!demo && session && project) { try { clearWorkspaceDrafts(session.user.id, orgId, project.id) } catch { /* Tab storage can be unavailable. */ } }
+      // The external browser-history navigation was confirmed; clear its abandoned form state.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setDirty(false); setUnsavedDraft(null); blocker.proceed()
+    } else blocker.reset()
+  }, [blocker, saving, demo, session, project, orgId])
+  useEffect(() => {
+    if (!demo && (!session || expired || recovery || !orgId)) return
+    const key = `${demo ? 'demo' : session?.user.id}/${location.pathname}`
+    if (handledRoute.current === key) return
+    const route = parseRoute(location.pathname)
+    let active = true
+    async function followRoute() {
+      if (!route) { setError('This page does not exist. Choose Projects or Explore Map.'); setScreenState('projects'); handledRoute.current = key; return }
+      if (!route.project) { setScreenState(route.screen); handledRoute.current = key; return }
+      if (Boolean(route.demo) !== demo) { setError('This link belongs to a different workspace mode. Sign in for real projects or open Browser Demo for demo projects.'); setScreenState('projects'); handledRoute.current = key; return }
+      if (!demo && route.org !== orgId) {
+        if (organisations.some(org => org.id === route.org)) { setOrgId(route.org!); return }
+        setProject(null); setError('This project is unavailable to your account.'); setScreenState('projects'); handledRoute.current = key; return
+      }
+      if (project?.id === route.project) { setScreenState(route.screen); handledRoute.current = key; return }
+      setLoading(true); setError(''); setProject(null)
+      try {
+        const fresh = demo ? demoStore.list().find(item => item.id === route.project) : await api.project(route.org!, route.project!, token!)
+        if (!active) return
+        if (!fresh) throw new Error('This project is unavailable to your account.')
+        setProject(fresh); setBounds(fresh.site.bounds); setScreenState(route.screen); setGeometryOpen(false); setDirty(false); setUnsavedDraft(null); handledRoute.current = key
+      } catch (reason) { if (active) { setError(displayError(reason)); setScreenState('projects'); handledRoute.current = key } }
+      finally { if (active) setLoading(false) }
+    }
+    void followRoute()
+    return () => { active = false }
+  }, [location.pathname, demo, session, expired, recovery, orgId, organisations, project?.id, token])
 
   function leaveAllowed() {
     if (saving || (dirty && !window.confirm('You have unsaved changes. Discard them and continue?'))) return false
@@ -173,7 +227,7 @@ export default function App() {
       const fresh = demo ? demoStore.list().find((entry) => entry.id === item.id) : await api.project(orgId, item.id, token!)
       if (!stillCurrent()) return
       if (!fresh) throw new Error('This project no longer exists. Reload the project list.')
-      setProject(fresh); setBounds(fresh.site.bounds); setScreen('project'); setDirty(false); setUnsavedDraft(null); setNotice(''); setGeometryOpen(false)
+      setProject(fresh); setBounds(fresh.site.bounds); setScreen('project', fresh); setDirty(false); setUnsavedDraft(null); setNotice(''); setGeometryOpen(false)
     } catch (reason) { if (stillCurrent()) report(reason) }
     finally { if (stillCurrent()) setLoading(false) }
   }
@@ -186,7 +240,7 @@ export default function App() {
         ? demo ? demoStore.update(project.id, project.revision, input) : await api.update(orgId, project.id, { ...input, expected_revision: project.revision }, token!)
         : demo ? demoStore.create(input) : await api.create(orgId, input, token!)
       if (!stillCurrent()) return
-      setProject(saved); setBounds(saved.site.bounds); setDirty(false); setUnsavedDraft(null); setScreen('project'); setNotice(demo ? 'Saved in this browser’s Demo storage.' : 'Project saved.'); void loadProjects()
+      setProject(saved); setBounds(saved.site.bounds); setDirty(false); setUnsavedDraft(null); setScreen('project', saved); setNotice(demo ? 'Saved in this browser’s Demo storage.' : 'Project saved.'); void loadProjects()
     } catch (reason) { if (stillCurrent()) report(reason) }
     finally { setSaving(false) }
   }
@@ -212,7 +266,7 @@ export default function App() {
   const loggedIn = demo || (session && !expired && !recovery)
   const title = screen === 'settings' ? 'Settings and members' : screen === 'projects' ? 'Your projects' : screen === 'explore' ? 'Explore Map' : screen === 'create' ? 'A place. A purpose. A project.' : screen === 'edit' ? 'Edit project brief' : project?.name ?? 'Site Plan'
 
-  return <div className="app-shell">
+  return <DisplayUnitsContext.Provider value={demo ? 'metric' : displayUnits}><div className="app-shell">
     <a className="skip-link" href="#main-content">Skip to main content</a>
     <aside className="sidebar"><button className="brand" onClick={() => loggedIn && navigate('projects')} aria-label="InfraShader home"><span className="brand-symbol"><Leaf size={23} /></span><span>InfraShader<small>OUTDOOR PLANNING</small></span></button>
       <div className="workspace-label">{demo ? 'LOCAL WORKSPACE' : 'WORKSPACE'}</div>
@@ -235,20 +289,22 @@ export default function App() {
         <form className="flex flex-wrap items-end gap-3 py-4" onSubmit={event => { event.preventDefault(); setProjectQuery(searchText.trim()); setOffset(0) }}>
           <div className="field"><label htmlFor="project-search">Search projects or stakeholders</label><input id="project-search" maxLength={160} value={searchText} onChange={event => setSearchText(event.target.value)} /></div>
           <div className="field"><label htmlFor="project-sort">Sort projects</label><select id="project-sort" value={projectSort} onChange={event => { setProjectSort(event.target.value); setOffset(0) }}><option value="updated">Recently updated</option><option value="created">Recently created</option><option value="name">Project name</option></select></div>
+          <div className="field"><label htmlFor="project-stage">Project stage</label><select id="project-stage" value={projectStage} onChange={event => { setProjectStage(event.target.value); setOffset(0) }}><option value="">All stages</option>{['brief','site','option','estimate','developer_brief','proposal'].map(stage => <option key={stage} value={stage}>{stage.replaceAll('_',' ')}</option>)}</select></div>
           <button className="button secondary" type="submit" disabled={loading}>Search projects</button>
         </form>
         <div className="projects-toolbar"><div className="segmented" aria-label="Project list filter"><button className={!archived ? 'selected' : ''} onClick={() => { setArchived(false); setOffset(0); setProjects([]) }}>Active projects</button><button className={archived ? 'selected' : ''} onClick={() => { setArchived(true); setOffset(0); setProjects([]) }}>Archived</button></div><button className="button text compact" disabled={loading} onClick={() => void loadProjects()}><RefreshCw size={15} />Refresh</button></div>
-        {loading ? <div className="loading-state" role="status">Loading projects…</div> : projects.length === 0 ? <div className="empty-state"><div className="empty-illustration" aria-hidden="true"><MapPin size={34} /><span /><span /></div><span className="eyebrow">{archived ? 'Room to return' : 'Every project begins somewhere'}</span><h2>{archived ? 'No archived projects' : 'Find your first site.'}</h2><p>{archived ? 'Projects you archive will appear here. You can restore them when you are ready.' : 'Explore the map, select a site extent, then give your project a name and a purpose.'}</p>{!archived && <button className="button primary" onClick={() => navigate('explore')}>Explore Map<ArrowRight size={17} /></button>}</div> : <div className="project-grid">{projects.map((item) => <button className="project-card" key={item.id} onClick={() => void openProject(item)}><div className="project-thumbnail" aria-hidden="true"><MapPin size={25} /><span>{item.archived ? 'ARCHIVED' : 'GROUND SITE'}</span></div><div className="project-card-body"><span className="eyebrow">{purposeLabel(item.purpose)}</span><h2>{item.name}</h2><p>{item.stakeholder}</p><div className="project-card-footer"><span>Brief · rev {item.revision}</span><span>{new Date(item.updated_at).toLocaleDateString('en-MY', { timeZone: item.timezone, day: 'numeric', month: 'short' })}<ArrowRight size={15} /></span></div></div></button>)}</div>}
+        {loading ? <div className="loading-state" role="status">Loading projects…</div> : projects.length === 0 ? <div className="empty-state"><div className="empty-illustration" aria-hidden="true"><MapPin size={34} /><span /><span /></div><span className="eyebrow">{archived ? 'Room to return' : 'Every project begins somewhere'}</span><h2>{archived ? 'No archived projects' : 'Find your first site.'}</h2><p>{archived ? 'Projects you archive will appear here. You can restore them when you are ready.' : 'Explore the map, select a site extent, then give your project a name and a purpose.'}</p>{!archived && <button className="button primary" onClick={() => navigate('explore')}>Explore Map<ArrowRight size={17} /></button>}</div> : <div className="project-grid">{projects.map((item) => <button className="project-card" key={item.id} onClick={() => void openProject(item)}><div className="project-thumbnail" aria-hidden="true"><MapPin size={25} /><span>{item.archived ? 'ARCHIVED' : 'GROUND SITE'}</span></div><div className="project-card-body"><span className="eyebrow">{purposeLabel(item.purpose)}</span><h2>{item.name}</h2><p>{item.stakeholder}</p><div className="project-card-footer"><span>{item.stage.replaceAll('_', ' ')} / brief rev {item.revision}</span><span>{new Date(item.updated_at).toLocaleDateString('en-MY', { timeZone: item.timezone, day: 'numeric', month: 'short' })}<ArrowRight size={15} /></span></div></div></button>)}</div>}
         {total > 100 && <div className="pagination"><button className="button secondary" disabled={offset === 0 || loading} onClick={() => setOffset(Math.max(0, offset - 100))}>Previous</button><span>{offset + 1}–{Math.min(offset + 100, total)} of {total}</span><button className="button secondary" disabled={offset + 100 >= total || loading} onClick={() => setOffset(offset + 100)}>Next</button></div>}
         <div className="dashboard-note"><CircleHelp size={18} /><div><strong>Build understanding before comparing options.</strong><p>Start with a brief and locator, then open the geometry workspace to define targets and independent options. Real calculations require the configured local services.</p></div></div>
       </>}
       {screen === 'explore' && organisation && <div className="map-workspace"><Suspense fallback={<MapFallback />}><SiteMap bounds={bounds} onViewport={setViewport} onSelect={setBounds} /></Suspense><aside className="context-panel"><div className="panel-section"><span className="eyebrow">Your starting point</span><h2>Select a site extent</h2><p>Enter known coordinates, or pan and zoom then use the current map view. No location data is inferred.</p><PlaceSearch onSelect={setBounds} /><BoundsForm key={bounds.join(',')} initial={bounds} viewport={viewport} onApply={setBounds} /></div><div className="selected-location"><MapPin size={19} /><div><strong>Selected geographic extent</strong><span>{bounds[0].toFixed(5)}, {bounds[1].toFixed(5)} →<br />{bounds[2].toFixed(5)}, {bounds[3].toFixed(5)}</span></div></div><div className="panel-section"><button className="button primary full" onClick={() => navigate('create')}>Continue with this site<ArrowRight size={17} /></button><p className="fine-print">Small-site locator only. Draw and verify the actual boundary at the geometry milestone.</p></div></aside></div>}
-      {screen === 'settings' && organisation && !demo && <SettingsPage key={organisation.id} organisation={organisation} token={token} onDirty={setDirty} onChanged={()=>void loadSession()} />}
+      {screen === 'settings' && organisation && !demo && <SettingsPage key={organisation.id} email={session?.user.email ?? ''} organisation={organisation} token={token} onDirty={setDirty} onChanged={()=>void loadSession()} />}
       {(screen === 'create' || screen === 'edit') && organisation && <div className="brief-layout"><section className="paper"><BriefForm key={screen === 'edit' ? project?.id : 'new'} initial={unsavedDraft?.input ?? (screen === 'edit' && project ? project : {...emptyBrief(bounds),timezone:demo ? 'Asia/Kuala_Lumpur' : defaultTimezone})} saving={saving} onSave={(input) => void saveBrief(input)} onCancel={() => navigate(screen === 'edit' ? 'project' : 'explore')} onDirty={setDirty} onDraftChange={(input) => setUnsavedDraft({ input, project: screen === 'edit' ? project : null, screen, orgId, userId: session?.user.id ?? 'demo' })} editing={screen === 'edit'} /></section><aside className="brief-side"><div className="mini-site"><MapPin size={25} /><span>SELECTED SITE</span></div><h3>A grounded brief</h3><p>A good project starts with an honest account of the place, the people and the problem.</p><div className="brief-tip"><Check size={16} /><span>Name, stakeholder and site extent are required.</span></div><div className="brief-tip"><Check size={16} /><span>Save an incomplete brief and return to it later.</span></div><div className="brief-tip"><ShieldCheck size={16} /><span>Purpose changes your workflow, never your permissions.</span></div><span className="save-badge">{saving ? 'Saving…' : dirty ? 'Unsaved changes' : 'Ready to edit'}</span></aside></div>}
       {screen === 'project' && project && <><div className="project-tabs"><span className="selected"><Map size={16} />Site Plan</span><span>Brief & site locator</span>{project.archived && <span className="archive-badge">Archived project</span>}</div><div className="map-workspace"><Suspense fallback={<MapFallback />}><SiteMap key={project.id} bounds={project.site.bounds} readOnly /></Suspense><aside className="context-panel"><div className="panel-section"><span className="eyebrow">Project brief</span><h2>{project.purpose === 'contractor_proposal' ? 'Client proposal foundation' : 'Decision foundation'}</h2><dl className="brief-details"><dt>Problem</dt><dd>{project.problem || 'Not recorded yet'}</dd><dt>Intended users</dt><dd>{project.intended_users || 'Not recorded yet'}</dd><dt>Desired outcome</dt><dd>{project.desired_outcome || 'Not recorded yet'}</dd><dt>Relevant use times</dt><dd>{project.use_periods || 'Not recorded yet'}</dd><dt>Timezone / currency</dt><dd>{project.timezone} · {project.currency}</dd></dl>{(!project.problem || !project.intended_users || !project.desired_outcome) && <div className="notice small">Brief incomplete. Add your observations before comparing options.</div>}</div><div className="panel-section border-top"><h3>Site extent</h3><p className="coordinate-readout">{project.site.bounds.map((n) => n.toFixed(6)).join(' / ')}</p><p className="fine-print">EPSG:4326 · west / south / east / north. A locator, not a surveyed boundary. No metric quantities calculated.</p></div><div className="panel-section border-top"><button className="button secondary full" disabled={saving || loading} onClick={() => void openProject(project)}><RefreshCw size={15} />Reload saved project</button><button className="button text full" disabled={saving} onClick={() => void toggleArchive()}>{project.archived ? <RotateCcw size={15} /> : <Archive size={15} />}{project.archived ? 'Restore project' : 'Archive project'}</button></div></aside></div><div className="dashboard-note"><Leaf size={20} /><div><strong>Continue with boundary, targets and work items.</strong><p>Open the geometry workspace below. Real calculations and issued outputs require an authenticated organisation workspace; Browser Demo keeps draft geometry only.</p></div></div></>}
       {screen === 'project' && project && !demo && <ProjectHistory project={project} token={token} dirty={dirty} onRestore={value=>{setProject(value);setBounds(value.site.bounds);setGeometryOpen(false)}} />}
+      {screen === 'project' && project && <BriefReadiness project={project} />}
       {screen === 'project' && project && <div className="mt-6"><button className="button primary" onClick={() => { if (!geometryOpen || leaveAllowed()) { setGeometryOpen(!geometryOpen); setDirty(false) } }}>{geometryOpen ? 'Close geometry workspace' : 'Open geometry workspace'}</button>{geometryOpen && <Suspense fallback={<p role="status">Loading drawing tools…</p>}><GeometryWorkspace key={`${demo}/${project.id}`} project={project} token={token} demo={demo} userId={session?.user.id} onDirty={setDirty} /></Suspense>}</div>}
       </>}
     </main><footer className="app-footer"><span>InfraShader · Ground-site workspace</span><span>Local build · No deployment</span></footer></div>
-  </div>
+  </div></DisplayUnitsContext.Provider>
 }

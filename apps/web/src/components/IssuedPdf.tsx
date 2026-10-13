@@ -1,4 +1,16 @@
-import { Document, Page, Text, View, Svg, Polygon, StyleSheet, Font } from '@react-pdf/renderer'
+import { displayQuantity, type DisplayUnits } from '../services/display-units'
+import {
+  Document,
+  Page,
+  Text,
+  View,
+  Svg,
+  Polygon,
+  Polyline,
+  Circle,
+  StyleSheet,
+  Font,
+} from '@react-pdf/renderer'
 import type { Snapshot } from '../domain/calculations'
 
 Font.register({ family: 'Noto Sans', src: '/fonts/NotoSans-Regular.ttf' })
@@ -25,7 +37,15 @@ const styles = StyleSheet.create({
   footer: { position: 'absolute', bottom: 25, left: 40, right: 40, fontSize: 8, color: '#56655d' },
 })
 
-function Scope({ title, items }: { title: string; items: Snapshot['selected_scope'] }) {
+function Scope({
+  title,
+  items,
+  units,
+}: {
+  title: string
+  items: Snapshot['selected_scope']
+  units: DisplayUnits
+}) {
   return (
     <View>
       <Text style={styles.heading}>{title}</Text>
@@ -35,13 +55,14 @@ function Scope({ title, items }: { title: string; items: Snapshot['selected_scop
             <View style={styles.name}>
               <Text>
                 {item.name} ({item.status})
+                {item.manual_basis === 'fixed' ? ' - fixed-price scope' : ''}
               </Text>
               <Text style={styles.note}>
                 {item.provenance}: {item.source_note}
               </Text>
             </View>
             <Text style={styles.quantity}>
-              {item.quantity} {item.unit === 'm2' ? 'm²' : item.unit}
+              {displayQuantity(Number(item.quantity), item.unit, units)}
             </Text>
           </View>
         ))
@@ -51,7 +72,15 @@ function Scope({ title, items }: { title: string; items: Snapshot['selected_scop
     </View>
   )
 }
-function SiteVisual({ snapshot }: { snapshot: Snapshot }) {
+function SiteVisual({
+  snapshot,
+  items = [],
+  title = 'Site and shared target zones',
+}: {
+  snapshot: Snapshot
+  items?: Snapshot['selected_scope']
+  title?: string
+}) {
   if (snapshot.site_boundary.type !== 'Polygon') return null
   const ring = snapshot.site_boundary.coordinates[0]
   const xs = ring.map((point) => point[0]),
@@ -72,7 +101,7 @@ function SiteVisual({ snapshot }: { snapshot: Snapshot }) {
       .join(' ')
   return (
     <View wrap={false}>
-      <Text style={styles.heading}>Site and shared target zones · north up</Text>
+      <Text style={styles.heading}>{title} · north up</Text>
       <Svg width={470} height={200}>
         <Polygon points={points(ring)} fill="#e5ece0" stroke="#174d3d" strokeWidth={1} />
         {snapshot.targets.map((target, index) =>
@@ -87,6 +116,35 @@ function SiteVisual({ snapshot }: { snapshot: Snapshot }) {
             />
           ) : null,
         )}
+        {items.map((item) => {
+          const geometry = item.geometry
+          if (!geometry) return null
+          if (geometry.type === 'Polygon')
+            return (
+              <Polygon
+                key={item.id}
+                points={points(geometry.coordinates[0])}
+                fill="#75a7bd"
+                fillOpacity={0.65}
+                stroke="#214b60"
+                strokeWidth={1}
+              />
+            )
+          if (geometry.type === 'LineString')
+            return (
+              <Polyline
+                key={item.id}
+                points={points(geometry.coordinates)}
+                stroke="#214b60"
+                strokeWidth={2}
+              />
+            )
+          if (geometry.type === 'Point') {
+            const [cx, cy] = points([geometry.coordinates]).split(',').map(Number)
+            return <Circle key={item.id} cx={cx} cy={cy} r={3} fill="#214b60" />
+          }
+          return null
+        })}
       </Svg>
       <Text style={styles.note}>
         {snapshot.visual_source} Targets: {snapshot.targets.map((target) => target.name).join(', ')}
@@ -117,12 +175,42 @@ function SharedHeader({ snapshot, id }: { snapshot: Snapshot; id: string }) {
         {snapshot.use_periods} · {snapshot.timezone}
       </Text>
       <SiteVisual snapshot={snapshot} />
+      {snapshot.customer_narrative && (
+        <View>
+          <Text style={styles.heading}>Scope narrative</Text>
+          <Text>{snapshot.customer_narrative}</Text>
+        </View>
+      )}
+      {snapshot.site_evidence.length > 0 && (
+        <View>
+          <Text style={styles.heading}>Selected site evidence references</Text>
+          {snapshot.site_evidence.map((item) => (
+            <View key={item.id}>
+              <Text>{item.description}</Text>
+              <Text>{item.observations}</Text>
+              <Text style={styles.note}>
+                {item.source_note} · Record {item.id}, revision {item.revision}. Photo retained
+                privately in project gallery.
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
       {snapshot.brief_details && (
         <>
           <Text style={styles.heading}>Project priorities and constraints</Text>
           <Text>Type: {snapshot.brief_details.project_type || 'Not specified'}</Text>
           <Text>Priorities: {snapshot.brief_details.priorities || 'Not specified'}</Text>
           <Text>Constraints: {snapshot.brief_details.constraints || 'Not specified'}</Text>
+          {snapshot.brief_details.site_notes && (
+            <Text>Site notes: {snapshot.brief_details.site_notes}</Text>
+          )}
+          {snapshot.brief_details.known_facts && (
+            <Text>Known site facts: {snapshot.brief_details.known_facts}</Text>
+          )}
+          {snapshot.brief_details.unknown_facts && (
+            <Text>Site facts to verify: {snapshot.brief_details.unknown_facts}</Text>
+          )}
           {snapshot.brief_details.stakeholders.map((person, index) => (
             <Text key={index}>
               {person.name} ({person.role}): {person.needs}
@@ -168,9 +256,24 @@ export function DeveloperBriefPdf({ snapshot, id }: { snapshot: Snapshot; id: st
             {index + 1}. {criterion}
           </Text>
         ))}
-        <Scope title="Baseline" items={snapshot.baseline} />
-        <Scope title="Option A" items={snapshot.option_a ?? []} />
-        <Scope title="Option B" items={snapshot.option_b ?? []} />
+        <Scope units={snapshot.display_units} title="Baseline" items={snapshot.baseline} />
+        <SiteVisual
+          snapshot={snapshot}
+          items={snapshot.baseline}
+          title="Baseline scope schematic"
+        />
+        <Scope units={snapshot.display_units} title="Option A" items={snapshot.option_a ?? []} />
+        <SiteVisual
+          snapshot={snapshot}
+          items={snapshot.option_a ?? []}
+          title="Option A scope schematic"
+        />
+        <Scope units={snapshot.display_units} title="Option B" items={snapshot.option_b ?? []} />
+        <SiteVisual
+          snapshot={snapshot}
+          items={snapshot.option_b ?? []}
+          title="Option B scope schematic"
+        />
         {snapshot.option_budgets && (
           <View>
             <Text style={styles.heading}>Option budget comparison</Text>
@@ -205,8 +308,22 @@ export function ContractorProposalPdf({ snapshot, id }: { snapshot: Snapshot; id
     <Document title={`${snapshot.project_name} — Contractor client proposal`}>
       <Page size="A4" style={styles.page}>
         <SharedHeader snapshot={snapshot} id={id} />
-        <Scope title="Existing baseline" items={snapshot.baseline} />
-        <Scope title="Selected scope" items={snapshot.selected_scope} />
+        <Scope units={snapshot.display_units} title="Existing baseline" items={snapshot.baseline} />
+        <SiteVisual
+          snapshot={snapshot}
+          items={snapshot.baseline}
+          title="Baseline scope schematic"
+        />
+        <SiteVisual
+          snapshot={snapshot}
+          items={snapshot.selected_scope}
+          title="Selected scope schematic"
+        />
+        <Scope
+          units={snapshot.display_units}
+          title="Selected scope"
+          items={snapshot.selected_scope}
+        />
         <Text style={styles.heading}>
           Customer selling price: {snapshot.currency} {snapshot.selling_total}
         </Text>

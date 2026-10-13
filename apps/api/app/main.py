@@ -28,7 +28,7 @@ app.add_middleware(BodyLimit)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=get_settings().cors_origins,
-    allow_methods=["GET", "POST", "PATCH", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
     expose_headers=["X-Request-ID"],
 )
@@ -157,10 +157,13 @@ def project_list(
     archived: bool = False,
     query: Annotated[str, Query(max_length=160)] = "",
     sort: Literal["updated", "name", "created"] = "updated",
+    stage: Literal["", "brief", "site", "option", "estimate", "developer_brief", "proposal"] = "",
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
     offset: Annotated[int, Query(ge=0)] = 0,
 ):
-    return projects.list_projects(db, organisation_id, user, archived, limit, offset, query, sort)
+    return projects.list_projects(
+        db, organisation_id, user, archived, limit, offset, query, sort, stage
+    )
 
 
 @app.post(
@@ -333,8 +336,24 @@ def output_preview(
 
 
 @app.get("/api/v1/organisations/{organisation_id}/projects/{project_id}/evidence")
-def evidence_list(organisation_id: UUID, project_id: UUID, user: User, db: Database):
-    return evidence.list_evidence(db, organisation_id, project_id, user)
+def evidence_list(
+    organisation_id: UUID, project_id: UUID, user: User, db: Database, archived: bool = False
+):
+    return evidence.list_evidence(db, organisation_id, project_id, user, archived)
+
+
+@app.patch(
+    "/api/v1/organisations/{organisation_id}/projects/{project_id}/evidence/{evidence_id}/archive"
+)
+def evidence_archive(
+    organisation_id: UUID,
+    project_id: UUID,
+    evidence_id: UUID,
+    data: evidence.EvidenceArchive,
+    user: User,
+    db: Database,
+):
+    return evidence.archive_evidence(db, organisation_id, project_id, user, evidence_id, data)
 
 
 @app.post("/api/v1/organisations/{organisation_id}/projects/{project_id}/evidence", status_code=201)
@@ -515,3 +534,29 @@ def rate_archive(
     db: Database,
 ):
     return calculations.archive_rate(db, organisation_id, user, rate_id, data)
+
+
+@app.get("/api/v1/organisations/{organisation_id}/service-requests")
+def service_requests(organisation_id: UUID, user: User, db: Database):
+    return administration.service_requests(db, organisation_id, user)
+
+
+@app.post("/api/v1/organisations/{organisation_id}/service-requests", status_code=201)
+def service_request(
+    organisation_id: UUID, data: administration.ServiceRequestInput, user: User, db: Database
+):
+    return administration.save_service_request(db, organisation_id, user, data)
+
+
+@app.post(
+    "/api/v1/organisations/{organisation_id}/service-requests/{request_id}/responses",
+    status_code=201,
+)
+def service_response(
+    organisation_id: UUID,
+    request_id: UUID,
+    data: administration.ServiceResponseInput,
+    user: User,
+    db: Database,
+):
+    return administration.save_service_request(db, organisation_id, user, data, request_id)

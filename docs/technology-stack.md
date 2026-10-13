@@ -5,6 +5,7 @@ Exact dependencies are pinned by `package-lock.json` and `apps/api/uv.lock`.
 | Area | Runtime/library | Actual use |
 |---|---|---|
 | Web | React 19.3, TypeScript 5.9, Vite 8.3 | Session, projects, geometry, calculations, review and downloads |
+| Routing | React Router DOM 7.18.4 | Protected project URLs, reload, navigation and unsaved Back guards |
 | UI | Tailwind 4.3, editable shadcn-style Radix/CVA button, Lucide | Workspace layouts and controls; existing semantic CSS tokens retained |
 | Maps | MapLibre 6.13, Terra Draw 1.37, adapter 1.5 | Site canvas, polygon/line/point drawing; numeric alternative |
 | Validation | Zod 4.6 / Pydantic | Runtime API contracts / authoritative server validation |

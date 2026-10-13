@@ -1,3 +1,4 @@
+import { displayQuantity, useDisplayUnits } from '../services/display-units'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Feature } from 'geojson'
 import type { Project } from '../domain/projects'
@@ -35,9 +36,18 @@ type Props = {
 }
 type Kind = 'boundary' | 'target' | WorkItem['kind']
 export default function GeometryWorkspace({ project, token, demo, onDirty, userId }: Props) {
+  const displayUnits = useDisplayUnits()
   const [saved, setSaved] = useState<SavedWorkspace>({ revision: 0, data: null })
   const [data, setData] = useState<WorkspaceData | null>(null)
   const [scenario, setScenario] = useState<ScenarioKey>('baseline')
+  const [layers, setLayers] = useState({
+    boundary: true,
+    target: true,
+    building: true,
+    canopy: true,
+    work: true,
+    shadow: true,
+  })
   const [kind, setKind] = useState<Kind>('boundary')
   const [name, setName] = useState('Site boundary')
   const [source, setSource] = useState('')
@@ -46,6 +56,7 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
   const [height, setHeight] = useState('')
   const [heightSource, setHeightSource] = useState('')
   const [count, setCount] = useState('1')
+  const [manualBasis, setManualBasis] = useState<'count' | 'fixed'>('count')
   const [category, setCategory] = useState('General')
   const [crown, setCrown] = useState('')
   const [undo, setUndo] = useState<WorkspaceData[]>([])
@@ -76,6 +87,7 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
           revision: saved.revision,
           data,
           form: {
+            manualBasis,
             scenario,
             category,
             crown,
@@ -114,6 +126,7 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
     height,
     heightSource,
     count,
+    manualBasis,
     override,
     provenance,
     editingId,
@@ -178,6 +191,7 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
     setHeight(form.height)
     setHeightSource(form.heightSource)
     setCount(form.count)
+    setManualBasis(form.manualBasis)
     setCategory(form.category)
     setCrown(form.crown)
     setOverride(form.override)
@@ -198,6 +212,16 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
     setNotice('')
   }
   function change(next: WorkspaceData) {
+    const sharedIds = new Set(next.scenarios.baseline.items.map((item) => item.id))
+    const previousIds = new Set(data?.scenarios.baseline.items.map((item) => item.id) ?? [])
+    for (const key of ['option_a', 'option_b'] as const) {
+      next.scenarios[key].items = [
+        ...structuredClone(next.scenarios.baseline.items),
+        ...next.scenarios[key].items.filter(
+          (item) => !sharedIds.has(item.id) && !previousIds.has(item.id),
+        ),
+      ]
+    }
     if (data) setUndo((previous) => [...previous.slice(-49), structuredClone(data)])
     setRedo([])
     setData(next)
@@ -215,6 +239,7 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
     setHeight(next === 'canopy' ? '3' : '')
     setHeightSource('')
     setKind(next)
+    setManualBasis('count')
     setCategory(
       next === 'tree'
         ? 'Vegetation'
@@ -260,17 +285,19 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
           (!(Number(height) > 0) || Number(height) > 100 || !heightSource.trim())
         )
           throw new Error('Enter a height greater than 0 and no more than 100 m, with its source.')
-        if (!Number.isInteger(Number(count)) || Number(count) < 1)
-          throw new Error('Count must be a positive whole number.')
+        if (!Number.isInteger(Number(count)) || Number(count) < 0)
+          throw new Error('Count must be a nonnegative whole number.')
         if (
           override &&
           (!Number.isFinite(Number(override)) ||
-            Number(override) <= 0 ||
+            Number(override) < 0 ||
+            (Number(override) === 0 && !['tree', 'bench', 'manual'].includes(kind)) ||
             provenance === 'calculated')
         )
           throw new Error('An override needs a positive value and its own non-calculated source.')
         const previous = next.scenarios[scenario].items.find((item) => item.id === editingId)
         const item: WorkItem = {
+          manual_basis: kind === 'manual' ? manualBasis : 'count',
           category: category.trim() || 'General',
           visible: previous?.visible ?? true,
           crown_diameter_m: kind === 'tree' && crown ? Number(crown) : null,
@@ -305,6 +332,8 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
   function edit(item: WorkItem) {
     if (pendingForm && !window.confirm('Discard unapplied form changes?')) return false
     setPendingForm(false)
+    if (data?.scenarios.baseline.items.some((value) => value.id === item.id))
+      setScenario('baseline')
     setKind(item.kind)
     setName(item.name)
     setSource(item.source_note)
@@ -313,6 +342,7 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
     setHeight(String(item.height_m ?? ''))
     setHeightSource(item.height_source)
     setCount(String(item.count))
+    setManualBasis(item.manual_basis)
     setCategory(item.category)
     setCrown(item.crown_diameter_m === null ? '' : String(item.crown_diameter_m))
     setOverride(item.quantity_override ?? '')
@@ -374,7 +404,11 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
       !data
         ? []
         : [
-            { type: 'Feature', geometry: data.boundary, properties: { color: '#b4c5ae' } },
+            {
+              type: 'Feature' as const,
+              geometry: data.boundary,
+              properties: { color: '#b4c5ae', kind: 'boundary' },
+            },
             ...data.targets.map((target) => ({
               type: 'Feature' as const,
               geometry: target.geometry,
@@ -403,8 +437,11 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
                 },
               })),
             ...(!dirty && shadow?.revision === saved.revision ? shadow.features : []),
-          ],
-    [data, scenario, dirty, shadow, saved.revision],
+          ].filter((feature) => {
+            const kind = feature.properties?.kind
+            return layers[kind && kind in layers ? (kind as keyof typeof layers) : 'work']
+          }),
+    [data, scenario, dirty, shadow, saved.revision, layers],
   )
   const selectedFeature = useMemo<Feature | undefined>(() => {
     const target =
@@ -539,17 +576,24 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
                 variant="outline"
                 disabled={busy || project.archived}
                 onClick={() => {
-                  if (window.confirm('Replace this option with an independent copy of Baseline?')) {
+                  if (
+                    window.confirm('Remove this option own items and keep the shared Baseline?')
+                  ) {
                     const next = structuredClone(data)
                     next.scenarios[scenario].items = structuredClone(next.scenarios.baseline.items)
                     change(next)
                   }
                 }}
               >
-                Copy Baseline into this option
+                Reset option to Baseline
               </Button>
             )}
           </div>
+          <p>
+            Baseline objects are shared by both options. Edit or remove them in Baseline; saving
+            updates both options and makes earlier calculations stale. Proposed items stay
+            independent.
+          </p>
           <fieldset disabled={busy || project.archived} className="border-0 p-0 min-w-0">
             <div className="field">
               <label htmlFor="geometry-kind">Geometry to add or replace</label>
@@ -589,6 +633,25 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
                 }}
               />
             )}
+            <fieldset className="my-3">
+              <legend>Map layers</legend>
+              {Object.entries(layers).map(([key, visible]) => (
+                <label key={key} className="inline-flex flex-row items-center gap-2 mr-4">
+                  <input
+                    type="checkbox"
+                    checked={visible}
+                    onChange={(event) =>
+                      setLayers((current) => ({ ...current, [key]: event.target.checked }))
+                    }
+                  />{' '}
+                  Show {key} layer
+                </label>
+              ))}
+              <p>
+                Layer visibility changes this view only. Quantities, analysis and saved scope
+                include hidden objects.
+              </p>
+            </fieldset>
             <DrawingMap
               bounds={project.site.bounds}
               features={features}
@@ -654,6 +717,26 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
                     />
                     <p>Record the source and uncertainty below. This does not enable tree shade.</p>
                   </div>
+                )}
+                {kind === 'manual' && (
+                  <label>
+                    Manual quantity basis
+                    <select
+                      value={manualBasis}
+                      onChange={(event) => {
+                        const basis = event.target.value as 'count' | 'fixed'
+                        setManualBasis(basis)
+                        if (basis === 'fixed') {
+                          setCount('1')
+                          setOverride('')
+                        }
+                        markFormChanged()
+                      }}
+                    >
+                      <option value="count">Count</option>
+                      <option value="fixed">Fixed-price scope (one item)</option>
+                    </select>
+                  </label>
                 )}
                 {kind !== 'manual' && (
                   <div className="field">
@@ -721,8 +804,9 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
                     <label htmlFor="geometry-count">Count (items)</label>
                     <input
                       id="geometry-count"
+                      disabled={kind === 'manual' && manualBasis === 'fixed'}
                       type="number"
-                      min="1"
+                      min="0"
                       step="1"
                       value={count}
                       onChange={(event) => {
@@ -774,8 +858,9 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
                     <label htmlFor="quantity-override">Verified quantity override (optional)</label>
                     <input
                       id="quantity-override"
+                      disabled={kind === 'manual' && manualBasis === 'fixed'}
                       type="number"
-                      min="0.0001"
+                      min={['tree', 'bench', 'manual'].includes(kind) ? '0' : '0.0001'}
                       step="0.0001"
                       value={override}
                       onChange={(event) => {
@@ -808,7 +893,7 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
                   {dirty
                     ? 'Recalculation pending'
                     : target.area_m2
-                      ? `${target.area_m2.toFixed(2)} m²`
+                      ? displayQuantity(target.area_m2, 'm2', displayUnits)
                       : 'Quantity unavailable in Demo'}
                 </span>
                 <Button
@@ -859,6 +944,7 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
                         {item.name}
                         <br />
                         {item.kind} · {item.status}
+                        {item.manual_basis === 'fixed' && ' / Fixed-price scope (one item)'}
                         <br />
                         {item.category}
                         {item.crown_diameter_m
@@ -869,7 +955,7 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
                         {dirty
                           ? 'Stale / draft'
                           : item.quantity
-                            ? `${item.quantity.value.toFixed(2)} ${item.quantity.calculated.unit}${item.quantity.is_override ? ' (override)' : ''}`
+                            ? `${displayQuantity(item.quantity.value, item.quantity.calculated.unit, displayUnits)}${item.quantity.is_override ? ' (override)' : ''}`
                             : 'Unavailable in Demo'}
                       </td>
                       <td className="p-2">
@@ -881,7 +967,12 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
                           disabled={busy || project.archived}
                           onClick={() => {
                             const next = structuredClone(data)
-                            next.scenarios[scenario].items = next.scenarios[scenario].items.map(
+                            const owner = data.scenarios.baseline.items.some(
+                              (value) => value.id === item.id,
+                            )
+                              ? 'baseline'
+                              : scenario
+                            next.scenarios[owner].items = next.scenarios[owner].items.map(
                               (value) =>
                                 value.id === item.id
                                   ? { ...value, visible: !value.visible }
@@ -901,7 +992,12 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
                         </Button>
                         <Button
                           variant="outline"
-                          disabled={busy || project.archived}
+                          disabled={
+                            busy ||
+                            project.archived ||
+                            (scenario !== 'baseline' &&
+                              data.scenarios.baseline.items.some((value) => value.id === item.id))
+                          }
                           onClick={() => {
                             const next = structuredClone(data)
                             next.scenarios[scenario].items = next.scenarios[scenario].items.filter(
@@ -1019,10 +1115,18 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
               revision={saved.revision}
               dirty={dirty}
               scenario={scenario}
+              onScenarioChange={(option) => {
+                setScenario(option)
+                setShadow(null)
+              }}
               onInspect={(option, itemId) => {
                 const item = data.scenarios[option].items.find((value) => value.id === itemId)
                 if (item && edit(item) !== false) {
-                  setScenario(option)
+                  setScenario(
+                    data.scenarios.baseline.items.some((value) => value.id === item.id)
+                      ? 'baseline'
+                      : option,
+                  )
                   setShadow(null)
                   document
                     .querySelector('[aria-label="Geometry drawing canvas"]')
@@ -1030,6 +1134,7 @@ export default function GeometryWorkspace({ project, token, demo, onDirty, userI
                 }
               }}
               onReviewDirty={setReviewDirty}
+              recoveryKey={recoveryKey ?? undefined}
               onData={change}
               onShowShadows={(features, revision) => setShadow({ features, revision })}
             />

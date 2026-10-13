@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from app import calculations, projects, workspace
 from app.errors import APIError
-from app.models import Membership, Organisation
+from app.models import Evidence, Membership, Organisation
 from app.schemas import ProjectCreate
 from tests.test_workspace import fixture_workspace
 
@@ -86,6 +86,10 @@ def test_real_saved_geometry_analysis_estimate_issue_and_audience(database, purp
             session, org, project_id, admin, workspace.WorkspaceInput(**draft)
         )
         assert saved["revision"] == 1
+        assert (
+            projects.list_projects(session, org, admin, False, 100, 0, stage="option").items[0].id
+            == project_id
+        )
     with Session(database) as session:
         assert workspace.get_workspace(session, org, project_id, member)["data"] == saved["data"]
         with pytest.raises(APIError):
@@ -123,6 +127,10 @@ def test_real_saved_geometry_analysis_estimate_issue_and_audience(database, purp
             session.rollback()
         estimate = calculations.run_estimate(session, org, project_id, admin, estimate_input)
         assert estimate["payload"]["complete"]
+        assert (
+            projects.list_projects(session, org, admin, False, 100, 0, stage="estimate").items[0].id
+            == project_id
+        )
         safe = next(
             item
             for item in calculations.get_artifacts(session, org, project_id, member)["items"]
@@ -136,7 +144,24 @@ def test_real_saved_geometry_analysis_estimate_issue_and_audience(database, purp
         else:
             assert safe["payload"]["takeoff"][0]["price_basis"] == "indicative"
         kind = "developer_brief" if developer else "proposal"
+        photo = Evidence(
+            project_id=project_id,
+            object_path=f"fixture/{uuid4()}",
+            content_type="image/jpeg",
+            size_bytes=10,
+            sha256="a" * 64,
+            description="Site observation",
+            source_note="Test source",
+            observations="Needs verification",
+            target_ids=[],
+            created_by=admin,
+        )
+        session.add(photo)
+        session.commit()
+        photo_id = photo.id
         issue = calculations.IssueInput(
+            customer_narrative="A shaded waiting space with sourced scope.",
+            evidence_ids=[photo_id],
             request_key=uuid4(),
             estimate_id=estimate["id"],
             expected_project_revision=1,
@@ -164,6 +189,11 @@ def test_real_saved_geometry_analysis_estimate_issue_and_audience(database, purp
         issued = calculations.issue_snapshot(session, org, project_id, admin, issue, kind)
         retry = calculations.issue_snapshot(session, org, project_id, admin, issue, kind)
         assert retry["id"] == issued["id"]
+        assert (
+            projects.list_projects(session, org, admin, False, 100, 0, stage=kind).items[0].id
+            == project_id
+        )
+        assert projects.list_projects(session, org, admin, False, 100, 0, stage="brief").total == 0
         forbidden = {
             "cost",
             "cost_total",
@@ -189,6 +219,27 @@ def test_real_saved_geometry_analysis_estimate_issue_and_audience(database, purp
         assert "draft" not in issued["payload"]
         assert preview["version"] == issued["payload"]["version"]
         assert issued["payload"]["shade"]["status"] == "omitted"
+        assert issued["payload"]["customer_narrative"] == issue.customer_narrative
+        assert (
+            issued["payload"]["selected_scope"][0]["geometry"]
+            == draft["scenarios"]["option_a"]["items"][0]["geometry"]
+        )
+        assert issued["payload"]["site_evidence"][0]["description"] == "Site observation"
+        assert "object_path" not in issued["payload"]["site_evidence"][0]
+        photo.description = "Later change"
+        session.commit()
+        assert issued["payload"]["site_evidence"][0]["description"] == "Site observation"
+        with pytest.raises(APIError) as unavailable_evidence:
+            calculations.issue_snapshot(
+                session,
+                org,
+                project_id,
+                admin,
+                issue.model_copy(update={"request_key": uuid4(), "evidence_ids": [uuid4()]}),
+                kind,
+            )
+        assert unavailable_evidence.value.status_code == 404
+        session.rollback()
         if developer:
             budgets = issued["payload"]["option_budgets"]
             assert budgets["option_a"]["total"] == estimate["payload"]["selling_total"]

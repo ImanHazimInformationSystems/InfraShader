@@ -8,6 +8,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 Purpose = Literal["developer_decision", "contractor_proposal"]
+ProjectStage = Literal["brief", "site", "option", "estimate", "developer_brief", "proposal"]
 Capability = Literal[
     "manage_members",
     "change_catalogue",
@@ -45,11 +46,25 @@ class Stakeholder(Contract):
 
 
 class BriefDetails(Contract):
+    budget_min: Decimal | None = Field(default=None, ge=0, max_digits=14, decimal_places=2)
+    site_notes: str = Field(default="", max_length=8000)
+    known_facts: str = Field(default="", max_length=4000)
+    unknown_facts: str = Field(default="", max_length=4000)
     project_type: str = Field(default="", max_length=160)
     budget: Decimal | None = Field(default=None, ge=0, max_digits=14, decimal_places=2)
     priorities: str = Field(default="", max_length=4000)
     constraints: str = Field(default="", max_length=4000)
     stakeholders: list[Stakeholder] = Field(default_factory=list, max_length=30)
+
+    @model_validator(mode="after")
+    def budget_range(self):
+        if (
+            self.budget_min is not None
+            and self.budget is not None
+            and self.budget_min > self.budget
+        ):
+            raise ValueError("Budget minimum cannot exceed the budget ceiling.")
+        return self
 
 
 class ProjectCreate(Contract):
@@ -112,6 +127,7 @@ class ProjectResponse(ProjectCreate):
     revision: int
     updated_at: datetime
     created_at: datetime | None = None
+    stage: ProjectStage = "brief"
 
 
 class ProjectList(Contract):

@@ -58,6 +58,50 @@ def test_private_metadata_tenant_checks_and_integrity(database):
             storage,
         )
         assert "object_path" not in saved
+        assert saved["created_by"] == str(admin)
+        with pytest.raises(APIError):
+            evidence.archive_evidence(
+                session,
+                org,
+                project_id,
+                foreign,
+                saved["id"],
+                evidence.EvidenceArchive(expected_revision=1, archived=True),
+            )
+        session.rollback()
+        removed = evidence.archive_evidence(
+            session,
+            org,
+            project_id,
+            admin,
+            saved["id"],
+            evidence.EvidenceArchive(expected_revision=1, archived=True),
+        )
+        assert removed["archived"] and removed["revision"] == 2
+        assert evidence.list_evidence(session, org, project_id, member)["items"] == []
+        assert len(evidence.list_evidence(session, org, project_id, member, True)["items"]) == 1
+        with pytest.raises(APIError):
+            evidence.download(session, org, project_id, member, saved["id"], storage)
+        assert storage.reads == 0
+        with pytest.raises(APIError):
+            evidence.archive_evidence(
+                session,
+                org,
+                project_id,
+                admin,
+                saved["id"],
+                evidence.EvidenceArchive(expected_revision=1, archived=False),
+            )
+        session.rollback()
+        restored = evidence.archive_evidence(
+            session,
+            org,
+            project_id,
+            member,
+            saved["id"],
+            evidence.EvidenceArchive(expected_revision=2, archived=False),
+        )
+        assert restored["revision"] == 3 and not restored["archived"]
         with pytest.raises(APIError):
             evidence.download(session, org, project_id, foreign, saved["id"], storage)
         with pytest.raises(APIError):

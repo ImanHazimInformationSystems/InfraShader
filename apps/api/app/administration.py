@@ -2,6 +2,7 @@
 
 from decimal import Decimal
 from typing import Literal
+from uuid import UUID
 
 from pydantic import Field, field_validator
 from sqlalchemy import func, select, update
@@ -16,7 +17,7 @@ from app.schemas import Capability, Contract, ProjectCreate
 class OrganisationSettings(Contract):
     timezone: str = "Asia/Kuala_Lumpur"
     currency: Literal["MYR"] = "MYR"
-    units: Literal["metric"] = "metric"
+    units: Literal["metric", "imperial"] = "metric"
     default_markup: Decimal = Field(
         default=Decimal("0"), ge=0, le=1000, max_digits=8, decimal_places=4
     )
@@ -205,3 +206,94 @@ def events(session, org_id, user_id):
             for row in rows
         ]
     }
+
+
+class ServiceRequestInput(Contract):
+    request_key: UUID
+    kind: Literal["support", "data_export", "data_correction", "data_deletion", "account_closure"]
+    message: str = Field(min_length=1, max_length=4000)
+
+
+class ServiceResponseInput(Contract):
+    request_key: UUID
+    message: str = Field(min_length=1, max_length=4000)
+    status: Literal["in_progress", "resolved"]
+
+
+def service_record(row):
+    return {
+        "id": str(row.id),
+        "actor_id": str(row.actor_id),
+        "created_at": row.created_at.isoformat(),
+        **row.payload,
+    }
+
+
+def service_requests(session, org_id, user_id):
+    membership = require_membership(session, org_id, user_id)
+    query = select(AdministrationEvent).where(
+        AdministrationEvent.organisation_id == org_id,
+        AdministrationEvent.payload["action"].astext == "service_request",
+    )
+    if membership.role != "administrator":
+        query = query.where(AdministrationEvent.actor_id == user_id)
+    rows = session.scalars(query.order_by(AdministrationEvent.created_at.desc()).limit(100)).all()
+    results = []
+    for row in rows:
+        updates = session.scalars(
+            select(AdministrationEvent)
+            .where(
+                AdministrationEvent.organisation_id == org_id,
+                AdministrationEvent.payload["action"].astext == "service_response",
+                AdministrationEvent.payload["request_id"].astext == str(row.id),
+            )
+            .order_by(AdministrationEvent.created_at, AdministrationEvent.id)
+        ).all()
+        results.append(
+            {**service_record(row), "updates": [service_record(item) for item in updates]}
+        )
+    return {"items": results, "limit": 100}
+
+
+def save_service_request(session, org_id, user_id, data, request_id=None):
+    # Serialise retries and administrator responses; all records are append-only.
+    session.scalar(select(Organisation).where(Organisation.id == org_id).with_for_update())
+    require_membership(session, org_id, user_id)
+    payload = (
+        {"action": "service_request", "kind": data.kind, "message": data.message}
+        if request_id is None
+        else {
+            "action": "service_response",
+            "request_id": str(request_id),
+            "status": data.status,
+            "message": data.message,
+        }
+    )
+    if request_id is not None:
+        admin(session, org_id, user_id)
+        parent = session.get(AdministrationEvent, request_id)
+        if (
+            parent is None
+            or parent.organisation_id != org_id
+            or parent.payload.get("action") != "service_request"
+        ):
+            raise not_found()
+    previous = session.get(AdministrationEvent, data.request_key)
+    if previous:
+        if (
+            previous.organisation_id != org_id
+            or previous.actor_id != user_id
+            or previous.payload != payload
+        ):
+            raise APIError(
+                409, "request_conflict", "This request key is already used. Reload and retry."
+            )
+        return service_record(previous)
+    row = AdministrationEvent(
+        id=data.request_key, organisation_id=org_id, actor_id=user_id, payload=payload
+    )
+    session.add(row)
+    session.flush()
+    result = service_record(row)
+    session.commit()
+    return result

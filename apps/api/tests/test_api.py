@@ -29,6 +29,19 @@ async def test_public_health_requires_no_secret_or_database(client):
     assert response.headers["X-Request-ID"] == "test-request-123"
 
 
+async def test_local_settings_cors_preflight_accepts_put(client):
+    response = await client.options(
+        "/api/v1/profile",
+        headers={
+            "Origin": "http://127.0.0.1:5173",
+            "Access-Control-Request-Method": "PUT",
+            "Access-Control-Request-Headers": "Authorization,Content-Type",
+        },
+    )
+    assert response.status_code == 200
+    assert "PUT" in response.headers["access-control-allow-methods"]
+
+
 async def test_readiness_distinguishes_skeleton_from_configured_service(client):
     response = await client.get("/api/v1/readiness")
     assert response.status_code == 503

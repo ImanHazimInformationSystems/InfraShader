@@ -6,7 +6,7 @@ export const settingsSchema = z.object({
   settings: z.object({
     timezone: z.string(),
     currency: z.literal('MYR'),
-    units: z.literal('metric'),
+    units: z.enum(['metric', 'imperial']),
     default_markup: z.string(),
   }),
 })

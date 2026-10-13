@@ -2,6 +2,7 @@
 
 import hashlib
 import warnings
+from datetime import UTC, datetime
 from io import BytesIO
 from uuid import UUID, uuid4
 
@@ -13,7 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.config import Settings
 from app.errors import APIError, not_found, unavailable
-from app.models import Evidence, Workspace
+from app.models import AdministrationEvent, Evidence, Workspace
 from app.workspace import StrictModel, project_for_workspace
 
 MAX_BYTES = 10 * 1024 * 1024
@@ -106,6 +107,10 @@ class PrivateStorage:
 
 def metadata(record):
     return {
+        "archived": record.archived,
+        "created_by": str(record.created_by),
+        "updated_by": str(record.updated_by or record.created_by),
+        "updated_at": record.updated_at.isoformat(),
         "id": str(record.id),
         "revision": record.revision,
         "observations": record.observations,
@@ -119,11 +124,11 @@ def metadata(record):
     }
 
 
-def list_evidence(session, org_id, project_id, user_id):
+def list_evidence(session, org_id, project_id, user_id, archived=False):
     project_for_workspace(session, org_id, project_id, user_id)
     records = session.scalars(
         select(Evidence)
-        .where(Evidence.project_id == project_id)
+        .where(Evidence.project_id == project_id, Evidence.archived == archived)
         .order_by(Evidence.created_at.desc())
         .limit(100)
     ).all()
@@ -164,6 +169,7 @@ def upload(
             description=description.strip(),
             source_note=source_note.strip(),
             created_by=user_id,
+            updated_by=user_id,
         )
         session.add(record)
         session.flush()
@@ -185,7 +191,7 @@ def download(session, org_id, project_id, user_id, evidence_id, storage: Private
     record = session.scalar(
         select(Evidence).where(Evidence.id == evidence_id, Evidence.project_id == project_id)
     )
-    if record is None:
+    if record is None or record.archived:
         raise not_found()
     content = storage.get(record.object_path)
     if hashlib.sha256(content).hexdigest() != record.sha256:
@@ -208,7 +214,7 @@ def update_metadata(session, org_id, project_id, user_id, evidence_id, data: Evi
         .where(Evidence.project_id == project_id, Evidence.id == evidence_id)
         .with_for_update()
     )
-    if record is None:
+    if record is None or record.archived:
         raise not_found()
     if record.revision != data.expected_revision:
         raise APIError(409, "evidence_conflict", "Evidence changed. Reload before editing again.")
@@ -224,6 +230,47 @@ def update_metadata(session, org_id, project_id, user_id, evidence_id, data: Evi
     record.observations = data.observations
     record.target_ids = links
     record.revision += 1
+    record.updated_by = user_id
+    record.updated_at = datetime.now(UTC)
+    response = metadata(record)
+    session.commit()
+    return response
+
+
+class EvidenceArchive(StrictModel):
+    expected_revision: int = Field(ge=1)
+    archived: bool
+
+
+def archive_evidence(session, org_id, project_id, user_id, evidence_id, data: EvidenceArchive):
+    project_for_workspace(session, org_id, project_id, user_id, write=True)
+    record = session.scalar(
+        select(Evidence)
+        .where(Evidence.project_id == project_id, Evidence.id == evidence_id)
+        .with_for_update()
+    )
+    if record is None:
+        raise not_found()
+    if record.revision != data.expected_revision:
+        raise APIError(
+            409, "evidence_conflict", "Evidence changed. Reload before removing or restoring it."
+        )
+    record.archived = data.archived
+    record.revision += 1
+    record.updated_by = user_id
+    record.updated_at = datetime.now(UTC)
+    session.add(
+        AdministrationEvent(
+            organisation_id=org_id,
+            actor_id=user_id,
+            payload={
+                "action": "evidence_removed" if data.archived else "evidence_restored",
+                "project_id": str(project_id),
+                "evidence_id": str(record.id),
+                "revision": record.revision,
+            },
+        )
+    )
     response = metadata(record)
     session.commit()
     return response

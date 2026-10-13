@@ -1,6 +1,6 @@
 from concurrent.futures import ThreadPoolExecutor
 from threading import Barrier
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import pytest
 from sqlalchemy.orm import Session
@@ -11,18 +11,56 @@ from tests.test_workflow_integration import initialise
 
 
 @pytest.mark.integration
+def test_local_service_requests_are_private_retryable_and_admin_responses_append(database):
+    org, _, actor, member, foreign = initialise(database, "developer_decision")
+    with Session(database) as session:
+        data = admin.ServiceRequestInput(
+            request_key=uuid4(), kind="data_deletion", message="Review fixture retention"
+        )
+        saved = admin.save_service_request(session, org, member, data)
+        assert admin.save_service_request(session, org, member, data)["id"] == saved["id"]
+        with pytest.raises(APIError):
+            admin.service_requests(session, org, foreign)
+        assert len(admin.service_requests(session, org, actor)["items"]) == 1
+        assert len(admin.service_requests(session, org, member)["items"]) == 1
+        response = admin.ServiceResponseInput(
+            request_key=uuid4(), message="Review pending; no data deleted", status="in_progress"
+        )
+        with pytest.raises(APIError):
+            admin.save_service_request(session, org, member, response, UUID(saved["id"]))
+        session.rollback()
+        admin.save_service_request(session, org, actor, response, UUID(saved["id"]))
+        assert (
+            admin.service_requests(session, org, member)["items"][0]["updates"][0]["status"]
+            == "in_progress"
+        )
+        admin.save_service_request(
+            session,
+            org,
+            actor,
+            admin.ServiceRequestInput(
+                request_key=uuid4(), kind="support", message="Private administrator request"
+            ),
+        )
+        assert len(admin.service_requests(session, org, member)["items"]) == 1
+    with Session(database) as session:
+        assert len(admin.service_requests(session, org, actor)["items"]) == 2
+
+
+@pytest.mark.integration
 def test_settings_profiles_permissions_conflicts_and_last_admin(database):
     org, _, actor, member, foreign = initialise(database, "developer_decision")
     with Session(database) as session:
         config = admin.OrganisationInput(
             expected_revision=1,
             name="Updated organisation",
-            settings=admin.OrganisationSettings(default_markup="15.5"),
+            settings=admin.OrganisationSettings(default_markup="15.5", units="imperial"),
         )
         with pytest.raises(APIError):
             admin.save_settings(session, org, member, config)
         session.rollback()
         assert admin.save_settings(session, org, actor, config)["revision"] == 2
+        assert admin.get_settings(session, org, actor)["settings"]["units"] == "imperial"
         with pytest.raises(APIError):
             admin.save_settings(session, org, actor, config)
         session.rollback()

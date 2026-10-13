@@ -1,6 +1,10 @@
 import { api, ApiError } from './api'
 
 describe('API runtime validation and errors', () => {
+  it('identifies rejected fields without swallowing the server validation detail', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({error:{code:'validation_error',message:'Check the marked fields.',details:[{field:'body.height_m',message:'Input should be greater than 0'}]}}),{status:422})))
+    await expect(api.update('org','project',{expected_revision:1},'token')).rejects.toMatchObject({message:'Check the marked fields. height_m: Input should be greater than 0'})
+  })
   afterEach(() => vi.unstubAllGlobals())
   it('rejects an unexpected healthy response rather than claiming API compatibility', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ status: 'ok', service: 'different-api', version: '1' }))))

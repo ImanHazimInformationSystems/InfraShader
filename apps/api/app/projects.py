@@ -1,10 +1,10 @@
 from uuid import UUID
 
-from sqlalchemy import func, or_, select, update
+from sqlalchemy import case, exists, func, or_, select, update
 from sqlalchemy.orm import Session
 
 from app.errors import APIError, not_found
-from app.models import Membership, Organisation, Project, ProjectRevision
+from app.models import Artifact, Membership, Organisation, Project, ProjectRevision, Workspace
 from app.schemas import (
     OrganisationResponse,
     ProjectCreate,
@@ -62,6 +62,35 @@ def session_info(session: Session, user_id: UUID) -> SessionResponse:
     )
 
 
+def project_stage():
+    def artifact(kind):
+        return exists(
+            select(Artifact.id).where(Artifact.project_id == Project.id, Artifact.kind == kind)
+        )
+
+    return case(
+        (artifact("proposal"), "proposal"),
+        (artifact("developer_brief"), "developer_brief"),
+        (artifact("estimate"), "estimate"),
+        (
+            exists(
+                select(Workspace.project_id).where(
+                    Workspace.project_id == Project.id,
+                    or_(
+                        func.jsonb_array_length(Workspace.data["scenarios"]["option_a"]["items"])
+                        > 0,
+                        func.jsonb_array_length(Workspace.data["scenarios"]["option_b"]["items"])
+                        > 0,
+                    ),
+                )
+            ),
+            "option",
+        ),
+        (exists(select(Workspace.project_id).where(Workspace.project_id == Project.id)), "site"),
+        else_="brief",
+    )
+
+
 def list_projects(
     session: Session,
     organisation_id: UUID,
@@ -71,9 +100,12 @@ def list_projects(
     offset: int,
     query: str = "",
     sort: str = "updated",
+    stage: str = "",
 ) -> ProjectList:
     require_membership(session, organisation_id, user_id)
     conditions = [Project.organisation_id == organisation_id, Project.archived == archived]
+    if stage:
+        conditions.append(project_stage() == stage)
     if query.strip():
         conditions.append(
             or_(
@@ -87,11 +119,18 @@ def list_projects(
         "created": Project.created_at.desc(),
     }[sort]
     total = session.scalar(select(func.count()).select_from(Project).where(*conditions)) or 0
-    projects = session.scalars(
-        select(Project).where(*conditions).order_by(order, Project.id).offset(offset).limit(limit)
+    projects = session.execute(
+        select(Project, project_stage())
+        .where(*conditions)
+        .order_by(order, Project.id)
+        .offset(offset)
+        .limit(limit)
     ).all()
     return ProjectList(
-        items=[ProjectResponse.model_validate(project) for project in projects],
+        items=[
+            ProjectResponse.model_validate(project).model_copy(update={"stage": stage})
+            for project, stage in projects
+        ],
         total=total,
         limit=limit,
         offset=offset,

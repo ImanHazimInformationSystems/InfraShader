@@ -1,3 +1,4 @@
+import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 import { fireEvent, render, screen, waitFor, cleanup } from '@testing-library/react'
 import App from './App'
 import { DEMO_STORAGE_KEY } from './services/demo'
@@ -16,7 +17,7 @@ describe('separate Browser Demo workflow', () => {
   afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals() })
 
   it.each(['Developer decision', 'Contractor proposal'])('carries the site into a saved %s project, reloads and restores it', async (purpose) => {
-    const view = render(<App />)
+    const view = render(<RouterProvider router={createMemoryRouter([{path:'*',element:<App />}])} />)
     fireEvent.click(screen.getByRole('button', { name: /Open Browser Demo/ }))
     await screen.findByRole('heading', { name: 'Find your first site.' })
     fireEvent.click(screen.getAllByRole('button', { name: /Explore Map/ }).at(-1)!)
@@ -32,7 +33,7 @@ describe('separate Browser Demo workflow', () => {
     expect(screen.getByText(/Brief incomplete/)).toBeTruthy()
     expect(JSON.parse(localStorage.getItem(DEMO_STORAGE_KEY)!)[0].purpose).toBe(purpose === 'Developer decision' ? 'developer_decision' : 'contractor_proposal')
     view.unmount()
-    render(<App />)
+    render(<RouterProvider router={createMemoryRouter([{path:'*',element:<App />}])} />)
     fireEvent.click(screen.getByRole('button', { name: /Open Browser Demo/ }))
     fireEvent.click(await screen.findByRole('button', { name: /Courtyard test/ }))
     await screen.findByRole('heading', { name: 'Courtyard test' })
@@ -46,7 +47,7 @@ describe('separate Browser Demo workflow', () => {
   })
 
   it('keeps unsaved form changes when the user cancels navigation', async () => {
-    render(<App />)
+    render(<RouterProvider router={createMemoryRouter([{path:'*',element:<App />}])} />)
     fireEvent.click(screen.getByRole('button', { name: /Open Browser Demo/ }))
     fireEvent.click(await screen.findByRole('button', { name: /New project/ }))
     fireEvent.click(screen.getByRole('button', { name: /Continue with this site/ }))

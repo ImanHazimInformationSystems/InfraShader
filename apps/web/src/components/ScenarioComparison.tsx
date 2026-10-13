@@ -1,6 +1,13 @@
 import type { WorkspaceData, Geometry } from '../domain/workspace'
+import type { Artifact } from '../domain/calculations'
 
-export default function ScenarioComparison({ data }: { data: WorkspaceData }) {
+export default function ScenarioComparison({
+  data,
+  analysis,
+}: {
+  data: WorkspaceData
+  analysis?: Extract<Artifact, { kind: 'analysis' }>
+}) {
   if (data.boundary.type !== 'Polygon') return null
   const ring = data.boundary.coordinates[0]
   const west = Math.min(...ring.map((point) => point[0])),
@@ -78,6 +85,16 @@ export default function ScenarioComparison({ data }: { data: WorkspaceData }) {
             <text x="278" y="18" fontSize="12">
               N
             </text>
+            {analysis?.payload.status === 'modeled' &&
+              (() => {
+                const geometry = analysis.payload.scenarios[key]?.shadow_geometry
+                if (!geometry || geometry.type === 'GeometryCollection') return null
+                const polygons =
+                  geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates
+                return polygons.map((coordinates, index) =>
+                  shape({ type: 'Polygon', coordinates }, '#7046ac', `shade-${index}`),
+                )
+              })()}
             <path d="M282 40 L282 22 L278 28 M282 22 L286 28" fill="none" stroke="#174d3d" />
           </svg>
           <p className="text-sm">
@@ -87,7 +104,11 @@ export default function ScenarioComparison({ data }: { data: WorkspaceData }) {
       ))}
       <p className="text-sm md:col-span-3">
         Matched geometry schematics: grey existing, blue proposed canopy, green other proposed
-        scope, gold target zones. This view shows scope, not a shade simulation or surveyed map.
+        scope, gold target zones.{' '}
+        {analysis?.payload.status === 'modeled'
+          ? 'Purple overlays show saved modeled shade at the same target and time.'
+          : 'Shade overlay unavailable until a compatible analysis is saved.'}{' '}
+        Schematics are not surveyed maps.
       </p>
     </div>
   )

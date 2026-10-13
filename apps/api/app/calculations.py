@@ -10,9 +10,9 @@ from pydantic import AwareDatetime, Field, NaiveDatetime, model_validator
 from sqlalchemy import func, select
 
 from app.domain.pricing import calculate_estimate
-from app.domain.shade import analyse_workspace
+from app.domain.shade import MODEL, analyse_workspace
 from app.errors import APIError, not_found
-from app.models import Artifact, CatalogueRate, Organisation, Workspace
+from app.models import Artifact, CatalogueRate, Evidence, Organisation, Workspace
 from app.projects import require_membership
 from app.workspace import ScenarioKey, StrictModel, project_for_workspace
 
@@ -97,6 +97,8 @@ class EstimateInput(CalculationInput):
 
 
 class IssueInput(StrictModel):
+    customer_narrative: Annotated[str, Field(max_length=8000)] = ""
+    evidence_ids: Annotated[list[UUID], Field(max_length=20)] = []
     request_key: UUID
     estimate_id: UUID
     expected_project_revision: Annotated[int, Field(ge=1)]
@@ -290,7 +292,8 @@ def artifact_response(artifact, workspace_revision, project_revision, *, interna
         "project_revision": artifact.project_revision,
         "created_at": artifact.created_at.isoformat(),
         "stale": artifact.workspace_revision != workspace_revision
-        or artifact.project_revision != project_revision,
+        or artifact.project_revision != project_revision
+        or (artifact.kind == "analysis" and payload.get("method") != MODEL),
         "payload": payload,
     }
 
@@ -471,8 +474,24 @@ def issue_snapshot(
         )
         or 0
     ) + 1
+    evidence = session.scalars(
+        select(Evidence)
+        .where(
+            Evidence.project_id == project_id,
+            Evidence.id.in_(data.evidence_ids),
+            Evidence.archived.is_(False),
+        )
+        .order_by(Evidence.created_at, Evidence.id)
+    ).all()
+    if len({item.id for item in evidence}) != len(set(data.evidence_ids)):
+        raise not_found()
 
     def scope(key):
+        items = workspace.data["scenarios"][key]["items"]
+        if key != "baseline":
+            shared = workspace.data["scenarios"]["baseline"]["items"]
+            shared_ids = {item["id"] for item in shared}
+            items = shared + [item for item in items if item["id"] not in shared_ids]
         return [
             {
                 "id": item["id"],
@@ -483,13 +502,28 @@ def issue_snapshot(
                 "unit": item["quantity"]["calculated"]["unit"],
                 "source_note": item["source_note"],
                 "provenance": item["provenance"],
+                "geometry": item["geometry"],
+                "manual_basis": item.get("manual_basis", "count"),
             }
-            for item in workspace.data["scenarios"][key]["items"]
+            for item in items
         ]
 
     # Two explicit output contracts. Neither ever contains a rate, cost, markup, margin or profit.
     payload = {
         "version": version,
+        "customer_narrative": data.customer_narrative,
+        "site_evidence": [
+            {
+                "id": str(item.id),
+                "revision": item.revision,
+                "description": item.description,
+                "source_note": item.source_note,
+                "observations": item.observations,
+                "target_ids": item.target_ids,
+                "sha256": item.sha256,
+            }
+            for item in evidence
+        ],
         "issued_at": datetime.now(UTC).isoformat(),
         "project_name": project.name,
         "stakeholder": project.stakeholder,
@@ -499,6 +533,7 @@ def issue_snapshot(
         "use_periods": project.use_periods,
         "timezone": project.timezone,
         "brief_details": project.details,
+        "display_units": session.get(Organisation, org_id).settings.get("units", "metric"),
         "preferred_option": data.preferred_option,
         "baseline": scope("baseline"),
         "selected_scope": scope(data.preferred_option),

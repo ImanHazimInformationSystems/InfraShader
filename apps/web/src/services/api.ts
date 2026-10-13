@@ -16,8 +16,9 @@ export async function request<T>(path: string, schema: z.ZodType<T>, token?: str
   const requestId = response.headers.get('X-Request-ID') ?? undefined
   const data: unknown = await response.json().catch(() => null)
   if (!response.ok) {
-    const parsed = z.object({ error: z.object({ code: z.string(), message: z.string() }), request_id: z.string().optional() }).safeParse(data)
-    throw new ApiError(parsed.success ? parsed.data.error.message : 'The request failed. Please retry.', response.status, parsed.success ? parsed.data.error.code : 'request_failed', requestId)
+    const parsed = z.object({ error: z.object({ code: z.string(), message: z.string(), details: z.array(z.object({field: z.string(), message: z.string()})).optional().catch(undefined) }), request_id: z.string().optional() }).safeParse(data)
+    const detail = parsed.success ? (parsed.data.error.details ?? []).slice(0, 10).map((item) => `${item.field.replace(/^body\./, '')}: ${item.message}`).join('; ') : ''
+    throw new ApiError(parsed.success ? [parsed.data.error.message, detail].filter(Boolean).join(' ') : 'The request failed. Please retry.', response.status, parsed.success ? parsed.data.error.code : 'request_failed', requestId)
   }
   const parsed = schema.safeParse(data)
   if (!parsed.success) throw new ApiError('The API returned an unexpected response. Retry or report this request to your operator.', 502, 'invalid_response', requestId)
@@ -29,7 +30,7 @@ export const api = {
   health: () => request('/api/v1/health', healthSchema),
   readiness: () => request('/api/v1/readiness', readinessSchema),
   session: (token: string) => request('/api/v1/session', sessionSchema, token),
-  projects: (org: string, token: string, archived = false, offset = 0, query = '', sort = 'updated') => request(`/api/v1/organisations/${org}/projects?limit=100&offset=${offset}&archived=${archived}&query=${encodeURIComponent(query)}&sort=${sort}`, projectListSchema, token),
+  projects: (org: string, token: string, archived = false, offset = 0, query = '', sort = 'updated', stage = '') => request(`/api/v1/organisations/${org}/projects?limit=100&offset=${offset}&archived=${archived}&query=${encodeURIComponent(query)}&sort=${sort}&stage=${stage}`, projectListSchema, token),
   project: (org: string, id: string, token: string) => request(`/api/v1/organisations/${org}/projects/${id}`, projectSchema, token),
   create: (org: string, input: ProjectInput, token: string) => request(`/api/v1/organisations/${org}/projects`, projectSchema, token, { method: 'POST', body: JSON.stringify(input) }),
   update: (org: string, id: string, patch: Partial<ProjectInput> & { expected_revision: number; archived?: boolean }, token: string) => request(`/api/v1/organisations/${org}/projects/${id}`, projectSchema, token, { method: 'PATCH', body: JSON.stringify(patch) }),

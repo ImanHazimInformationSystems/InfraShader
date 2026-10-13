@@ -1,4 +1,7 @@
+from copy import deepcopy
 from datetime import datetime
+from time import perf_counter
+from uuid import uuid4
 
 import pytest
 from shapely import box
@@ -6,6 +9,47 @@ from shapely import box
 from app.domain.shade import analyse_workspace, project_shadow, solar_position
 from app.workspace import WorkspaceInput, validate_workspace
 from tests.test_workspace import fixture_workspace
+
+
+def test_shared_baseline_deltas_sources_and_capacity():
+    raw = fixture_workspace()
+    building = deepcopy(raw["scenarios"]["option_a"]["items"][0])
+    building.update(id=str(uuid4()), kind="building", status="existing", height_m=12)
+    raw["scenarios"]["baseline"]["items"] = [building]
+    data = validate_workspace(WorkspaceInput(**raw), [101.68, 3.13, 101.69, 3.14])
+    assert data["scenarios"]["option_a"]["items"][0]["id"] == building["id"]
+    result = analyse_workspace(
+        data, datetime.fromisoformat("2026-03-21T12:00:00+08:00"), data["targets"][0]["id"]
+    )
+    assert result["engine_versions"]["pvlib"]
+    assert result["inputs"][0]["height_source"] == "Fixture only"
+    base = result["scenarios"]["baseline"]
+    assert base["area_m2"] > 0
+    assert result["scenarios"]["option_b"]["delta_percentage_points"] == pytest.approx(0)
+    option = result["scenarios"]["option_a"]
+    assert option["delta_area_m2"] == pytest.approx(option["area_m2"] - base["area_m2"])
+    # Exercise the 150-item per scenario limit with overlapping solids. The union stays bounded.
+    raw["scenarios"]["baseline"]["items"] = [{**building, "id": str(uuid4())} for _ in range(149)]
+    started = perf_counter()
+    data = validate_workspace(WorkspaceInput(**raw), [101.68, 3.13, 101.69, 3.14])
+    result = analyse_workspace(
+        data, datetime.fromisoformat("2026-03-21T12:00:00+08:00"), data["targets"][0]["id"]
+    )
+    elapsed = perf_counter() - started
+    assert result["scenarios"]["baseline"]["area_m2"] == pytest.approx(base["area_m2"])
+    assert elapsed < 30, f"450-object upper-bound fixture took {elapsed:.2f}s"
+
+
+def test_nonfinite_solar_engine_result_never_becomes_zero_success(monkeypatch):
+    monkeypatch.setattr(
+        "app.domain.shade.solar_position",
+        lambda *args: {"azimuth_deg": float("nan"), "elevation_deg": float("nan")},
+    )
+    data = validate_workspace(WorkspaceInput(**fixture_workspace()), [101.68, 3.13, 101.69, 3.14])
+    with pytest.raises(ValueError, match="unavailable"):
+        analyse_workspace(
+            data, datetime.fromisoformat("2026-03-21T12:00:00+08:00"), data["targets"][0]["id"]
+        )
 
 
 def test_roof_translates_without_filling_swept_ground():

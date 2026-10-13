@@ -147,6 +147,9 @@ class Artifact(Base):
 
 
 class Evidence(Base):
+    archived: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    updated_by: Mapped[UUID | None] = mapped_column(nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     revision: Mapped[int] = mapped_column(Integer, default=1, server_default="1")
     observations: Mapped[str] = mapped_column(String(8000), default="", server_default="")
     target_ids: Mapped[list] = mapped_column(JSONB, default=list, server_default="[]")

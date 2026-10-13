@@ -43,6 +43,17 @@ test('catalogue search pages through real persisted rates and filters units', as
   await page.getByRole('button',{name:'Search catalogue',exact:true}).click()
   await expect(page.getByText('Rate versions 1-1 of 1',{exact:true})).toBeVisible()
 
+  await page.getByText('Catalogue: add an explicit dated rate',{exact:true}).click()
+  await page.getByLabel('Rate code',{exact:true}).fill('RECOVERED-RATE')
+  await page.getByLabel('Description',{exact:true}).fill('Unsaved fixture rate')
+  page.once('dialog',dialog=>dialog.accept())
+  await page.reload()
+  await page.getByRole('button',{name:'Open geometry workspace'}).click()
+  await page.getByText('Catalogue: add an explicit dated rate',{exact:true}).click()
+  await page.getByRole('button',{name:'Recover form draft',exact:true}).click()
+  await expect(page.getByLabel('Rate code',{exact:true})).toHaveValue('RECOVERED-RATE')
+  await expect(page.getByLabel('Description',{exact:true})).toHaveValue('Unsaved fixture rate')
+
   await mkdir('artifacts',{recursive:true})
   await page.getByRole('region',{name:'Browse rate catalogue',exact:true}).screenshot({path:'artifacts/catalogue-filtered.png'})
 })

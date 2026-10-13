@@ -4,6 +4,8 @@ import type { Organisation } from '../domain/projects'
 import { request } from '../services/api'
 import { Button } from './ui/button'
 import { settingsSchema } from '../domain/settings'
+import AccountSecurity from './AccountSecurity'
+import ServiceRequests from './ServiceRequests'
 const profileSchema = z.object({ display_name: z.string(), revision: z.number() })
 const memberSchema = z.object({
   id: z.uuid(),
@@ -37,11 +39,13 @@ export default function SettingsPage({
   token,
   onDirty,
   onChanged,
+  email,
 }: {
   organisation: Organisation
   token?: string
   onDirty: (value: boolean) => void
   onChanged: () => void
+  email: string
 }) {
   const [record, setRecord] = useState<z.infer<typeof settingsSchema> | null>(null)
   const [profile, setProfile] = useState<z.infer<typeof profileSchema> | null>(null)
@@ -117,7 +121,7 @@ export default function SettingsPage({
               settings: {
                 timezone: form.get('timezone'),
                 currency: 'MYR',
-                units: 'metric',
+                units: form.get('units'),
                 default_markup: form.get('default_markup'),
               },
             }),
@@ -167,6 +171,16 @@ export default function SettingsPage({
       >
         Reload settings
       </Button>
+      <AccountSecurity
+        key={`account-${refresh}`}
+        email={email}
+        disabled={busy || Boolean(editingKey && editingKey !== 'account')}
+        onDirty={(value) => {
+          setDirty(value)
+          onDirty(value)
+          setEditingKey(value ? 'account' : '')
+        }}
+      />
       {profile && (
         <form
           data-edit-key="profile"
@@ -218,15 +232,33 @@ export default function SettingsPage({
                 defaultValue={record.settings.default_markup}
               />
             </label>
+            <label htmlFor="display-units">Display units</label>
+            <select id="display-units" name="units" defaultValue={record.settings.units}>
+              <option value="metric">Metric</option>
+              <option value="imperial">Imperial with canonical metric values</option>
+            </select>
             <p>
-              Current calculation policy: MYR, metric quantities. Defaults apply to new drafts;
-              saved estimates are unchanged.
+              Currency: MYR. Geometry inputs, stored quantities and rate units remain metric.
+              Display conversion never changes saved quantities, prices or issued documents. Default
+              timezone/markup apply to new inputs.
             </p>
             <Button disabled={!admin || busy}>Save organisation settings</Button>
           </fieldset>
           {!admin && <p>An administrator can change organisation defaults.</p>}
         </form>
       )}
+      <ServiceRequests
+        key={`requests-${refresh}`}
+        org={organisation.id}
+        token={token}
+        admin={admin}
+        disabled={Boolean(editingKey && editingKey !== 'requests')}
+        onDirty={(value) => {
+          setEditingKey(value ? 'requests' : '')
+          setDirty(value)
+          onDirty(value)
+        }}
+      />
       {admin && (
         <>
           <h2>Organisation members</h2>

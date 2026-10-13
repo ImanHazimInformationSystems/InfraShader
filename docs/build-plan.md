@@ -1,6 +1,6 @@
 # InfraShader earlier build checkpoint
 
-13 October continuation: migrations 0005-0009, core feature changes and current test evidence are recorded in the continuation documents. This older table is historical.
+13 October continuation: migrations 0005-0010, F01-F08 implementation, recovered-form acceptance and current test evidence are recorded in the continuation documents. This older table is historical.
 
 Current work is maintained in [completion-plan.md](completion-plan.md); feature status is in [requirements.md](requirements.md).
 

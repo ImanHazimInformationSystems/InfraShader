@@ -51,14 +51,25 @@ test('real local Supabase login refresh private photo edit/download and foreign 
  expect(refreshed.status()).toBe(200)
  expect((await request.get('/api/v1/session',{headers:{Authorization:`Bearer ${(await refreshed.json()).access_token}`}})).status()).toBe(200)
  await mkdir('artifacts',{recursive:true});await page.getByRole('img',{name:'Green fixture',exact:true}).screenshot({path:'artifacts/live-private-photo.png'})
- await page.reload();await page.getByRole('button',{name:/Live private evidence fixture/}).click();await page.getByRole('button',{name:'Open geometry workspace'}).click();await page.getByText('Private site evidence',{exact:true}).click()
+ await page.reload();await expect(page.getByRole('heading',{name:'Live private evidence fixture',exact:true})).toBeVisible();await page.getByRole('button',{name:'Open geometry workspace'}).click();await page.getByText('Private site evidence',{exact:true}).click()
  await expect(page.getByText('Fixture observation saved through real services',{exact:true})).toBeVisible()
+ page.once('dialog',dialog=>dialog.accept())
+ await page.getByRole('button',{name:'Remove photo Green fixture',exact:true}).click()
+ await expect(page.getByRole('button',{name:'Download photo Green fixture',exact:true})).toHaveCount(0)
+ expect((await request.get(`${endpoint}/evidence/${photo.id}/content`,{headers})).status()).toBe(404)
+ await page.getByRole('checkbox',{name:'Show removed photographs',exact:true}).check()
+ await expect(page.getByRole('button',{name:'Download photo Green fixture',exact:true})).toBeDisabled()
+ page.once('dialog',dialog=>dialog.accept())
+ await page.getByRole('button',{name:'Restore photo Green fixture',exact:true}).click()
+ await page.getByRole('checkbox',{name:'Show removed photographs',exact:true}).uncheck()
+ await expect(page.getByRole('button',{name:'Download photo Green fixture',exact:true})).toBeEnabled()
+ expect((await request.get(`${endpoint}/evidence/${photo.id}/content`,{headers})).status()).toBe(200)
  await page.getByRole('button',{name:'Sign out',exact:true}).click();await expect(page.getByLabel('Email address')).toBeVisible()
 })
 
 
 test('real local recovery email and password update in browser',async({page,request})=>{
- test.setTimeout(60000)
+ test.setTimeout(90000)
  const fixture=JSON.parse(await readFile('.local/live-browser-fixture.json','utf8'))
  const user=fixture.users[0]
  await page.goto('/')
@@ -90,4 +101,48 @@ test('real local recovery email and password update in browser',async({page,requ
  const old=await request.post(`${fixture.supabase_url}/auth/v1/token?grant_type=password`,{headers:{apikey:fixture.public_key},data:{email:user.email,password:user.password}})
  expect(old.status()).toBe(400)
  await request.delete('http://127.0.0.1:54334/api/v1/messages',{data:{IDs:[mail.ID]}})
+ await page.getByRole('navigation').getByRole('button',{name:'Settings and members',exact:true}).click()
+ await page.getByText('Account email and password',{exact:true}).click()
+ await expect(page.getByText(`Signed-in email: ${user.email}`,{exact:true})).toBeVisible()
+ const changedPassword=`Account-${randomUUID()}`
+ await page.getByLabel('New account password',{exact:true}).fill(changedPassword)
+ await page.getByLabel('Confirm account password',{exact:true}).fill(changedPassword)
+ await page.getByRole('button',{name:'Change account password',exact:true}).click()
+ await expect(page.getByText('Password changed through your identity provider.',{exact:true})).toBeVisible()
+ const oldAfterChange=await request.post(`${fixture.supabase_url}/auth/v1/token?grant_type=password`,{headers:{apikey:fixture.public_key},data:{email:user.email,password}})
+ expect(oldAfterChange.status()).toBe(400)
+ await page.getByRole('button',{name:'Sign out',exact:true}).click()
+ await page.getByLabel('Email address',{exact:true}).fill(user.email)
+ await page.getByLabel('Password',{exact:true}).fill(changedPassword)
+ await page.getByRole('button',{name:'Sign in',exact:true}).click()
+ await expect(page.getByRole('heading',{name:'Your projects',exact:true})).toBeVisible()
+ await page.getByRole('navigation').getByRole('button',{name:'Settings and members',exact:true}).click()
+ await page.getByText('Account email and password',{exact:true}).click()
+ const beforeMail=new Set((await (await request.get('http://127.0.0.1:54334/api/v1/messages')).json()).messages.map(item=>item.ID))
+ const changedEmail=`local-change-${randomUUID()}@example.invalid`
+ await page.getByLabel('New account email',{exact:true}).fill(changedEmail)
+ await page.getByRole('button',{name:'Request email change',exact:true}).click()
+ await expect(page.getByRole('status').filter({hasText:'Email change requested.'})).toBeVisible()
+ const ownedMail=[]
+ for (const recipient of [user.email,changedEmail]) {
+   let confirmation
+   await expect.poll(async()=>{
+     const inbox=await (await request.get('http://127.0.0.1:54334/api/v1/messages')).json()
+     confirmation=inbox.messages.find(item=>!beforeMail.has(item.ID) && item.To?.some(to=>to.Address===recipient))
+     return Boolean(confirmation)
+   },{timeout:15000}).toBe(true)
+   ownedMail.push(confirmation.ID)
+   const message=await (await request.get(`http://127.0.0.1:54334/api/v1/message/${confirmation.ID}`)).json()
+   const confirmationLink=[...message.HTML.matchAll(/href="([^"]+)"/g)].map(match=>match[1].replaceAll('&amp;','&')).find(value=>value.includes('/auth/v1/verify'))
+   expect(new URL(confirmationLink).origin).toBe(fixture.supabase_url)
+   await page.goto(confirmationLink)
+ }
+ const changedLogin=await request.post(`${fixture.supabase_url}/auth/v1/token?grant_type=password`,{headers:{apikey:fixture.public_key},data:{email:changedEmail,password:changedPassword}})
+ expect(changedLogin.status()).toBe(200)
+ const changedIdentity=await changedLogin.json()
+ expect(changedIdentity.user.id).toBe(user.id)
+ expect((await request.get('/api/v1/session',{headers:{Authorization:`Bearer ${changedIdentity.access_token}`}})).status()).toBe(200)
+ await request.delete('http://127.0.0.1:54334/api/v1/messages',{data:{IDs:ownedMail}})
+
+
 })

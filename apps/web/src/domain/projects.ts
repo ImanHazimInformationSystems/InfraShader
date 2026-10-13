@@ -10,6 +10,8 @@ export const purposeSchema = z.enum(['developer_decision', 'contractor_proposal'
 const optionalBriefText = z.string().trim().max(4000)
 export const projectInputSchema = z.object({
   details: z.object({
+    budget_min: z.string().regex(/^\d+(\.\d{1,2})?$/).nullable().optional(),
+    site_notes: z.string().max(8000).optional(), known_facts: z.string().max(4000).optional(), unknown_facts: z.string().max(4000).optional(),
     project_type: z.string().max(160).default(''),
     budget: z.string().regex(/^\d+(\.\d{1,2})?$/).nullable().default(null),
     priorities: z.string().max(4000).default(''), constraints: z.string().max(4000).default(''),
@@ -29,7 +31,7 @@ export const projectInputSchema = z.object({
   currency: z.string().regex(/^[A-Z]{3}$/, 'Use a three-letter currency code, for example MYR.'),
 })
 export type ProjectInput = z.infer<typeof projectInputSchema>
-export const projectSchema = projectInputSchema.extend({
+export const projectSchema = projectInputSchema.extend({ stage: z.enum(['brief','site','option','estimate','developer_brief','proposal']).default('brief'),
   id: z.string().uuid(), organisation_id: z.string().uuid(),
   created_at: z.iso.datetime({ offset: true }).optional(), archived: z.boolean(), revision: z.number().int().positive(), updated_at: z.iso.datetime({ offset: true }),
 })

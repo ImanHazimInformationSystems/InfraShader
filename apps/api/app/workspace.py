@@ -1,7 +1,7 @@
 """Organisation-scoped, revisioned ground geometry and independent scenarios."""
 
 from copy import deepcopy
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from decimal import Decimal
 from typing import Annotated, Any, Literal
 from uuid import UUID
@@ -40,15 +40,16 @@ class Target(StrictModel):
 
 
 class WorkItem(StrictModel):
+    manual_basis: Literal["count", "fixed"] = "count"
     id: UUID
     name: Annotated[str, Field(min_length=1, max_length=160)]
     kind: Literal["area", "path", "building", "canopy", "tree", "bench", "manual"]
     status: Literal["existing", "proposed"] = "proposed"
     geometry: dict[str, Any] | None = None
-    count: Annotated[int, Field(strict=True, ge=1, le=1000000)] = 1
+    count: Annotated[int, Field(strict=True, ge=0, le=1000000)] = 1
     height_m: Annotated[float, Field(gt=0, le=100)] | None = None
     height_source: Annotated[str, Field(max_length=2000)] = ""
-    quantity_override: Annotated[Decimal, Field(gt=0, max_digits=14, decimal_places=4)] | None = (
+    quantity_override: Annotated[Decimal, Field(ge=0, max_digits=14, decimal_places=4)] | None = (
         None
     )
     provenance: Provenance
@@ -60,6 +61,14 @@ class WorkItem(StrictModel):
 
     @model_validator(mode="after")
     def tree_metadata(self):
+        if self.manual_basis == "fixed" and (
+            self.kind != "manual"
+            or self.count != 1
+            or self.quantity_override not in (None, Decimal(1))
+        ):
+            raise ValueError(
+                "Fixed-price scope needs a manual item, quantity one and no different override."
+            )
         if self.crown_diameter_m is not None and self.kind != "tree":
             raise ValueError("Crown diameter applies only to trees; tree shade is excluded.")
         return self
@@ -106,6 +115,21 @@ def validate_workspace(data: WorkspaceInput, site_bounds: tuple | list) -> dict:
         if not box(*site_bounds).covers(boundary):
             raise GeometryValidationError("The boundary must stay within the project site locator.")
         result = data.model_dump(mode="json", exclude={"expected_revision"})
+        baseline = result["scenarios"]["baseline"]["items"]
+        baseline_ids = {item["id"] for item in baseline}
+        for key in ("option_a", "option_b"):
+            own = result["scenarios"][key]["items"]
+            if any(item["id"] in baseline_ids and item["status"] != "existing" for item in own):
+                raise GeometryValidationError(
+                    "Proposed items must have IDs distinct from Baseline."
+                )
+            result["scenarios"][key]["items"] = deepcopy(baseline) + [
+                item for item in own if item["id"] not in baseline_ids
+            ]
+            if len(result["scenarios"][key]["items"]) > 150:
+                raise GeometryValidationError(
+                    "An option including Baseline may contain at most 150 items."
+                )
         result["metric_crs"] = projected.metric_crs
         for target in result["targets"]:
             quantity = calculate_geographic_quantity(
@@ -140,6 +164,8 @@ def validate_workspace(data: WorkspaceInput, site_bounds: tuple | list) -> dict:
                             "Manual count items must not claim map geometry."
                         )
                     quantity = count_quantity(item["count"])
+                    if item["manual_basis"] == "fixed":
+                        quantity = replace(quantity, method="explicit_fixed_price_scope")
                 else:
                     quantity = calculate_geographic_quantity(
                         geometry, source_crs=data.source_crs, site_boundary=data.boundary
@@ -187,7 +213,15 @@ def project_for_workspace(
 def get_workspace(session: Session, org_id: UUID, project_id: UUID, user_id: UUID) -> dict:
     project_for_workspace(session, org_id, project_id, user_id)
     saved = session.get(Workspace, project_id)
-    return {"revision": saved.revision if saved else 0, "data": saved.data if saved else None}
+    data = deepcopy(saved.data) if saved else None
+    if data:
+        baseline = data["scenarios"]["baseline"]["items"]
+        ids = {item["id"] for item in baseline}
+        for key in ("option_a", "option_b"):
+            data["scenarios"][key]["items"] = deepcopy(baseline) + [
+                item for item in data["scenarios"][key]["items"] if item["id"] not in ids
+            ]
+    return {"revision": saved.revision if saved else 0, "data": data}
 
 
 def save_workspace(
@@ -200,6 +234,17 @@ def save_workspace(
         raise APIError(
             409, "revision_conflict", "The workspace changed. Reload before saving again."
         )
+    if saved:
+        old_ids = {item["id"] for item in saved.data["scenarios"]["baseline"]["items"]}
+        new_ids = {str(item.id) for item in data.scenarios["baseline"].items}
+        removed = old_ids - new_ids
+        data = data.model_copy(deep=True)
+        for key in ("option_a", "option_b"):
+            data.scenarios[key].items = [
+                item
+                for item in data.scenarios[key].items
+                if str(item.id) not in removed or item.status != "existing"
+            ]
     canonical = validate_workspace(data, project.site["bounds"])
     if saved is None:
         saved = Workspace(project_id=project_id, revision=1, data=canonical, updated_by=user_id)

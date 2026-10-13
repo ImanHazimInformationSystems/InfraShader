@@ -5,6 +5,10 @@ import type { WorkspaceData } from '../domain/workspace'
 import { request } from '../services/api'
 import { Button } from './ui/button'
 const evidenceSchema = z.object({
+  archived: z.boolean().default(false),
+  created_by: z.string().optional(),
+  updated_by: z.string().optional(),
+  updated_at: z.string().optional(),
   id: z.uuid(),
   description: z.string(),
   source_note: z.string(),
@@ -30,6 +34,7 @@ export default function EvidencePanel({
   onDirty: (dirty: boolean) => void
 }) {
   const [items, setItems] = useState<Evidence[]>([])
+  const [archived, setArchived] = useState(false)
   const [error, setError] = useState(''),
     [busy, setBusy] = useState(false),
     [refresh, setRefresh] = useState(0)
@@ -50,7 +55,7 @@ export default function EvidencePanel({
   }, [])
   useEffect(() => {
     let active = true
-    request(endpoint, listSchema, token)
+    request(`${endpoint}?archived=${archived}`, listSchema, token)
       .then((result) => {
         if (active) {
           setItems(result.items)
@@ -63,7 +68,7 @@ export default function EvidencePanel({
     return () => {
       active = false
     }
-  }, [endpoint, token, refresh])
+  }, [endpoint, token, refresh, archived])
   async function upload(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const form = event.currentTarget
@@ -143,6 +148,40 @@ export default function EvidencePanel({
     onDirty(false)
     return true
   }
+  async function toggleArchive(item: Evidence) {
+    if (
+      !discard() ||
+      !window.confirm(
+        item.archived
+          ? 'Restore this photograph?'
+          : 'Remove this photograph from active evidence? Its private bytes are retained for recovery; this does not erase backups.',
+      )
+    )
+      return
+    setBusy(true)
+    setError('')
+    try {
+      await request(`${endpoint}/${item.id}/archive`, evidenceSchema, token, {
+        method: 'PATCH',
+        body: JSON.stringify({ expected_revision: item.revision, archived: !item.archived }),
+      })
+      setEditing(null)
+      setPhotos((previous) => {
+        const next = { ...previous }
+        if (next[item.id]) {
+          URL.revokeObjectURL(next[item.id])
+          urls.current.delete(next[item.id])
+          delete next[item.id]
+        }
+        return next
+      })
+      setRefresh((value) => value + 1)
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Removal failed; reload and retry.')
+    } finally {
+      setBusy(false)
+    }
+  }
   return (
     <details className="my-6 rounded-lg border border-stone-300 p-4">
       <summary>Private site evidence</summary>
@@ -151,6 +190,25 @@ export default function EvidencePanel({
         EXIF/GPS metadata. Record date, location and permissions explicitly.
       </p>
       {error && <p role="alert">{error}</p>}
+      {busy && <p role="status">Saving or loading private evidence...</p>}
+      <label>
+        <input
+          type="checkbox"
+          checked={archived}
+          disabled={busy}
+          onChange={(event) => {
+            if (discard()) {
+              setEditing(null)
+              setArchived(event.target.checked)
+            }
+          }}
+        />{' '}
+        Show removed photographs
+      </label>
+      <p>
+        Removal is reversible. Removed photographs cannot be downloaded or selected for a new
+        output. Permanent erasure follows an operator-reviewed retention request.
+      </p>
       <Button
         type="button"
         variant="outline"
@@ -165,7 +223,7 @@ export default function EvidencePanel({
         Reload evidence
       </Button>
       <form onSubmit={(event) => void upload(event)} className="grid gap-3 my-4">
-        <fieldset disabled={busy || project.archived || Boolean(editing)}>
+        <fieldset disabled={busy || project.archived || Boolean(editing) || archived}>
           <label>
             Photo
             <input name="photo" type="file" accept="image/png,image/jpeg" required />
@@ -192,18 +250,20 @@ export default function EvidencePanel({
             <p>{item.source_note}</p>
             <p>
               {item.created_at} / revision {item.revision}
+              {item.updated_at && ` / Updated ${item.updated_at} by ${item.updated_by}`}
             </p>
-            {photos[item.id] ? (
-              <img
-                src={photos[item.id]}
-                alt={item.description}
-                className="max-h-80 w-full object-contain"
-              />
-            ) : (
-              <Button variant="outline" disabled={busy} onClick={() => void content(item, true)}>
-                Preview photo {item.description}
-              </Button>
-            )}
+            {!item.archived &&
+              (photos[item.id] ? (
+                <img
+                  src={photos[item.id]}
+                  alt={item.description}
+                  className="max-h-80 w-full object-contain"
+                />
+              ) : (
+                <Button variant="outline" disabled={busy} onClick={() => void content(item, true)}>
+                  Preview photo {item.description}
+                </Button>
+              ))}
             <p className="whitespace-pre-wrap">{item.observations}</p>
             <p>
               Linked targets:{' '}
@@ -213,17 +273,28 @@ export default function EvidencePanel({
                 )
                 .join(', ') || 'None'}
             </p>
-            <Button variant="outline" disabled={busy} onClick={() => void content(item, false)}>
+            <Button
+              variant="outline"
+              disabled={busy || item.archived}
+              onClick={() => void content(item, false)}
+            >
               Download photo {item.description}
             </Button>
             <Button
               variant="outline"
-              disabled={busy || project.archived}
+              disabled={busy || project.archived || item.archived}
               onClick={() => {
                 if (discard()) setEditing(item.id)
               }}
             >
               Edit evidence {item.description}
+            </Button>
+            <Button
+              variant="outline"
+              disabled={busy || project.archived}
+              onClick={() => void toggleArchive(item)}
+            >
+              {item.archived ? 'Restore photo' : 'Remove photo'} {item.description}
             </Button>
             {editing === item.id && (
               <form

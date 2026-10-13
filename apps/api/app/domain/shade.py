@@ -4,7 +4,9 @@ This is a geometric model, not a measurement of site comfort or field accuracy.
 Tree crowns, terrain, transparency, diffuse light and remote obstructions are excluded.
 """
 
+from copy import deepcopy
 from datetime import datetime
+from importlib.metadata import version
 from math import cos, isfinite, radians, sin, tan
 
 import pandas as pd
@@ -17,6 +19,7 @@ from shapely.geometry import mapping
 from app.domain.geometry import project_wgs84_geometry
 
 MIN_ELEVATION = 5.0
+MODEL = "pvlib_nrel_numpy/opaque_ground_projection_v2_shared_baseline"
 
 
 def solar_position(timestamp: datetime, longitude: float, latitude: float) -> dict:
@@ -62,6 +65,16 @@ def project_shadow(
 
 
 def analyse_workspace(data: dict, timestamp: datetime, target_id: str) -> dict:
+    # Existing workspaces also inherit the shared Baseline at analysis time.
+    data = deepcopy(data)
+    baseline = data["scenarios"]["baseline"]["items"]
+    ids = {item["id"] for item in baseline}
+    for key in ("option_a", "option_b"):
+        data["scenarios"][key]["items"] = baseline + [
+            item for item in data["scenarios"][key]["items"] if item["id"] not in ids
+        ]
+        if len(data["scenarios"][key]["items"]) > 150:
+            raise ValueError("Each option including shared Baseline supports at most 150 items.")
     target = next((target for target in data["targets"] if target["id"] == target_id), None)
     if target is None:
         raise ValueError("Select a saved target zone.")
@@ -82,6 +95,8 @@ def analyse_workspace(data: dict, timestamp: datetime, target_id: str) -> dict:
     longitude = sum(p[0] for p in geographic_center[:-1]) / (len(geographic_center) - 1)
     latitude = sum(p[1] for p in geographic_center[:-1]) / (len(geographic_center) - 1)
     solar = solar_position(timestamp, longitude, latitude)
+    if not all(isfinite(value) for value in solar.values()):
+        raise ValueError("Solar engine returned unavailable values. Review time and location.")
     status = (
         "night"
         if solar["elevation_deg"] <= 0
@@ -94,7 +109,28 @@ def analyse_workspace(data: dict, timestamp: datetime, target_id: str) -> dict:
         "target_id": target_id,
         "solar": solar,
         "status": status,
-        "method": "pvlib_nrel_numpy/opaque_ground_projection_v1",
+        "method": MODEL,
+        "engine_versions": {name: version(name) for name in ("pvlib", "pyproj", "shapely")},
+        "site_location": {"longitude": longitude, "latitude": latitude},
+        "reason": "Sun is at or below the horizon."
+        if status == "night"
+        else "Sun elevation is below the supported 5 degree minimum."
+        if status == "low_sun"
+        else "",
+        "inputs": [
+            {
+                "scenario": key,
+                "id": item["id"],
+                "name": item["name"],
+                "height_m": item["height_m"],
+                "height_source": item["height_source"],
+                "provenance": item["provenance"],
+                "source_note": item["source_note"],
+            }
+            for key, scenario in data["scenarios"].items()
+            for item in scenario["items"]
+            if item["kind"] in ("building", "canopy")
+        ],
         "metric_crs": boundary.metric_crs,
         "limitations": [
             "Flat horizontal ground; opaque buildings and elevated roof surfaces only.",
@@ -141,4 +177,10 @@ def analyse_workspace(data: dict, timestamp: datetime, target_id: str) -> dict:
             "shadow_geometry": mapping(geographic),
             "excluded_trees": excluded,
         }
+    baseline = result["scenarios"]["baseline"]
+    for scenario in result["scenarios"].values():
+        scenario["delta_area_m2"] = scenario["area_m2"] - baseline["area_m2"]
+        scenario["delta_percentage_points"] = (
+            scenario["coverage_percent"] - baseline["coverage_percent"]
+        )
     return result

@@ -18,6 +18,10 @@ import ReviewPanel from './ReviewPanel'
 import { settingsSchema } from '../domain/settings'
 import CatalogueBrowser from './CatalogueBrowser'
 import OutputPreview from './OutputPreview'
+import { displayQuantity, useDisplayUnits } from '../services/display-units'
+import { z } from 'zod'
+import EstimateComparison from './EstimateComparison'
+import FormRecovery from './FormRecovery'
 
 const chargeCategories = ['labour', 'transport', 'overhead', 'fixed'] as const
 type ChargeDraft = {
@@ -27,30 +31,51 @@ type ChargeDraft = {
 }
 
 type Props = {
+  recoveryKey?: string
   project: Project
   token: string | undefined
   data: WorkspaceData
   revision: number
   dirty: boolean
   scenario: ScenarioKey
+  onScenarioChange: (scenario: ScenarioKey) => void
   onInspect: (scenario: ScenarioKey, itemId: string) => void
   onReviewDirty: (dirty: boolean) => void
   onData: (data: WorkspaceData) => void
   onShowShadows: (features: Feature[], revision: number) => void
 }
 export default function CalculationsPanel({
+  recoveryKey,
   project,
   token,
   data,
   revision,
   dirty,
   scenario,
+  onScenarioChange,
   onData,
   onShowShadows,
   onReviewDirty,
   onInspect,
 }: Props) {
   const [error, setError] = useState('')
+  const [reviewChanged, setReviewChanged] = useState(false)
+  const [outputChanged, setOutputChanged] = useState(false)
+  const [rateChanged, setRateChanged] = useState(false)
+  const [rateDraft, setRateDraft] = useState<Record<string, string | string[]>>({})
+  function captureRate(form: HTMLFormElement) {
+    const values = new FormData(form)
+    setRateDraft({
+      ...Object.fromEntries([...values].map(([key, value]) => [key, String(value)])),
+      includes: values.getAll('includes').map(String),
+    })
+    setRateChanged(true)
+  }
+  useEffect(
+    () => onReviewDirty(reviewChanged || outputChanged || rateChanged),
+    [reviewChanged, outputChanged, rateChanged, onReviewDirty],
+  )
+  const displayUnits = useDisplayUnits()
   const [preview, setPreview] = useState<Snapshot | null>(null)
   const [rates, setRates] = useState<Rate[]>([])
   const [catalogueRevision, setCatalogueRevision] = useState(0)
@@ -107,6 +132,7 @@ export default function CalculationsPanel({
     if (details) details.open = true
     form.scrollIntoView({ block: 'center' })
     ;(form.elements.namedItem('amount') as HTMLInputElement).focus()
+    captureRate(form)
   }
   const [artifacts, setArtifacts] = useState<Artifact[]>([])
   const [busy, setBusy] = useState(false)
@@ -136,6 +162,9 @@ export default function CalculationsPanel({
   const [notes, setNotes] = useState('')
   const [assumptions, setAssumptions] = useState('')
   const [exclusions, setExclusions] = useState('')
+  const [narrative, setNarrative] = useState('')
+  const [evidenceChoices, setEvidenceChoices] = useState<{ id: string; description: string }[]>([])
+  const [evidenceIds, setEvidenceIds] = useState<string[]>([])
   const pendingIssue = useRef<{ fingerprint: string; key: string } | null>(null)
   const orgEndpoint = `/api/v1/organisations/${project.organisation_id}`
   const endpoint = `${orgEndpoint}/projects/${project.id}`
@@ -203,6 +232,8 @@ export default function CalculationsPanel({
       mergeRates([created])
       setCatalogueRevision((value) => value + 1)
       form.reset()
+      setRateChanged(false)
+      if (recoveryKey) sessionStorage.removeItem(`${recoveryKey}:rate`)
     })
   }
   function calculate(kind: 'analyses' | 'estimates') {
@@ -252,6 +283,8 @@ export default function CalculationsPanel({
         .map((text) => text.trim())
         .filter(Boolean),
       review_notes: notes,
+      customer_narrative: narrative,
+      evidence_ids: evidenceIds,
       assumptions,
       exclusions,
       confirmed: true,
@@ -283,6 +316,8 @@ export default function CalculationsPanel({
         { method: 'POST', body: JSON.stringify({ ...body, request_key: requestKey }) },
       )
       pendingIssue.current = null
+      setOutputChanged(false)
+      if (recoveryKey) sessionStorage.removeItem(`${recoveryKey}:output`)
     })
   }
   const blocked = busy || dirty || !revision || project.archived
@@ -315,8 +350,36 @@ export default function CalculationsPanel({
       />
       <details className="my-5 rounded-lg border border-stone-300 p-4">
         <summary>Catalogue: add an explicit dated rate</summary>
+        <FormRecovery
+          storageKey={recoveryKey ? `${recoveryKey}:rate` : undefined}
+          revision="new-rate-version"
+          dirty={rateChanged}
+          values={rateDraft}
+          onRestore={(values) => {
+            const form = rateForm.current
+            if (!form) return
+            for (const key of [
+              'code',
+              'category',
+              'description',
+              'unit',
+              'amount',
+              'effective_date',
+              'source_note',
+            ]) {
+              const input = form.elements.namedItem(key) as HTMLInputElement | null
+              if (input) input.value = String(values[key] ?? '')
+            }
+            form.querySelectorAll<HTMLInputElement>('input[name="includes"]').forEach((input) => {
+              input.checked =
+                Array.isArray(values.includes) && values.includes.includes(input.value)
+            })
+            captureRate(form)
+          }}
+        />
         <form
           ref={rateForm}
+          onChange={(event) => captureRate(event.currentTarget)}
           onSubmit={(event) => void createRate(event)}
           className="grid gap-3 py-4 md:grid-cols-2"
         >
@@ -617,15 +680,22 @@ export default function CalculationsPanel({
         </form>
       </div>
       <ReviewPanel
+        analysisSelection={{
+          target: target || data.targets[0]?.id || '',
+          time: timeMode === 'local' ? localTime : timestamp,
+          mode: timeMode,
+        }}
         data={data}
         project={project}
         token={token}
         revision={revision}
         dirty={dirty}
         artifacts={artifacts}
-        onDirty={onReviewDirty}
+        onDirty={setReviewChanged}
+        recoveryKey={recoveryKey ? `${recoveryKey}:review` : undefined}
       />
       <h3>Saved analysis and estimate revisions</h3>
+      <EstimateComparison artifacts={artifacts} dirty={dirty} />
       {artifacts
         .filter((item) => item.kind === 'analysis' || item.kind === 'estimate')
         .map((item) => (
@@ -669,6 +739,22 @@ export default function CalculationsPanel({
                   Show {scenario} shade on map
                 </Button>
                 <p className="text-sm">{item.payload.limitations.join(' ')}</p>
+                {item.payload.reason && <p>{item.payload.reason}</p>}
+                <details>
+                  <summary>Analysis sources and engine versions</summary>
+                  <p>
+                    {item.payload.method};{' '}
+                    {Object.entries(item.payload.engine_versions ?? {})
+                      .map(([name, version]) => `${name} ${version}`)
+                      .join(', ') || 'Version information unavailable in this older result.'}
+                  </p>
+                  {item.payload.inputs.map((source, index) => (
+                    <p key={index}>
+                      {source.scenario}: {source.name} / {source.height_m ?? 'Unknown'} m /{' '}
+                      {source.provenance}: {source.height_source}; {source.source_note}
+                    </p>
+                  ))}
+                </details>
               </>
             ) : item.kind === 'estimate' ? (
               <>
@@ -702,7 +788,7 @@ export default function CalculationsPanel({
                               {line.quantity_source}
                             </td>
                             <td>
-                              {line.quantity} {line.unit}
+                              {displayQuantity(Number(line.quantity), line.unit, displayUnits)}
                             </td>
                             <td>
                               {line.rate_code} v{line.rate_version}
@@ -763,10 +849,40 @@ export default function CalculationsPanel({
             ) : null}
           </article>
         ))}
-      <details className="my-5 rounded-lg border border-stone-300 p-4">
+      <details
+        className="my-5 rounded-lg border border-stone-300 p-4"
+        onChange={() => setOutputChanged(true)}
+      >
         <summary>
           Review and issue {developer ? 'developer decision brief' : 'contractor client proposal'}
         </summary>
+        <FormRecovery
+          storageKey={recoveryKey ? `${recoveryKey}:output` : undefined}
+          revision={`${project.revision}/${revision}`}
+          dirty={outputChanged}
+          values={{
+            criteria,
+            notes,
+            narrative,
+            assumptions,
+            exclusions,
+            estimateId,
+            evidenceIds,
+            scenario,
+          }}
+          onRestore={(value) => {
+            if (value.scenario === 'option_a' || value.scenario === 'option_b')
+              onScenarioChange(value.scenario)
+            setCriteria(String(value.criteria ?? ''))
+            setNotes(String(value.notes ?? ''))
+            setNarrative(String(value.narrative ?? ''))
+            setAssumptions(String(value.assumptions ?? ''))
+            setExclusions(String(value.exclusions ?? ''))
+            setEstimateId(String(value.estimateId ?? ''))
+            setEvidenceIds(Array.isArray(value.evidenceIds) ? value.evidenceIds : [])
+            setOutputChanged(true)
+          }}
+        />
         <div className="field">
           <label htmlFor="issue-estimate">Complete estimate for preferred option</label>
           <select
@@ -798,6 +914,58 @@ export default function CalculationsPanel({
             onChange={(event) => setCriteria(event.target.value)}
           />
         </div>
+        <div className="field">
+          <label htmlFor="customer-narrative">Customer-facing scope narrative</label>
+          <textarea
+            id="customer-narrative"
+            maxLength={8000}
+            value={narrative}
+            onChange={(event) => setNarrative(event.target.value)}
+          />
+          <p>
+            Included in the preview and issued document. Review this text for its intended audience.
+          </p>
+        </div>
+        <fieldset>
+          <legend>Site evidence references to include</legend>
+          <Button
+            variant="outline"
+            disabled={busy}
+            onClick={() =>
+              void perform(async () => {
+                const result = await request(
+                  `${endpoint}/evidence`,
+                  z.object({ items: z.array(z.object({ id: z.uuid(), description: z.string() })) }),
+                  token,
+                )
+                setEvidenceChoices(result.items)
+              })
+            }
+          >
+            Load available evidence
+          </Button>
+          <p>
+            Selected descriptions, observations and source references are frozen at issue. Photos
+            remain private in the project gallery.
+          </p>
+          {evidenceChoices.map((item) => (
+            <label key={item.id} className="flex flex-row items-center gap-2">
+              <input
+                type="checkbox"
+                checked={evidenceIds.includes(item.id)}
+                disabled={!evidenceIds.includes(item.id) && evidenceIds.length >= 20}
+                onChange={(event) =>
+                  setEvidenceIds((current) =>
+                    event.target.checked
+                      ? [...current, item.id]
+                      : current.filter((id) => id !== item.id),
+                  )
+                }
+              />
+              Include {item.description}
+            </label>
+          ))}
+        </fieldset>
         <div className="field">
           <label htmlFor="issue-notes">Reviewer notes</label>
           <textarea

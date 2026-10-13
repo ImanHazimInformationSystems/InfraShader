@@ -6,6 +6,8 @@ import type { Project } from '../domain/projects'
 import type { Artifact } from '../domain/calculations'
 import { request } from '../services/api'
 import { Button } from './ui/button'
+import FormRecovery from './FormRecovery'
+import { matchesAnalysisTime } from '../services/analysis-selection'
 
 const reviewSchema = z.object({
   id: z.uuid(),
@@ -27,6 +29,8 @@ const reviewSchema = z.object({
 const listSchema = z.object({ items: z.array(reviewSchema), limit: z.number() })
 type Review = z.infer<typeof reviewSchema>
 type Props = {
+  analysisSelection?: { target: string; time: string; mode: string }
+  recoveryKey?: string
   data: WorkspaceData
   project: Project
   token?: string
@@ -37,6 +41,8 @@ type Props = {
 }
 
 export default function ReviewPanel({
+  analysisSelection,
+  recoveryKey,
   data,
   project,
   token,
@@ -51,6 +57,7 @@ export default function ReviewPanel({
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
+  const [changed, setChanged] = useState(false)
   const [criteria, setCriteria] = useState('')
   const [notes, setNotes] = useState('')
   const [option, setOption] = useState('option_a')
@@ -79,7 +86,18 @@ export default function ReviewPanel({
       item.workspace_revision === revision &&
       item.project_revision === project.revision,
   )
-  const analysis = current.find((item) => item.kind === 'analysis')
+  const analysis = current.find(
+    (item) =>
+      item.kind === 'analysis' &&
+      (!analysisSelection ||
+        (item.payload.target_id === analysisSelection.target &&
+          matchesAnalysisTime(
+            item.payload.timestamp,
+            analysisSelection.time,
+            analysisSelection.mode,
+            project.timezone,
+          ))),
+  )
   const estimates = (['option_a', 'option_b'] as const).map((key) =>
     current.find((item) => item.kind === 'estimate' && item.payload.scenario === key),
   )
@@ -129,6 +147,8 @@ export default function ReviewPanel({
       )
       pending.current = null
       onDirty(false)
+      setChanged(false)
+      if (recoveryKey) sessionStorage.removeItem(recoveryKey)
       setNotice(`Review revision ${saved.payload.revision} saved.`)
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : 'Review could not be saved.')
@@ -142,7 +162,10 @@ export default function ReviewPanel({
       className="my-6 rounded-lg border border-stone-300 p-4"
     >
       <h3>Compare saved options</h3>
-      <ScenarioComparison data={data} />
+      <ScenarioComparison
+        data={data}
+        analysis={analysis?.kind === 'analysis' ? analysis : undefined}
+      />
       {dirty && (
         <p>
           Geometry diagrams include unsaved edits. Saved calculation comparisons are unavailable
@@ -178,6 +201,31 @@ export default function ReviewPanel({
                   ? `${shade.coverage_percent.toFixed(1)}% modeled target coverage`
                   : 'Shade comparison unavailable'}
               </p>
+              {shade && (
+                <p>
+                  {shade.area_m2.toFixed(2)} / {shade.target_area_m2.toFixed(2)} m2 shaded.
+                  {key !== 'baseline' &&
+                    shade.delta_percentage_points !== undefined &&
+                    ` Change from Baseline: ${shade.delta_area_m2?.toFixed(2)} m2 / ${shade.delta_percentage_points.toFixed(1)} percentage points.`}
+                </p>
+              )}
+              {!shade && (
+                <p>
+                  {analysis?.kind === 'analysis'
+                    ? analysis.payload.reason || 'No compatible modeled result.'
+                    : 'Run a current analysis for a saved target and time to compare shade.'}
+                </p>
+              )}
+              <ul>
+                {data.scenarios[key].items.map((item) => (
+                  <li key={item.id}>
+                    {item.name} ({item.status}):{' '}
+                    {dirty || !item.quantity
+                      ? 'Save to calculate quantity'
+                      : `${item.quantity.value.toFixed(2)} ${item.quantity.calculated.unit}`}
+                  </li>
+                ))}
+              </ul>
               <p>
                 {estimate?.kind === 'estimate'
                   ? `${estimate.payload.complete ? 'Total' : 'Incomplete subtotal'}: MYR ${estimate.payload.selling_total}`
@@ -188,6 +236,26 @@ export default function ReviewPanel({
         })}
       </div>
       <h3>Save an option review</h3>
+      {loaded && (
+        <FormRecovery
+          storageKey={recoveryKey}
+          revision={`${project.revision}/${revision}/${Math.max(0, ...history.map((item) => item.payload.revision))}`}
+          dirty={changed}
+          values={{ criteria, notes, option, status }}
+          onRestore={(value) => {
+            setCriteria(String(value.criteria ?? ''))
+            setNotes(String(value.notes ?? ''))
+            setOption(value.option === 'option_b' ? 'option_b' : 'option_a')
+            setStatus(
+              ['draft', 'needs_information', 'reviewed'].includes(String(value.status))
+                ? String(value.status)
+                : 'draft',
+            )
+            setChanged(true)
+            onDirty(true)
+          }}
+        />
+      )}
       <p>
         Reviews are saved independently of issued documents. Reviewed records are internal notes,
         not external approval.
@@ -196,6 +264,7 @@ export default function ReviewPanel({
         onSubmit={save}
         onChange={() => {
           onDirty(true)
+          setChanged(true)
           setNotice('')
         }}
       >

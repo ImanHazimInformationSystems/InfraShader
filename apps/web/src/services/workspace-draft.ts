@@ -6,6 +6,7 @@ export const workspaceDraftSchema = z.object({
   revision: z.number().int().nonnegative(),
   data: workspaceDataSchema,
   form: z.object({
+    manualBasis: z.enum(['count', 'fixed']).default('count'),
     category: z.string().default('General'),
     crown: z.string().default(''),
     scenario: z.enum(['baseline', 'option_a', 'option_b']),
@@ -53,7 +54,10 @@ export function clearWorkspaceDrafts(user: string, org?: string, project?: strin
       : `infrashader.workspace-recovery.v1.${user}.`
   for (let index = sessionStorage.length - 1; index >= 0; index--) {
     const key = sessionStorage.key(index)
-    if (key && (org && project ? key === prefix : key.startsWith(prefix)))
+    if (
+      key &&
+      (org && project ? key === prefix || key.startsWith(`${prefix}:`) : key.startsWith(prefix))
+    )
       sessionStorage.removeItem(key)
   }
 }

@@ -46,6 +46,7 @@ export default function BriefForm({
     budget: null,
     priorities: '',
     constraints: '',
+    budget_min: null,
     stakeholders: [],
   }
   const contractor = draft.purpose === 'contractor_proposal'
@@ -215,6 +216,19 @@ export default function BriefForm({
             />
           </label>
           <label>
+            Budget minimum ({draft.currency})
+            <input
+              type="number"
+              min="0"
+              max={details.budget ?? undefined}
+              step="0.01"
+              value={details.budget_min ?? ''}
+              onChange={(event) =>
+                change('details', { ...details, budget_min: event.target.value || null })
+              }
+            />
+          </label>
+          <label>
             Site and delivery constraints
             <textarea
               maxLength={4000}
@@ -224,6 +238,20 @@ export default function BriefForm({
               }
             />
           </label>
+          {(['site_notes', 'known_facts', 'unknown_facts'] as const).map((key) => (
+            <label key={key}>
+              {key === 'site_notes'
+                ? 'Site visit notes and sources'
+                : key === 'known_facts'
+                  ? 'Known site facts and sources'
+                  : 'Unknown site facts to verify'}
+              <textarea
+                maxLength={key === 'site_notes' ? 8000 : 4000}
+                value={details[key] ?? ''}
+                onChange={(event) => change('details', { ...details, [key]: event.target.value })}
+              />
+            </label>
+          ))}
           {details.stakeholders.map((person, index) => (
             <fieldset key={index}>
               <legend>Stakeholder {index + 1}</legend>

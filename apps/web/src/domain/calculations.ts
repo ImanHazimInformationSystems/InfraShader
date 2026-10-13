@@ -34,6 +34,8 @@ const artifactBase = {
   stale: z.boolean(),
 }
 const scopeItem = z.object({
+  manual_basis: z.enum(['count', 'fixed']).default('count'),
+  geometry: geometrySchema.optional(),
   id: z.uuid(),
   name: z.string(),
   kind: z.string(),
@@ -44,7 +46,22 @@ const scopeItem = z.object({
   provenance: z.string(),
 })
 export const snapshotSchema = z.object({
+  customer_narrative: z.string().default(''),
+  site_evidence: z
+    .array(
+      z.object({
+        id: z.uuid(),
+        revision: z.number(),
+        description: z.string(),
+        source_note: z.string(),
+        observations: z.string(),
+        target_ids: z.array(z.uuid()),
+        sha256: z.string(),
+      }),
+    )
+    .default([]),
   draft: z.boolean().optional(),
+  display_units: z.enum(['metric', 'imperial']).default('metric'),
   brief_details: projectInputSchema.shape.details,
   option_budgets: z
     .record(
@@ -105,6 +122,21 @@ const analysisSchema = z.object({
     solar: z.object({ azimuth_deg: z.number().finite(), elevation_deg: z.number().finite() }),
     status: z.enum(['modeled', 'night', 'low_sun']),
     method: z.string(),
+    reason: z.string().default(''),
+    engine_versions: z.record(z.string(), z.string()).optional(),
+    inputs: z
+      .array(
+        z.object({
+          scenario: z.string(),
+          id: z.string(),
+          name: z.string(),
+          height_m: z.number().nullable(),
+          height_source: z.string(),
+          provenance: z.string(),
+          source_note: z.string(),
+        }),
+      )
+      .default([]),
     metric_crs: z.string(),
     limitations: z.array(z.string()),
     scenarios: z.record(
@@ -114,6 +146,8 @@ const analysisSchema = z.object({
         area_m2: z.number().finite(),
         target_area_m2: z.number().finite(),
         coverage_percent: z.number().finite(),
+        delta_area_m2: z.number().finite().optional(),
+        delta_percentage_points: z.number().finite().optional(),
         shadow_geometry: shadowGeometry,
         excluded_trees: z.array(z.string()),
       }),

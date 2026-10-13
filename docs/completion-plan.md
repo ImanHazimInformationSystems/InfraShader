@@ -30,11 +30,11 @@ No field observations, physical touch device, customer pilots, hosted CI or depl
 
 ## Next exact work
 
-Current migrations: 0009, applied to the local application database. The 13 October checkpoint below supersedes earlier missing-feature notes in this plan.
+Current migrations: 0010, applied to the local application database. The 13 October checkpoint below supersedes earlier missing-feature notes in this plan.
 
 1. Retained PDF/file lifecycle, richer scope/evidence output visuals, privacy export/deletion/retention with approved policy, and a joint application/Auth/private-file restore drill.
-2. Dashboard URL/stage navigation; catalogue/review/evidence/settings form recovery; forced-expiry/multi-tab recovery acceptance.
-3. Estimate revision comparison, richer object map representations and remaining pricing explanations. Basic object grouping/categories/crown metadata/map visibility and applied-edit undo/redo are implemented. Trees remain excluded from shade.
+2. Catalogue/review/output form-recovery browser acceptance is complete. Remaining: evidence/settings form recovery; forced-expiry/multi-tab recovery acceptance. URL/stage navigation is implemented and browser-tested.
+3. Estimate revision-comparison browser acceptance is complete for both purposes. Remaining: pricing explanations/commercial approval. Basic object grouping/categories/crown metadata/map visibility and applied-edit undo/redo are implemented. Trees remain excluded from shade.
 4. Representative accessibility/physical touch/capacity checks, support/monitoring/throttling and rollback evidence. Field observations, commercial/provider decisions and user pilots remain external gates.
 
 Keep F13/F16-F20 gated. Run relevant regression checks after each slice and update requirements.md. Browser configurations own ports 8000/5173 and run sequentially. Signed fixture identity, Browser Demo, live local Supabase and public provider evidence remain distinct.
@@ -60,3 +60,13 @@ Actual checks and remaining release gates are recorded in validation.md. The cor
 ### Basic objects and workspace undo follow-up
 
 Added grouped geometry/object choices, editable categories, optional tree-crown diameter with sourced metadata, and persisted per-item editor-map visibility. Visibility never removes an item from authoritative quantities, pricing, comparison or shade; crown metadata never enables tree shade. Up to 50 applied workspace edits support undo/redo in the current tab; saving/restoring starts a new undo stack. Existing JSONB records receive backward-compatible defaults on validation; no additional migration is needed.
+
+## F01-F08 software closeout - 13 October 2026
+
+Implemented and tested remaining software gaps: known/unknown facts and site notes, budget bounds/readiness; reversible private-photo removal/restore and author/time; map layer controls; nonnegative counts and explicit fixed-price scope; automatic shared Baseline with independent proposals; saved engine/input provenance, baseline area/percentage-point deltas, compatible target/time comparison and saved overlay diagrams. Older analysis model records now require recalculation. See [f01-f08-acceptance.md](f01-f08-acceptance.md) for requirement-level coverage.
+
+F01/F04/F05/F08 software paths are verified. F02/F03/F06/F07 software is implemented with external policy/provider/field gates explicitly open. No field accuracy or production-provider acceptance is claimed. Photo removal retains private recovery bytes and cannot be called permanent erasure.
+
+Earlier uncommitted navigation/settings/account-security/output/support/form-recovery work is preserved and integrated. Retained PDFs, actual data export/permanent deletion, joint backup/restore, broader operations/accessibility/pilot acceptance and staged extensions remain outside this F01-F08 closeout. No push or deployment.
+
+Final continuation: dedicated catalogue/review/output recovery, estimate comparison and support-request browser acceptance passed. Fixed output recovery to restore its selected scenario, and settings reload to discard child-form edits. Latest results and remaining gates are in validation.md.

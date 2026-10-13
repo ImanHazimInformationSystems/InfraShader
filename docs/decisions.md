@@ -56,3 +56,11 @@ Administrators manage existing memberships under an organisation row lock, with 
 Project and workspace restore append new revisions and revalidate against current project bounds. Tab-local workspace recovery is scoped by user, organisation and project and expires after eight hours; automatic recovery cannot overwrite a changed server revision. No credentials are placed in the recovery record. This limited recovery does not constitute a full lifecycle/backup or forced-expiry acceptance claim.
 
 Draft PDF preview shares issuance permission/readiness checks but does not save an Artifact or consume an issue version. Both-budget developer snapshots use the selected preferred estimate and latest same-revision other-option estimate, explicitly labelling incomplete or unavailable budgets. Issuance remains separate and requires confirmation.
+
+## ADR-012 Shared baseline, comparison provenance and reversible evidence removal
+
+Baseline objects now participate automatically in both options; shared IDs take their authoritative values from Baseline. Existing option-only data is retained. Save/delete propagation is tested. Model v2 applies this rule even to old saved workspaces, and v1 analysis records are marked stale. Comparisons require current revisions and the selected target/time. Conservative whole-workspace invalidation remains intentional.
+
+Evidence removal is reversible and blocks content access/new issue selection while retaining private bytes and audit provenance. This is an interim recovery rule, not approval of permanent deletion or backup retention. Migration 0010 adds archive/update provenance without deleting existing data.
+
+Manual scope can explicitly use a fixed-price basis with quantity one; its canonical rate unit remains item. Count scope accepts whole nonnegative values. The backend rejects fixed scope with a different quantity/override.
