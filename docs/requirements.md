@@ -40,3 +40,7 @@ Status vocabulary: verified working; partially working; missing; blocked by exte
 ## Cross-cutting acceptance
 
 SRS G1-G8 remain open: scope/policy, full tenant/Auth/Storage checks, field shade, independent takeoffs, PDF/review completeness, accessibility/performance, DB+file recovery, and user pilots. G9-G11 govern the staged rows. Hosted CI and deployment have not run. Optional GeoPandas/OSMnx/pybdshadow/Ollama are not missing mandatory dependencies. Existing deterministic tests do not establish field accuracy.
+
+### Explorer extension, 14 October 2026
+
+F03 now has a fullscreen browser-window map and collapsible site search/coordinate controls. F06-adjacent exploration reads provider footprints/heights automatically, without requiring manual project modelling. Date/time/UTC-offset controls drive a bounded local shadow preview with sun azimuth/elevation. Provider preview is separate from verified saved analysis and does not satisfy G3 field acceptance. Complete city coverage, terrain, trees and roof/facade occlusion remain outside this implementation. See ADR-013.

@@ -41,10 +41,11 @@ def project_shadow(
     *,
     roof_only: bool,
     convergence: float = 0,
+    max_height: float = 100,
 ):
     if not all(isfinite(n) for n in (height, elevation, azimuth, convergence)):
         raise ValueError("Solar and height inputs must be finite.")
-    if height <= 0 or height > 100 or not MIN_ELEVATION <= elevation <= 90:
+    if height <= 0 or height > max_height or not MIN_ELEVATION <= elevation <= 90:
         raise ValueError("Height or solar elevation is outside the supported range.")
     distance = height / tan(radians(elevation))
     bearing = radians(azimuth - convergence)

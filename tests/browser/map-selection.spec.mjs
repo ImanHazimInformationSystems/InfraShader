@@ -12,7 +12,7 @@ test('place search and two-corner map extent carry into project creation', async
   const canvas=map.locator('canvas');await canvas.scrollIntoViewIfNeeded();const bounds=await canvas.boundingBox()
   await page.mouse.click(bounds.x+bounds.width*.4,bounds.y+bounds.height*.4)
   await page.mouse.click(bounds.x+bounds.width*.6,bounds.y+bounds.height*.6)
-  await expect(map.getByRole('status')).toHaveText('Site extent selected. Continue or refine the coordinates.')
+  await expect(map.getByRole('status').filter({hasText:'Site extent selected.'})).toHaveText('Site extent selected. Continue or refine the coordinates.')
   const west=await page.getByLabel('West longitude').inputValue()
   expect(Number(west)).toBeGreaterThan(101.681)
   await page.getByRole('button',{name:'Continue with this site'}).click()

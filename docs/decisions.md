@@ -64,3 +64,13 @@ Baseline objects now participate automatically in both options; shared IDs take 
 Evidence removal is reversible and blocks content access/new issue selection while retaining private bytes and audit provenance. This is an interim recovery rule, not approval of permanent deletion or backup retention. Migration 0010 adds archive/update provenance without deleting existing data.
 
 Manual scope can explicitly use a fixed-price basis with quantity one; its canonical rate unit remains item. Count scope accepts whole nonnegative values. The backend rejects fixed scope with a different quantity/override.
+
+## ADR-013 Automatic explorer shadows (14 October 2026)
+
+The user's new request authorises automatic provider-building shadows and fullscreen exploration. This supersedes earlier restrictions on provider heights for previews, while preserving separate authoritative project analysis.
+
+Explore reads loaded tiles, prioritises nearby footprints, and sends at most 500 parts/10,000 vertices to a stateless local endpoint. pvlib supplies sun position; solid-building shadows use local UTM coordinates. Preview heights support 1,000 m; saved project inputs retain the 100 m limit. Invalid fragments are omitted and counted. Loaded tiles, seams and sample bounds can leave gaps. Terrain, trees, courtyard holes and facade/roof occlusion are excluded; no complete-coverage percentage is claimed.
+
+The bounded public endpoint fetches no remote URL and writes no records. Explicit UTC offset defaults to Malaysia +8; no automatic timezone inference. Moving the map or changing inputs clears prior overlays and cancels obsolete browser requests. Provider preview never enters issued project analysis.
+
+References: [Shadowmap interaction](https://shadowmap.org/) and [MapLibre source features](https://maplibre.org/maplibre-gl-js/docs/API/classes/Map/#querysourcefeatures). No paid Shadowmap API, deployment or remote write.

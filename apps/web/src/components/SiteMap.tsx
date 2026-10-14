@@ -5,6 +5,7 @@ import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { loadBasemap } from '../services/map'
 import { boundsSchema, boundsPolygon, type Bounds } from '../domain/projects'
+import ExploreSun from './ExploreSun'
 
 // MapLibre 6 needs an explicit bundled worker URL under Vite.
 maplibregl.setWorkerUrl(workerUrl)
@@ -14,8 +15,15 @@ type Props = {
   onViewport?: (bounds: Bounds) => void
   onSelect?: (bounds: Bounds) => void
   readOnly?: boolean
+  onSelectionStart?: () => void
 }
-export default function SiteMap({ bounds, onViewport, onSelect, readOnly = false }: Props) {
+export default function SiteMap({
+  bounds,
+  onViewport,
+  onSelect,
+  onSelectionStart,
+  readOnly = false,
+}: Props) {
   const container = useRef<HTMLDivElement>(null)
   const map = useRef<maplibregl.Map | null>(null)
   const boundsRef = useRef(bounds)
@@ -30,6 +38,7 @@ export default function SiteMap({ bounds, onViewport, onSelect, readOnly = false
   const [basemap, setBasemap] = useState(false)
   const [unavailable, setUnavailable] = useState(false)
   const [loaded, setLoaded] = useState(false)
+  const [loadedMap, setLoadedMap] = useState<maplibregl.Map | null>(null)
   const [contextFeatures, setContextFeatures] = useState(0)
   const [renderedFeatures, setRenderedFeatures] = useState(0)
   useEffect(() => {
@@ -123,6 +132,7 @@ export default function SiteMap({ bounds, onViewport, onSelect, readOnly = false
               { padding: 80, duration: 0 },
             )
             setLoaded(true)
+            setLoadedMap(active)
           })
           active.on('moveend', () => {
             const extent = active.getBounds()
@@ -214,6 +224,7 @@ export default function SiteMap({ bounds, onViewport, onSelect, readOnly = false
       aria-label={readOnly ? 'Saved site extent map' : 'Explore site map'}
     >
       <div ref={container} className="map-canvas" />
+      {!readOnly && loadedMap && <ExploreSun map={loadedMap} />}
       <div className="map-chip">
         <Compass size={15} />{' '}
         {readOnly ? 'Site Plan / 2D' : threeD ? 'Explore Map / 3D context' : 'Explore Map / 2D'}
@@ -252,6 +263,7 @@ export default function SiteMap({ bounds, onViewport, onSelect, readOnly = false
                 map.current?.jumpTo({ pitch: 0, bearing: 0 })
               }
               selecting.current = !selecting.current
+              if (selecting.current) onSelectionStart?.()
               firstCorner.current = null
               if (map.current)
                 map.current.getCanvas().style.cursor = selecting.current ? 'crosshair' : ''
@@ -276,7 +288,7 @@ export default function SiteMap({ bounds, onViewport, onSelect, readOnly = false
               ? 'Loading map...'
               : basemap
                 ? threeD
-                  ? 'Provider 3D context: heights may be estimated or missing. Not used in shade, quantities or project geometry.'
+                  ? 'Provider heights may be estimated or missing. Explorer shadows are approximate; no verified project analysis.'
                   : 'Basemap context only - verify boundaries on site'
                 : 'Basemap unavailable/offline - coordinate canvas remains usable'}
         </span>

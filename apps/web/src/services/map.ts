@@ -18,7 +18,7 @@ export function loadBasemap() {
       const style = (await response.json()) as StyleSpecification
       if (style.version !== 8 || !Array.isArray(style.layers) || !style.sources)
         throw new Error('Invalid map style')
-      // Context tiles may invent render heights. Only our sourced workspace buildings are extruded.
+      // Explore adds its labelled provider extrusion separately; project geometry remains sourced.
       style.layers = style.layers.filter((layer) => layer.type !== 'fill-extrusion')
       return { style, available: true }
     } catch {

@@ -70,3 +70,7 @@ F01/F04/F05/F08 software paths are verified. F02/F03/F06/F07 software is impleme
 Earlier uncommitted navigation/settings/account-security/output/support/form-recovery work is preserved and integrated. Retained PDFs, actual data export/permanent deletion, joint backup/restore, broader operations/accessibility/pilot acceptance and staged extensions remain outside this F01-F08 closeout. No push or deployment.
 
 Final continuation: dedicated catalogue/review/output recovery, estimate comparison and support-request browser acceptance passed. Fixed output recovery to restore its selected scenario, and settings reload to discard child-form edits. Latest results and remaining gates are in validation.md.
+
+## User-requested explorer extension - 14 October
+
+Implemented automatic provider-tile building shadows, date/time slider, explicit UTC offset and sun azimuth/elevation, fullscreen map and collapsible site controls. Local stateless calculation is separate from persisted analysis. See ADR-013 and setup.md for bounds. Final verification is recorded in validation.md. This does not unlock terrain/BIM stages or claim complete Shadowmap parity.

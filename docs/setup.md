@@ -123,3 +123,11 @@ The comparison uses the selected target and time; changing either hides incompat
 Private site evidence supports Remove photo and Show removed photographs / Restore photo. Removal is reversible and blocks downloads/new output selection while retaining private recovery bytes. It is not permanent deletion. An operator-reviewed retention request remains necessary for erasure.
 
 Brief edits include budget minimum/ceiling, site visit notes, known facts and unknown facts. Brief readiness lists missing required output fields. Site measurements, production provider approval and retention policy are still external release gates; see f01-f08-acceptance.md.
+
+## Automatic map shadows (14 October)
+
+Restart API and web, then open **Explore Map**. The map fills the browser window. Search/select a site, then choose **Hide site controls** for a clear map; **Show site controls** restores search and coordinates. **Projects** exits the fullscreen layout. Two-corner site selection temporarily collapses the controls.
+
+**Sun & shadows** starts enabled. Zoom to street level (14 or closer), choose date/time and the UTC offset for the site/date (+8 for Malaysia). Drag **Time of day** to update automatically. **Explore in 3D** shows provider building extrusions over the ground-shadow preview. No manual building model or project is required. The local API and internet map provider must be reachable. Missing/unsupported data and coverage limits are reported; night and sun below 5 degrees suppress daylight shadows. **Retry shadows** is under **Preview data & limits**.
+
+This is an approximate flat-ground preview from up to 500 nearby loaded building parts. Terrain, trees and facade/roof shading are not implemented. It does not enter verified project calculations or issued outputs. No database migration or paid key is required.

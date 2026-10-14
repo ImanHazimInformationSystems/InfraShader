@@ -14,7 +14,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from starlette.exceptions import HTTPException
 
-from app import administration, calculations, evidence, projects, reviews, workspace
+from app import administration, calculations, evidence, explore, projects, reviews, workspace
 from app.auth import TokenVerifier, current_user, get_verifier
 from app.body_limit import BodyLimit
 from app.config import Settings, get_settings
@@ -24,6 +24,17 @@ from app.schemas import ProjectCreate, ProjectList, ProjectResponse, ProjectUpda
 
 logger = logging.getLogger("infrashader.requests")
 app = FastAPI(title="InfraShader API", version="0.1.0", docs_url="/api/docs")
+
+
+@app.post("/api/v1/explore/shadows")
+def explore_shadows(data: explore.ExploreInput):
+    # Public, bounded and stateless: no project, identity, persistence or provider access.
+    try:
+        return explore.preview(data)
+    except ValueError as error:
+        raise APIError(422, "explore_unavailable", str(error)) from error
+
+
 app.add_middleware(BodyLimit)
 app.add_middleware(
     CORSMiddleware,
