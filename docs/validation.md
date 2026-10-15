@@ -164,3 +164,13 @@ Limits: at most 500 nearby building parts, 10,000 vertices, 128 vertices/part an
 Final project regression: all six real-PostGIS browser workflows passed together (53.4 seconds) after starting local PostgreSQL. Latest ESLint, TypeScript and production build passed; existing large-bundle warning remains.
 
 Phone live-provider check reached and passed 3D rendering, automatic shadows, midnight/afternoon changes, fullscreen and collapsed controls; the screenshot was visually inspected. The combined test then FAILED because Photon place search timed out (UI reported signal timed out). This is not a full passing phone provider suite. Earlier desktop/tablet live-provider checks passed. Coordinate fallback remains covered by the 24 responsive checks.
+
+## Explorer phone/search completion - 16 October 2026
+
+Completed the outstanding phone provider workflow from the automatic-shadow request. The real phone-sized browser check passed (41.5 seconds), including loaded buildings/3D, automatic shadows, date/time changes, night state, fullscreen/collapsed controls and live Photon search. Inspected artifacts/live-map-phone.png with actual returned search results and shadow controls. Public provider availability is still not guaranteed.
+
+Place search now preserves timed-out input, explains timeout/network/invalid-response failures, offers explicit Retry place search and Cancel search, and ignores obsolete results after cancelling or editing the query. No automatic provider request loop or paid fallback was added. A new unit test exposed DOMException handling differences; timeout classification now handles DOMException explicitly. All 32 frontend unit tests pass, including timeout/retry and cancellation/late-response checks.
+
+Backend Ruff/format passed (54 files); 168 PostgreSQL/PostGIS tests passed in 10.72 seconds, with the existing Starlette TestClient deprecation warning. Frontend lint, typecheck and production build passed. Existing bundle, router POP and upstream sprite/filter warnings remain. Full database-browser and Supabase suites were not repeated for this search-only change; their previous results remain historical. No push, deployment or paid service. ADR-013 preview limits remain unchanged.
+
+Final responsive browser run: 27 passed across desktop/tablet/phone (1.1 minutes), including controlled provider failure, retained query, explicit retry, recovered result selection and continuation into project creation.

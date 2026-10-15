@@ -24,6 +24,7 @@ export default function PlaceSearch({ onSelect }: { onSelect: (bounds: Bounds) =
   const [results, setResults] = useState<Result[]>([])
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState('')
+  const [failed, setFailed] = useState(false)
   const controller = useRef<AbortController | null>(null)
   useEffect(() => () => controller.current?.abort(), [])
   async function search(event: FormEvent) {
@@ -33,6 +34,7 @@ export default function PlaceSearch({ onSelect }: { onSelect: (bounds: Bounds) =
     controller.current = current
     setBusy(true)
     setMessage('')
+    setFailed(false)
     setResults([])
     try {
       if (geocoderUrl === 'offline')
@@ -55,10 +57,21 @@ export default function PlaceSearch({ onSelect }: { onSelect: (bounds: Bounds) =
         )
       }
     } catch (reason) {
-      if (!current.signal.aborted)
+      if (!current.signal.aborted) {
+        setFailed(true)
         setMessage(
-          reason instanceof Error ? reason.message : 'Search unavailable. Use coordinates.',
+          (reason instanceof Error || reason instanceof DOMException) &&
+            reason.name === 'TimeoutError'
+            ? 'Place search timed out. Your search is kept. Retry, select your site on the map, or enter coordinates.'
+            : reason instanceof TypeError
+              ? 'Place search could not connect. Check your connection and retry, or use map selection or coordinates.'
+              : reason instanceof z.ZodError || reason instanceof SyntaxError
+                ? 'The search provider returned an invalid response. Retry later or use coordinates.'
+                : reason instanceof Error
+                  ? reason.message
+                  : 'Search unavailable. Use coordinates.',
         )
+      }
     } finally {
       if (!current.signal.aborted) setBusy(false)
     }
@@ -70,7 +83,14 @@ export default function PlaceSearch({ onSelect }: { onSelect: (bounds: Bounds) =
           Search for a place
           <input
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) => {
+              controller.current?.abort()
+              setBusy(false)
+              setFailed(false)
+              setResults([])
+              setMessage('')
+              setQuery(event.target.value)
+            }}
             minLength={3}
             maxLength={160}
             required
@@ -78,8 +98,21 @@ export default function PlaceSearch({ onSelect }: { onSelect: (bounds: Bounds) =
           />
         </label>
         <button className="button secondary full" disabled={busy || query.trim().length < 3}>
-          {busy ? 'Searching?' : 'Search places'}
+          {busy ? 'Searching…' : failed ? 'Retry place search' : 'Search places'}
         </button>
+        {busy && (
+          <button
+            type="button"
+            className="button text full"
+            onClick={() => {
+              controller.current?.abort()
+              setBusy(false)
+              setMessage('Search cancelled. You can retry or select a site on the map.')
+            }}
+          >
+            Cancel search
+          </button>
+        )}
       </form>
       <p className="fine-print">
         Search sends your query to the configured Photon provider. No automatic location tracking.

@@ -1,4 +1,25 @@
 import { test, expect } from '@playwright/test'
+
+test('failed place search preserves input and an explicit retry selects the site', async ({page}) => {
+  let calls = 0
+  await page.route('https://photon.komoot.io/api/**', route => {
+    calls++
+    return calls === 1 ? route.fulfill({status:503,json:{message:'Temporary provider outage'}}) : route.fulfill({json:{features:[{geometry:{type:'Point',coordinates:[101.682,3.132]},properties:{name:'Recovered search fixture'}}]}})
+  })
+  await page.goto('/')
+  await page.getByRole('button',{name:'Open Browser Demo'}).click()
+  await page.getByRole('navigation').getByRole('button',{name:'Explore Map'}).click()
+  await page.getByLabel('Search for a place').fill('Retained query')
+  await page.getByRole('button',{name:'Search places',exact:true}).click()
+  await expect(page.getByText('Place search unavailable or rate limited. Use coordinates or retry later.',{exact:true})).toBeVisible()
+  await expect(page.getByLabel('Search for a place')).toHaveValue('Retained query')
+  await page.getByRole('button',{name:'Retry place search',exact:true}).click()
+  await page.getByRole('button',{name:'Recovered search fixture',exact:true}).click()
+  await expect(page.getByLabel('West longitude')).toHaveValue('101.681')
+  await page.getByRole('button',{name:'Continue with this site',exact:true}).click()
+  await expect(page.getByLabel('Project name')).toBeVisible()
+  expect(calls).toBe(2)
+})
 test('place search and two-corner map extent carry into project creation', async ({page}) => {
   await page.route('https://photon.komoot.io/api/**',route => route.fulfill({json:{features:[{geometry:{type:'Point',coordinates:[101.682,3.132]},properties:{name:'Controlled place fixture',city:'Fixture city'}}]}}))
   await page.goto('/'); await page.getByRole('button',{name:'Open Browser Demo'}).click()

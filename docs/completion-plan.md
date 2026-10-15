@@ -74,3 +74,5 @@ Final continuation: dedicated catalogue/review/output recovery, estimate compari
 ## User-requested explorer extension - 14 October
 
 Implemented automatic provider-tile building shadows, date/time slider, explicit UTC offset and sun azimuth/elevation, fullscreen map and collapsible site controls. Local stateless calculation is separate from persisted analysis. See ADR-013 and setup.md for bounds. Final verification is recorded in validation.md. This does not unlock terrain/BIM stages or claim complete Shadowmap parity.
+
+16 October follow-up: the previously failing live phone provider workflow now passes, including Photon search. Search timeout recovery, explicit retry/cancellation and obsolete-response protection are implemented and tested. The automatic-shadow/fullscreen explorer task is complete within ADR-013's documented preview scope; city-wide completeness, terrain/tree/roof/facade shading and automatic timezone detection remain outside that implementation.
