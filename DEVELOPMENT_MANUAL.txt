@@ -1,0 +1,217 @@
+INFRASHADER - LOCAL DEVELOPMENT MANUAL
+Updated: 16 October 2026
+
+Use this manual to open and check the site between development prompts.
+The application runs on your PC. These commands do not deploy or push to GitHub.
+Map tiles and place search use external public providers and need internet access.
+
+============================================================
+1. NORMAL STARTUP (YOUR EXISTING, CONFIGURED INSTALLATION)
+============================================================
+
+A. Open Docker Desktop.
+   Wait until its Linux engine is running. If Docker is paused, resume it.
+   Keep Docker open while using real login and private photos.
+
+B. Open the InfraShader folder in VS Code.
+   Open Terminal > New Terminal. Use PowerShell.
+
+   In Terminal 1, run these commands one at a time:
+
+   cd C:\Users\User\Coding_Projects\InfraShader
+   .\scripts\local-db.ps1 start
+   .\scripts\supabase.ps1 start
+   .\scripts\api.ps1 migrate
+   .\scripts\api.ps1 dev
+
+   Wait for the API to report that startup is complete on port 8000.
+   Leave this terminal running. It will not return to the PowerShell prompt.
+   That is normal: it is serving the backend.
+
+C. Open a SECOND terminal using the + button in VS Code's terminal panel.
+
+   In Terminal 2, run:
+
+   cd C:\Users\User\Coding_Projects\InfraShader
+   npm run dev
+
+   Wait for Vite to display its local URL. Leave this terminal running too.
+
+D. Open your browser:
+
+   http://127.0.0.1:5173
+
+   Sign in with your existing local email/password account.
+   Use this same address consistently while testing login.
+   Public account registration is disabled; do not create a new account each day.
+
+   If any startup command reports an error, resolve it before proceeding.
+   Do not run a second API or frontend if one is already running.
+
+============================================================
+2. BETWEEN PROMPTS / AFTER CODE CHANGES
+============================================================
+
+Most React/TypeScript/CSS edits appear automatically through Vite.
+The API development command also reloads ordinary Python code edits.
+Refresh the browser if necessary. Save any form edits before refreshing.
+
+For a reliable fresh check after a substantial change:
+
+   1. Press Ctrl+C in Terminal 1 and Terminal 2.
+   2. If package dependencies or lockfiles changed, run:
+
+      npm ci
+      .\scripts\api.ps1 sync
+
+   3. If database models/migrations changed, run:
+
+      .\scripts\api.ps1 migrate
+
+   4. Restart the API in Terminal 1:
+
+      .\scripts\api.ps1 dev
+
+   5. Restart the frontend in Terminal 2:
+
+      npm run dev
+
+   6. Refresh http://127.0.0.1:5173
+
+You do NOT need npm ci, dependency sync or a database setup download every time.
+Environment-file changes require restarting the affected API/frontend process.
+After Windows restarts, follow the normal startup section again.
+
+When asking for browser/integration tests in a development prompt, stop your
+API and frontend with Ctrl+C first so the tests can use ports 8000 and 5173.
+Keep PostgreSQL and Docker/Supabase running unless instructed otherwise.
+Test servers normally stop after their tests; restart the two development
+terminals above when you want to browse the site yourself again.
+
+============================================================
+3. QUICK SHADOW EXPLORER CHECK
+============================================================
+
+   1. Open Explore Map.
+   2. Search for a place, enter coordinates, or select a site on the map.
+   3. Zoom in to street/building level (zoom 14 or closer).
+   4. Sun & shadows is enabled by default. Choose a date and daytime.
+   5. Use UTC offset 8 for Malaysia. Set the correct offset elsewhere.
+   6. Move the Time of day slider to compare morning and afternoon.
+   7. Choose Explore in 3D to view available building heights.
+   8. Hide site controls clears the search/coordinate panel from the map.
+      Show site controls brings it back. Projects exits the fullscreen layout.
+
+No manual building model is required for this explorer preview.
+Both the API and map-provider connection must be available for the preview.
+The preview uses available nearby map buildings and estimated heights. It can
+have gaps. It does not model terrain, trees or roof/facade shading, and does not
+replace verified, saved project analysis. Night/very low sun hides shadows.
+
+If place search fails, use Retry place search, map selection or coordinates.
+Cancel search stops a pending search. Your query is preserved after a timeout.
+For shadow errors, open Preview data & limits and use Retry shadows.
+
+Browser Demo is a separate browser-only project workflow. Use normal sign-in
+to test real saved projects, permissions and private evidence. The explorer's
+stateless preview can also run in Demo, but it still needs the local API.
+
+============================================================
+4. STOPPING THE PROJECT
+============================================================
+
+For a short break:
+   Press Ctrl+C in both development terminals.
+   If PowerShell asks whether to terminate the batch job, enter Y.
+   You can leave the database and Docker/Supabase running for the next check.
+
+To stop all project services for the day, after stopping API/frontend:
+
+   cd C:\Users\User\Coding_Projects\InfraShader
+   .\scripts\supabase.ps1 stop
+   .\scripts\local-db.ps1 stop
+
+You may then quit Docker Desktop and close VS Code.
+Normal shutdown preserves saved data. Do not delete Docker volumes, .local,
+signing keys or environment files as a way of stopping or restarting the app.
+
+============================================================
+5. USEFUL LOCAL ADDRESSES AND CHECKS
+============================================================
+
+Website:           http://127.0.0.1:5173
+API health:        http://127.0.0.1:8000/api/v1/health
+API documentation: http://127.0.0.1:8000/api/docs
+Supabase Studio:   http://127.0.0.1:54333
+Local email inbox: http://127.0.0.1:54334
+
+The local email inbox receives password-recovery/confirmation messages.
+These local test messages are not sent to your normal external email inbox.
+
+Service status commands (use a spare PowerShell terminal):
+
+   .\scripts\local-db.ps1 status
+   .\scripts\supabase.ps1 status
+
+Supabase status can display local keys. Do not paste its raw output into chat,
+commit it to Git or put server/service-role keys in frontend variables.
+
+============================================================
+6. COMMON PROBLEMS
+============================================================
+
+Website cannot be reached:
+   Check that Terminal 2 is still running npm run dev. Read its displayed URL
+   and any error. If port 5173 is occupied, stop your previous frontend first.
+
+API unavailable / shadow calculation cannot connect:
+   Check Terminal 1 and the API health URL. Restart .\scripts\api.ps1 dev.
+   API health alone does not prove that login, database and Storage are ready.
+
+Database connection error:
+   Run .\scripts\local-db.ps1 start, then restart the API.
+
+Docker paused / login or private photos unavailable:
+   Resume Docker Desktop and run .\scripts\supabase.ps1 start.
+   Then restart the API/frontend and sign in again if necessary.
+
+Map or place search unavailable:
+   Check the internet connection. The public provider can temporarily fail.
+   Use coordinates or retry later; offline tiles cannot supply building shadows.
+
+Changes seem missing:
+   Confirm both terminals are in this repository, restart them and refresh.
+   Save your work before a hard refresh (Ctrl+Shift+R).
+
+Missing dependencies:
+   Stop API/frontend, then run npm ci and .\scripts\api.ps1 sync.
+
+Missing environment files / first-time setup:
+   This PC is already configured. Do not routinely rerun setup/bootstrap.
+   For a new installation, follow docs\setup.md. The command
+   .\scripts\supabase.ps1 configure is for initial environment configuration;
+   it refuses to overwrite existing files. Organisation bootstrap is also an
+   initial provisioning task, not part of normal startup.
+
+============================================================
+DAILY SHORT VERSION
+============================================================
+
+Open Docker Desktop and wait for the engine.
+
+Terminal 1:
+   cd C:\Users\User\Coding_Projects\InfraShader
+   .\scripts\local-db.ps1 start
+   .\scripts\supabase.ps1 start
+   .\scripts\api.ps1 migrate
+   .\scripts\api.ps1 dev
+
+Terminal 2:
+   cd C:\Users\User\Coding_Projects\InfraShader
+   npm run dev
+
+Browser:
+   http://127.0.0.1:5173
+
+Stop API/frontend:
+   Ctrl+C in both terminals.

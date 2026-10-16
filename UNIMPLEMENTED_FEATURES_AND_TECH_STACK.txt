@@ -1,0 +1,297 @@
+INFRASHADER - REMAINING FEATURES AND TECHNOLOGY CHECKLIST
+Updated: 16 October 2026
+Repository branch: build/core-spatial-completion
+Code checkpoint: 31c770a
+
+PURPOSE AND STATUS
+This inventory distinguishes missing implementation from unfinished acceptance.
+It includes the three previously requested explorer changes, which now exist.
+It does not claim that the whole MVP is complete or field validated.
+No packages, services, deployments or paid resources were added for this report.
+
+PARTIAL = useful implementation exists, but stated work remains.
+MISSING = the stated workflow is absent.
+ACCEPTANCE = software exists; testing, policy or external evidence remains.
+GATED = separate expansion requiring its prerequisites before implementation.
+Candidate tools below are suggestions, not installed or mandatory dependencies.
+Most remaining core work needs application development on the existing stack,
+not replacement frameworks. Software and map-data licensing are separate matters.
+
+======================================================================
+1. YOUR THREE PREVIOUSLY REQUESTED MAP CHANGES
+======================================================================
+
+1.1 Automatic shadows from available map buildings - no manual modelling
+Status: IMPLEMENTED as a bounded explorer preview; broader coverage unfinished.
+The explorer reads available provider building footprints and heights and asks
+the API to calculate ground shadows. Manual project modelling is not required.
+Existing stack: MapLibre, OpenFreeMap building tiles, React/TypeScript,
+FastAPI, pvlib solar position, PyProj projection and Shapely geometry.
+Limits: loaded provider geometry, available heights, zoom 14 or closer, at most
+500 building parts / 10,000 vertices / 128 vertices per ring per request.
+Incomplete/unsupported geometry is omitted and preview limitations are shown.
+This does not provide complete city coverage, terrain/tree shadows, or full
+roof/facade occlusion. It does not create authoritative saved project geometry.
+Remaining work for broader coverage is listed in section 3.
+
+1.2 Date/time slider and sun direction/elevation
+Status: IMPLEMENTED.
+Date selection, time slider and UTC offset control update the preview. Sun
+azimuth (clockwise from north) and elevation are displayed. Night and unsupported
+low-sun conditions are reported.
+Existing stack: React controls, FastAPI and pvlib; no new engine required.
+Remaining enhancement: automatic location/date-aware timezone and daylight-saving
+handling. Current offset is manual, with +8 appropriate for Malaysia.
+Candidate: timezonefinder plus Python zoneinfo/timezone data; retain a clear
+manual override and test ambiguous/nonexistent local times.
+
+1.3 Fullscreen map with collapsible search and coordinate controls
+Status: IMPLEMENTED.
+Explore fills the browser window. Site search/coordinates can be hidden and
+shown, and site controls collapse during map extent selection.
+Existing stack: React, CSS and MapLibre; Photon search.
+This means browser-window fullscreen, not an operating-system fullscreen mode.
+No missing core implementation identified for this request. Broader physical
+touch and accessibility acceptance remains part of section 2.
+
+======================================================================
+2. UNFINISHED CORE WORKFLOWS AND ACCEPTANCE
+======================================================================
+
+2.1 Retained issued PDFs and richer evidence visuals [F12, F14] - PARTIAL
+Exists: immutable issued data snapshots, previews, PDF generation, narratives,
+scope diagrams and evidence references.
+Remaining: retain issued PDF bytes as private files, record file/hash/version
+metadata, retrieve the same issued file, and define retention/restore behavior.
+Complete richer embedded evidence visuals and audience/font/layout acceptance.
+Use: existing @react-pdf/renderer, Supabase private Storage, FastAPI,
+PostgreSQL/SQLAlchemy, Pillow and pypdf/Playwright checks.
+No new rendering framework is required. File access stays server authorised.
+
+2.2 Actual data export, permanent deletion and account closure
+[F02, D04, D09] - MISSING execution workflows / PARTIAL lifecycle
+Exists: support/data-request queue, administrator responses, archive and restore.
+Remaining: execute an authorised export, permanent erasure and account closure;
+handle linked evidence, revisions, issued records and retained backups under an
+approved policy. Archive/remove currently does not mean permanent erasure.
+Use: FastAPI, SQLAlchemy/PostgreSQL, server-side Supabase Auth/Storage APIs,
+Python archive/streaming utilities, audit records and integration tests.
+Prerequisite: decide retention, historical-output obligations and deletion scope.
+
+2.3 Joint application database, Auth and file backup/restore [D09, D10]
+Status: INCOMPLETE operational workflow and acceptance.
+Remaining: coordinated backup, documented recovery order, file/database
+consistency checks, restore into an isolated local environment and recovery
+evidence. An application database dump alone does not restore Auth/private files.
+Use: PostgreSQL backup tools, Supabase local services, private-file backup,
+PowerShell, Docker/WSL and existing API/browser checks.
+Prerequisite: define retention and acceptable recovery time/data-loss limits.
+
+2.4 Remaining form recovery and session interruption handling [D01, D06]
+Status: PARTIAL.
+Exists: account-scoped tab drafts and revision guards for workspace, catalogue,
+review and output forms; history/restore and workspace undo/redo.
+Remaining: evidence/settings draft recovery; forced-session-expiry and multi-tab
+acceptance, including conflicts, logout and account switches.
+Use: React/TypeScript, existing scoped draft storage, Supabase session events,
+server revision checks, Vitest and Playwright. No new state framework required.
+
+2.5 Invitations and new-member onboarding [D02] - MISSING
+Exists: operator provisioning, existing-member role/capability administration,
+revocation, audit and last-administrator safeguards.
+Remaining: authorised invite, acceptance, expiry/revocation, duplicate handling
+and safe tenant membership assignment through a self-service flow.
+Use: FastAPI, server-side Supabase Auth administration, PostgreSQL memberships,
+React and the local mail capture service for development verification.
+External email delivery/provider configuration requires separate authorisation.
+Never expose service-role credentials to the browser.
+
+2.6 Complete pricing explanations and commercial acceptance [F10, F11]
+Status: PARTIAL.
+Exists: pricing arithmetic, permissions, versioned rates, itemised takeoffs and
+saved estimate comparison.
+Remaining: complete user-facing breakdown/explanations and agree commercial
+policy; independently check representative quantities and totals.
+Use: existing Decimal/PostgreSQL NUMERIC, FastAPI/Pydantic, React and pytest.
+An AI model is not needed for deterministic pricing explanations.
+
+2.7 Consistent field errors and recoverable failures [D07] - PARTIAL
+Remaining: audit all forms for field-level errors, retained input, useful retry,
+conflict recovery and repair without reloading the whole application.
+Use: existing Zod, Pydantic/API error contracts, React and browser tests.
+Provider search retry/input preservation already exists; do not rebuild it.
+
+2.8 Full accessibility and device acceptance [D08] - ACCEPTANCE / fixes pending
+Exists: responsive browser checks and semantic controls.
+Remaining: complete keyboard focus/navigation, contrast, screen-reader review,
+physical touch checks and any fixes identified, including map-control alternatives.
+Use: Playwright and existing accessible HTML/Radix patterns.
+Optional addition: axe-core automated checks. Human assistive-technology testing
+is still needed; automated checks alone do not establish accessibility.
+
+2.9 Operations, security hardening and capacity [D10] - PARTIAL
+Exists: health/readiness endpoints and request identifiers.
+Remaining: monitoring/alerts, bounded request throttling, support procedures,
+representative concurrency/large-geometry tests, rollback and recovery runbooks.
+Review browser bundle size and provider/session navigation edge cases.
+Use: FastAPI middleware, structured logging, PostgreSQL and existing tests/scripts.
+Optional addition: OpenTelemetry instrumentation with a separately selected local
+collector/backend. Distributed throttling needs shared state only if deployment
+architecture requires it; no new Redis service is assumed mandatory.
+No public deployment or paid monitoring is authorised by this checklist.
+
+2.10 External acceptance that cannot be completed by adding a library
+[F02/F03/F06/F07/F09/F10/F12/F14; SRS G1-G8]
+- Real site shade measurements and agreed tolerances for buildings/canopies.
+- Production map-provider terms, attribution/export rights, coverage and capacity.
+- Approved access, commercial and retention policies.
+- Independent takeoff/pricing review and representative developer/contractor pilots.
+- Multilingual PDF glyph/layout and audience review.
+- Complete session/tenant/file, performance, accessibility and restore acceptance.
+Use: the existing application and test stack, measured observations and approved
+test datasets. Passing deterministic tests does not establish field accuracy.
+Hosted CI/deployment has not been exercised; deployment is separately authorised.
+
+======================================================================
+3. ADDITIONAL WORK FOR A MORE COMPLETE SHADOWMAP-LIKE EXPLORER
+======================================================================
+These are limits/enhancements beyond the implemented bounded preview. They are
+not all previously agreed mandatory core requirements or promises of parity.
+
+3.1 Reliable building coverage beyond currently loaded tiles - MISSING
+Need: coverage accounting, robust tile-edge geometry handling, cached/spatially
+queried building data, provenance and honest missing-height states.
+Use: existing PostGIS, FastAPI, MapLibre, Shapely and PyProj.
+Optional ingestion tooling: GDAL; GeoPandas/OSMnx only if selected data needs it.
+Prerequisite: licensed footprints and suitable heights. Software cannot supply
+accurate building heights where the source has none.
+
+3.2 Courtyards, complex footprints and seam-safe building assembly - INCOMPLETE
+Need: explicit holes/multipart semantics, duplicate/tile-clipping reconciliation,
+resource bounds and regression fixtures before expanding preview coverage.
+Use: Shapely/PyProj/PostGIS and a revised API/MapLibre extraction contract.
+No new 3D framework is inherently needed for improved ground projections.
+
+3.3 Roof/facade and full 3D occlusion - MISSING
+Need: suitable 3D geometry and a tested ray/occlusion or shadow-map pipeline.
+Candidate: Three.js for meshes/rendering/rays, with pvlib sun position and the
+existing API/data stack. A visual GPU shadow alone is not validated numerical
+shade analysis. Accurate meshes, resource limits and validation are prerequisites.
+
+3.4 Terrain-aware shadows - MISSING / related to gated F18
+Need: licensed elevation data, aligned horizontal/vertical units and datum, and
+terrain occlusion calculations. Displaying terrain does not calculate its shade.
+Candidate: GDAL, PyProj/PostGIS, MapLibre terrain or Three.js display, plus an
+explicitly selected and tested terrain shadow calculation method.
+
+3.5 Tree/vegetation shade - MISSING
+Exists: tree objects and optional crown metadata; they are excluded from shade.
+Need: crown geometry, height/source, opacity/season assumptions and validation.
+Use/candidate: existing geometry/solar stack for an explicitly limited model;
+Three.js only if a mesh-based approach is selected. A tree icon is insufficient.
+
+3.6 Automatic timezone/DST - MISSING enhancement
+See 1.2: coordinate-to-timezone lookup plus date-aware conversion and tests.
+
+3.7 Provider resilience at wider usage - INCOMPLETE operational acceptance
+Need: provider capacity assessment, cache/failure handling and approved hosting
+or service arrangements. Public OpenFreeMap/Photon use is not a capacity guarantee.
+Use: existing MapLibre/Photon adapters; assess self-hosting only when justified.
+Open-source software does not imply unlimited free data or infrastructure.
+
+======================================================================
+4. SEPARATELY GATED FEATURES - NOT IMPLEMENTED
+======================================================================
+
+F13 Building-surface workflow [G9]
+Need: approved Stage A scope; IFC samples/rights for Stage B; DXF only after its
+separate approval. Do not confuse this with existing sourced building extrusion.
+Candidates: Three.js, existing Shapely/PyProj, IfcOpenShell for IFC; ezdxf for
+approved DXF work. Add schema/routes/tests only after defining accepted scope.
+
+F16 Explanation assistant [G10]
+Need: reviewed templates, grounded inputs, permitted claims and acceptance cases.
+Start with deterministic FastAPI/Python templates and React presentation.
+A local language model is optional, not a prerequisite or current dependency.
+
+F17 Reference plan overlay [G10]
+Need: approved samples/privacy rules, upload/display, calibration/georeferencing,
+opacity/alignment controls and clear distinction from measured geometry.
+Use/candidates: MapLibre image/raster layers, existing private Storage and Pillow;
+GDAL if geospatial raster processing is required. Select PDF handling only if
+PDF plans are admitted to the agreed upload scope.
+
+F18 Terrain/pond tools [G11]
+Need: accepted terrain/pond scope, data alignment, units, edit limits, undo and
+performance evidence. Pond geometry does not establish hydrological simulation.
+Candidates: GDAL, MapLibre terrain/Three.js, PostGIS, PyProj and Shapely.
+
+F19 3D preset asset library [G11]
+Need: licensed assets, dimensions/units, metadata, placement and performance caps.
+Candidates: Three.js/glTF assets, existing private Storage and PostgreSQL metadata.
+Blender is an optional asset-authoring tool, not required for every installation.
+
+F20 GLB import [G11]
+Need: rights confirmation, validated files, texture/resource caps, units/orientation,
+safe upload/processing and device performance acceptance.
+Candidates: Three.js GLTFLoader, existing upload/storage/API stack and a reviewed
+glTF validation pipeline. Merely adding a loader does not complete secure import.
+
+======================================================================
+5. ALREADY IMPLEMENTED - DO NOT COUNT THESE AS ENTIRELY MISSING
+======================================================================
+- F01 structured briefs, stakeholder/budget/site facts and revision restore.
+- F02 private evidence upload/edit/download, target links and reversible removal.
+- F03 map search, extent selection, 2D/3D context and layer controls.
+- F04 map/numeric geometry editing, projected quantities and undo/history.
+- F05 sourced-height project buildings and inherited Baseline objects.
+- F06 restricted ground shade and F07 opaque flat canopy calculations.
+- F08 Baseline/two-option comparison and persisted decisions.
+- F09 catalogue search/filter/pagination/version/archive and form recovery.
+- F10 itemised takeoffs and saved estimate comparison.
+- F12 draft/issued output generation and F14 review history/budget snapshots.
+- F15 basic object categories/counts/visibility and tree crown metadata.
+- Login/recovery, existing-member administration, dashboard navigation, settings,
+  project archive/restore and support request/response workflows.
+The specific remaining parts and acceptance gates are listed above.
+
+======================================================================
+6. EXISTING STACK, EVIDENCE AND SOURCES
+======================================================================
+Existing web: React, TypeScript, Vite, React Router, Tailwind, Radix/CVA,
+MapLibre, Terra Draw, Zod, Supabase JS and @react-pdf/renderer.
+Existing API/data: Python 3.12, uv, FastAPI/Uvicorn, Pydantic, SQLAlchemy,
+Alembic, Psycopg, PostgreSQL/PostGIS, Shapely, PyProj, pvlib and Decimal.
+Existing identity/files: local Supabase Auth/private Storage; Pillow upload checks.
+Existing checks: ESLint, TypeScript, Vitest, Playwright, Ruff, pytest and pypdf.
+Local runtime: Docker Desktop/WSL 2. Docker Desktop has its own licence terms;
+do not describe the entire installed toolchain as universally free open source.
+Exact installed versions: package-lock.json and apps/api/uv.lock.
+
+Evidence: docs/requirements.md, docs/completion-plan.md, docs/decisions.md,
+docs/validation.md, docs/technology-stack.md and the current explorer source:
+apps/web/src/components/ExploreWorkspace.tsx
+apps/web/src/components/ExploreSun.tsx
+apps/api/app/explore.py
+
+This is a documentation-only inventory. Application tests were not rerun for
+this file. Existing recorded test results are historical checkpoint evidence,
+not a new test run or complete release acceptance.
+
+Official references for candidate tools (selection still requires compatibility
+and licence review; none was installed by this documentation task):
+Three.js: https://threejs.org/docs/
+timezonefinder: https://timezonefinder.readthedocs.io/en/latest/
+GDAL: https://gdal.org/en/stable/
+IfcOpenShell: https://docs.ifcopenshell.org/
+ezdxf: https://ezdxf.readthedocs.io/en/stable/
+axe-core: https://github.com/dequelabs/axe-core
+OpenTelemetry: https://opentelemetry.io/docs/
+
+Suggested next implementation order:
+1. Retained output files and coordinated restore foundations.
+2. Evidence/settings recovery, session interruption tests and pricing explanations.
+3. Invitation flow, consistent errors, accessibility and operational hardening.
+4. Policy-dependent export/deletion and full core acceptance evidence.
+5. Broader explorer improvements and individually authorised staged expansions.
+No push, deployment, paid service or expansion gate is approved by this report.

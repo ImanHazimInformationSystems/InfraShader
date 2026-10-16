@@ -1,0 +1,80 @@
+INFRASHADER - FIRST SETUP ON ANOTHER WINDOWS LAPTOP
+
+This creates a separate local installation with fresh data.
+Git transfers code, not the PC's accounts, projects, uploads or credentials.
+Do not copy .env files or signing keys from GitHub; they are intentionally absent.
+
+1. Install Git, VS Code, Node.js 22 (22.12 or newer), uv, and Docker Desktop.
+   Enable WSL 2/Linux containers for Docker. Restart Windows if requested.
+   Open Docker Desktop and wait for its engine to run.
+   Reopen VS Code after installing tools so its terminal receives the new PATH.
+
+2. In VS Code, press Ctrl+Shift+P, choose Git: Clone and paste:
+   https://github.com/ImanHazimInformationSystems/InfraShader.git
+   Choose a local parent folder such as C:\Users\YOUR_NAME\Coding_Projects.
+   Open the resulting InfraShader folder. Sign into GitHub if prompted.
+
+3. Open a PowerShell terminal in that folder. Run commands ONE AT A TIME.
+   Stop and resolve any error before running the next command.
+
+   git fetch origin
+   git switch build/core-spatial-completion
+   git pull --ff-only
+   node --version
+   uv --version
+   docker info
+   uv python install 3.12
+   npm ci
+   .\scripts\api.ps1 sync
+   .\scripts\local-db.ps1 setup
+   .\scripts\local-db.ps1 start
+   .\scripts\api.ps1 migrate
+   .\scripts\supabase.ps1 start
+   .\scripts\supabase.ps1 configure
+
+   Database setup downloads the project-local Windows PostgreSQL/PostGIS tools.
+   Supabase start downloads local containers; first startup can take time.
+   Configure creates local environment files and refuses to overwrite them.
+   Do not run configure each day. Never share its generated secret values.
+
+4. Create your LAPTOP'S local user:
+   Open http://127.0.0.1:54333 (Supabase Studio).
+   Under Authentication / Users, create an email/password user and confirm it
+   locally. Copy this NEW user's UUID. Your PC user does not transfer via Git.
+   Provision its organisation in the repository terminal:
+
+   .\scripts\api.ps1 bootstrap --organisation "Umbrix Technology TTP" --user-id "PASTE_LAPTOP_USER_UUID_HERE"
+
+5. Start the backend in Terminal 1:
+   .\scripts\api.ps1 dev
+
+   Open Terminal 2 in the same repository and start the frontend:
+   npm run dev
+
+   Leave both terminals running. Open http://127.0.0.1:5173 and sign in with
+   the account created in step 4. Keep Docker Desktop running.
+
+6. On later days, use DEVELOPMENT_MANUAL.txt, substituting your laptop folder
+   for its example PC path. Do not repeat first-time database setup/bootstrap.
+   Stop API and frontend with Ctrl+C in their respective terminals.
+
+7. To receive later work pushed from the PC:
+   Save your work and stop the API/frontend. From this branch run:
+   git status
+   git pull --ff-only
+   npm ci
+   .\scripts\api.ps1 sync
+   .\scripts\local-db.ps1 start
+   .\scripts\api.ps1 migrate
+   Restart the two development terminals as in step 5.
+   If Git reports local changes or divergence, resolve those without discarding
+   your work. Do not use a hard reset as a routine update step.
+
+Existing PC data transfer is a separate task requiring coordinated application
+database, Supabase Auth and private-file backup/restore. That restore procedure
+has not yet been fully verified. Keep the original PC data intact.
+
+See docs/setup.md for configuration details and DEVELOPMENT_MANUAL.txt for
+daily startup, shutdown and the automatic map-shadow preview.
+These steps were checked against the repository scripts; they have not been
+executed on your laptop. They assume a compatible Windows laptop with WSL 2.
