@@ -1,8 +1,9 @@
+import { openDetailedWorkspace, openStudiesStep } from '../studio-helpers.mjs'
 import { test, expect } from '@playwright/test'
 import { mkdir } from 'node:fs/promises'
 
 test('catalogue search pages through real persisted rates and filters units', async ({ page, request }) => {
-  const login = await request.post('http://127.0.0.1:8000/auth/v1/token', {data:{email:'fixture@example.invalid',password:'fixture-only'}})
+  const login = await request.post(`${process.env.INFRA_TEST_API_URL || 'http://127.0.0.1:8000'}/auth/v1/token`, {data:{email:'fixture@example.invalid',password:'fixture-only'}})
   const headers = {Authorization:`Bearer ${(await login.json()).access_token}`}
   const session = await request.get('/api/v1/session',{headers})
   const org = (await session.json()).organisations[0].id
@@ -19,7 +20,8 @@ test('catalogue search pages through real persisted rates and filters units', as
   await page.getByLabel('Password',{exact:true}).fill('fixture-only')
   await page.getByRole('button',{name:'Sign in',exact:true}).click()
   await page.getByRole('button',{name:/Catalogue paging fixture/}).click()
-  await page.getByRole('button',{name:'Open geometry workspace'}).click()
+  await openDetailedWorkspace(page)
+  await openStudiesStep(page, 'prices')
   await page.getByLabel('Search rate code or description').fill('PAGED-')
   await page.getByRole('button',{name:'Search catalogue',exact:true}).click()
   await expect(page.getByText('Rate versions 1-20 of 21',{exact:true})).toBeVisible()
@@ -48,7 +50,8 @@ test('catalogue search pages through real persisted rates and filters units', as
   await page.getByLabel('Description',{exact:true}).fill('Unsaved fixture rate')
   page.once('dialog',dialog=>dialog.accept())
   await page.reload()
-  await page.getByRole('button',{name:'Open geometry workspace'}).click()
+  await openDetailedWorkspace(page)
+  await openStudiesStep(page, 'prices')
   await page.getByText('Catalogue: add an explicit dated rate',{exact:true}).click()
   await page.getByRole('button',{name:'Recover form draft',exact:true}).click()
   await expect(page.getByLabel('Rate code',{exact:true})).toHaveValue('RECOVERED-RATE')

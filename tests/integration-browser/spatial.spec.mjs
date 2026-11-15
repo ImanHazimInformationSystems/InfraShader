@@ -1,10 +1,11 @@
+import { openDetailedWorkspace, openStudiesStep } from '../studio-helpers.mjs'
 import { test, expect } from '@playwright/test'
 import { randomUUID } from 'node:crypto'
 import { mkdir } from 'node:fs/promises'
 const polygon = (w,s,e,n) => ({ type:'Polygon',coordinates:[[[w,s],[e,s],[e,n],[w,n],[w,s]]] })
 test('saved buildings: unknown height, sourced 3D, graphical edit, reload and backend shade', async ({ page, request }) => {
   test.setTimeout(90000)
-  const login = await request.post('http://127.0.0.1:8000/auth/v1/token', { data:{email:'fixture@example.invalid',password:'fixture-only'} })
+  const login = await request.post(`${process.env.INFRA_TEST_API_URL || 'http://127.0.0.1:8000'}/auth/v1/token`, { data:{email:'fixture@example.invalid',password:'fixture-only'} })
   const headers = { Authorization:`Bearer ${(await login.json()).access_token}` }
   const session = await request.get('/api/v1/session',{headers})
   const org = (await session.json()).organisations[0].id
@@ -18,9 +19,10 @@ test('saved buildings: unknown height, sourced 3D, graphical edit, reload and ba
   await page.goto('/')
   await page.getByLabel('Email address').fill('fixture@example.invalid'); await page.getByLabel('Password',{exact:true}).fill('fixture-only'); await page.getByRole('button',{name:'Sign in',exact:true}).click()
   await page.getByRole('button',{name:/Spatial acceptance fixture/}).click()
-  await page.getByRole('button',{name:'Open geometry workspace'}).click()
+  await openDetailedWorkspace(page)
   const canvasRegion=page.getByRole('region',{name:'Geometry drawing canvas'})
   await expect(canvasRegion).toHaveAttribute('data-unknown-buildings','1')
+  await openStudiesStep(page, 'shade')
   await page.getByLabel('Date/time with explicit timezone offset').fill('2026-03-21T12:00:00+08:00')
   await page.getByRole('button',{name:'Calculate all three scenarios'}).click()
   await expect(page.getByRole('alert').filter({hasText:'Building height unknown'})).toBeVisible()
@@ -39,7 +41,8 @@ test('saved buildings: unknown height, sourced 3D, graphical edit, reload and ba
   await page.getByRole('button',{name:'Edit Measured building',exact:true}).click()
   const field=page.getByLabel('Longitude, latitude coordinates')
   const before=await field.inputValue()
-  const canvas=canvasRegion.locator('canvas'); await canvas.scrollIntoViewIfNeeded()
+  const canvas=canvasRegion.locator('canvas.mapboxgl-canvas'); // a hidden ground-paint texture canvas also lives in the map container
+  await canvas.scrollIntoViewIfNeeded()
   await page.waitForTimeout(650) // finish the documented camera fit animation
   const box=await canvas.boundingBox()
   // This small square fits at the editor's capped zoom 19; Web Mercator world is 512*2^19.
@@ -56,6 +59,7 @@ test('saved buildings: unknown height, sourced 3D, graphical edit, reload and ba
   expect(saved.data.scenarios.baseline.items[0].status).toBe('existing')
   expect(saved.data.scenarios.option_a.items[0].geometry).toEqual(saved.data.scenarios.baseline.items[0].geometry)
   expect(saved.data.scenarios.option_b.items.find(item=>item.id===building.id).height_m).toBe(12)
+  await openStudiesStep(page, 'shade')
   await page.getByRole('button',{name:'Calculate all three scenarios'}).click()
   await page.getByRole('button',{name:'Show baseline shade on map'}).click()
   await expect(page.getByText(/Change from Baseline: 0.00 m2 \/ 0.0 percentage points/)).toHaveCount(2)
@@ -68,15 +72,19 @@ test('saved buildings: unknown height, sourced 3D, graphical edit, reload and ba
   await page.getByRole('checkbox',{name:'Show building layer',exact:true}).check()
   await expect(canvasRegion).toHaveAttribute('data-rendered-shadows',/^[1-9]/)
   await canvasRegion.screenshot({path:'artifacts/spatial-shadow-fixture.png'})
+  await openStudiesStep(page, 'proposal')
   await page.getByLabel('Decision criteria (one per line)').fill('Ground shade\nField evidence')
   await page.getByLabel('Review notes', {exact:true}).fill('Need measured site observations before accepting shade accuracy.')
   await page.getByRole('combobox', {name:'Review status',exact:true}).selectOption('needs_information')
   page.once('dialog',dialog=>dialog.accept())
   await page.reload()
-  await page.getByRole('button',{name:'Open geometry workspace'}).click()
+  await openDetailedWorkspace(page)
+  await openStudiesStep(page, 'proposal')
   await page.getByRole('button',{name:'Recover form draft',exact:true}).click()
   await expect(page.getByRole('textbox',{name:'Review notes',exact:true})).toHaveValue('Need measured site observations before accepting shade accuracy.')
+  await openStudiesStep(page, 'shade')
   await page.getByLabel('Date/time with explicit timezone offset').fill('2026-03-21T12:00:00+08:00')
+  await openStudiesStep(page, 'proposal')
   await page.getByRole('button', {name:'Save review',exact:true}).click()
   await expect(page.getByText('Review revision 1 saved.',{exact:true})).toBeVisible()
   const reviews=await (await request.get(`${endpoint}/reviews`,{headers})).json()
@@ -85,9 +93,10 @@ test('saved buildings: unknown height, sourced 3D, graphical edit, reload and ba
   await page.getByRole('region',{name:'Option comparison and review'}).screenshot({path:'artifacts/saved-review-fixture.png'})
   await page.reload()
   await expect(page.getByRole('heading',{name:'Spatial acceptance fixture',exact:true})).toBeVisible()
-  await page.getByRole('button',{name:'Open geometry workspace'}).click()
+  await openDetailedWorkspace(page)
   await expect(canvasRegion).toHaveAttribute('data-known-buildings','2')
   await expect(canvasRegion).toHaveAttribute('data-unknown-buildings','0')
+  await openStudiesStep(page, 'proposal')
   await expect(page.getByText('Need measured site observations before accepting shade accuracy.',{exact:true})).toBeVisible()
   await expect(page.getByText('Review 1: needs information / option a',{exact:true})).toBeVisible()
   await page.getByText('Workspace history and restore',{exact:true}).click()
@@ -103,7 +112,7 @@ test('saved buildings: unknown height, sourced 3D, graphical edit, reload and ba
   page.once('dialog',dialog=>dialog.accept())
   await page.reload()
   await expect(page.getByRole('heading',{name:'Spatial acceptance fixture',exact:true})).toBeVisible()
-  await page.getByRole('button',{name:'Open geometry workspace'}).click()
+  await openDetailedWorkspace(page)
   await page.getByRole('button',{name:'Recover workspace draft',exact:true}).click()
   await expect(page.getByLabel('Geometry name',{exact:true})).toHaveValue('Recovered target name')
   await page.getByRole('button',{name:'Apply item changes',exact:true}).click()
@@ -119,11 +128,14 @@ test('saved buildings: unknown height, sourced 3D, graphical edit, reload and ba
   await expect(page.getByText('Workspace revision 6 saved.',{exact:false})).toBeVisible()
   expect((await (await request.get(`${endpoint}/workspace`,{headers})).json()).data.scenarios.baseline.items.find(item=>item.name==='Measured building').visible).toBe(false)
 
+  await openStudiesStep(page, 'shade')
   await page.getByLabel('Time entry',{exact:true}).selectOption('local')
   await page.getByLabel('Local date and time (Asia/Kuala_Lumpur)',{exact:true}).fill('2026-03-21T12:00')
   const localAnalysis=page.waitForResponse(response=>response.url().endsWith('/analyses') && response.status()===201)
   await page.getByRole('button',{name:'Calculate all three scenarios'}).click()
   expect((await (await localAnalysis).json()).payload.timestamp).toContain('2026-03-21T12:00:00+08:00')
+  // Studio opens proposed Option A by default; an existing tree belongs to the Baseline.
+  await page.getByRole('group',{name:'Scenario selection'}).getByRole('button',{name:'Baseline',exact:true}).click()
   await page.getByLabel('Geometry to add or replace',{exact:true}).selectOption('tree')
   await page.getByLabel('Geometry name',{exact:true}).fill('Courtyard tree')
   await page.getByLabel('Longitude, latitude coordinates').fill('101.68125, 3.13125')
@@ -136,7 +148,7 @@ test('saved buildings: unknown height, sourced 3D, graphical edit, reload and ba
   const finalWorkspace=await (await request.get(`${endpoint}/workspace`,{headers})).json()
   const tree=finalWorkspace.data.scenarios.baseline.items.find(item=>item.name==='Courtyard tree')
   expect(tree.category).toBe('Vegetation'); expect(tree.crown_diameter_m).toBe(8); expect(tree.quantity.value).toBe(1)
-  await page.getByRole('button',{name:'Option B',exact:true}).click()
+  await page.getByRole('group',{name:'Scenario selection'}).getByRole('button',{name:'Option B',exact:true}).click()
   await page.getByLabel('Geometry to add or replace',{exact:true}).selectOption('manual')
   await page.getByRole('combobox',{name:'Manual quantity basis',exact:true}).selectOption('fixed')
   await expect(page.getByLabel('Count (items)',{exact:true})).toBeDisabled()

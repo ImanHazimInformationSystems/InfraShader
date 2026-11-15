@@ -1,24 +1,28 @@
 import {test,expect} from '@playwright/test'
 import {mkdir} from 'node:fs/promises'
+import { signInFixture, openWorkspaceProjects, openProjectRecords } from '../studio-helpers.mjs'
 
 test('structured brief restore, profile defaults and last-administrator browser recovery',async({page,request})=>{
- const login=await request.post('http://127.0.0.1:8000/auth/v1/token',{data:{email:'fixture@example.invalid',password:'fixture-only'}})
+ const login=await request.post(`${process.env.INFRA_TEST_API_URL || 'http://127.0.0.1:8000'}/auth/v1/token`,{data:{email:'fixture@example.invalid',password:'fixture-only'}})
  const headers={Authorization:`Bearer ${(await login.json()).access_token}`}
  const org=(await (await request.get('/api/v1/session',{headers})).json()).organisations[0].id
  const base=`/api/v1/organisations/${org}`
  const project=await (await request.post(`${base}/projects`,{headers,data:{name:'Brief history fixture',purpose:'developer_decision',stakeholder:'Facilities',site:{bounds:[101.681,3.131,101.683,3.133]},details:{project_type:'Courtyard',budget:'10000.50',priorities:'Access first',constraints:'Retain entrance',stakeholders:[{name:'Residents',role:'Users',needs:'Evening access'}]}}})).json()
  await page.goto('/')
- await page.getByLabel('Email address').fill('fixture@example.invalid');await page.getByLabel('Password',{exact:true}).fill('fixture-only');await page.getByRole('button',{name:'Sign in',exact:true}).click()
+ await signInFixture(page);await openWorkspaceProjects(page,'studio')
  await page.getByLabel('Search projects or stakeholders',{exact:true}).fill('No such project')
  await page.getByRole('button',{name:'Search projects',exact:true}).click()
  await expect(page.getByRole('button',{name:/Brief history fixture/})).toHaveCount(0)
  await page.getByLabel('Search projects or stakeholders',{exact:true}).fill('Facilities')
+ await page.getByText(/^More filters and options/).click()
  await page.getByLabel('Sort projects',{exact:true}).selectOption('name')
  await page.getByRole('button',{name:'Search projects',exact:true}).click()
- await page.getByLabel('Project stage',{exact:true}).selectOption('option')
+ await page.getByLabel('Status',{exact:true}).selectOption('option')
  await expect(page.getByRole('button',{name:/Brief history fixture/})).toHaveCount(0)
- await page.getByLabel('Project stage',{exact:true}).selectOption('brief')
+ await page.getByLabel('Status',{exact:true}).selectOption('brief')
  await page.getByRole('button',{name:/Brief history fixture/}).click()
+ // A project card opens the immersive design workspace; brief and history live in project details.
+ await page.getByRole('button',{name:'Project details',exact:true}).click()
  await page.getByRole('button',{name:'Edit brief',exact:true}).click()
  await page.getByText('Budget, priorities and stakeholders',{exact:true}).click()
  await expect(page.getByLabel('Budget ceiling (MYR)',{exact:true})).toHaveValue('10000.50')
@@ -27,6 +31,7 @@ test('structured brief restore, profile defaults and last-administrator browser 
  await page.getByLabel('Known site facts and sources',{exact:true}).fill('Existing entrance retained; fixture plan')
  await page.getByLabel('Unknown site facts to verify',{exact:true}).fill('Verify underground services')
  await page.getByRole('button',{name:'Save brief',exact:true}).click()
+ await openProjectRecords(page)
  await page.getByText('Project brief history',{exact:true}).click()
  await expect(page.getByText('Unknown facts to verify: Verify underground services',{exact:true})).toBeVisible()
  await expect(page.getByText('Priorities: Changed priority',{exact:true})).toBeVisible()

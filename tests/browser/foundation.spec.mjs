@@ -1,3 +1,4 @@
+import { navigate, openDetailedWorkspace, openExploreMap } from '../studio-helpers.mjs'
 import { test, expect } from '@playwright/test'
 import { mkdir } from 'node:fs/promises'
 
@@ -6,20 +7,25 @@ test('Terra Draw polygon saves and reloads as an explicitly local Demo draft', a
   page.on('request', request => { if (/\/api\/v1\/(session|organisations)/.test(request.url())) protectedCalls.push(request.url()) })
   await page.goto('/')
   await page.getByRole('button', { name: 'Open Browser Demo' }).click()
-  await page.getByRole('navigation').getByRole('button', { name: 'Explore Map' }).click()
+  await openExploreMap(page)
   await page.getByRole('button', { name: 'Continue with this site' }).click()
   await page.getByLabel('Project name').fill('Drawing fixture')
   await page.getByLabel('Internal sponsor').fill('Fixture sponsor')
   await page.getByRole('button', { name: 'Create project', exact: true }).click()
-  await page.getByRole('button', { name: 'Open geometry workspace' }).click()
-  await page.getByRole('button', { name: 'Start from selected locator' }).click()
+  await openDetailedWorkspace(page)
+  await page.getByRole('button', { name: 'Start building on this site' }).click()
+  // Starting to build re-enables the embedded map; this check drafts on the detailed canvas.
+  const embed = page.getByLabel('Embed design on map', { exact: true })
+  if (await embed.isChecked()) await embed.uncheck()
+  await page.getByText('Draw and snap', { exact: true }).click()
   await expect(page.getByText('Ready to draw. Numeric coordinates are also available below.', { exact: true })).toBeVisible()
   await page.getByLabel('Geometry to add or replace').selectOption('target')
   await page.getByRole('button', { name: 'Draw polygon', exact: true }).click()
-  const canvas = page.getByRole('region', { name: 'Geometry drawing canvas' }).locator('canvas')
+  const canvas = page.getByRole('region', { name: 'Geometry drawing canvas' }).locator('canvas.mapboxgl-canvas')
   await canvas.scrollIntoViewIfNeeded()
   const bounds = await canvas.boundingBox()
   for (const [x,y] of [[.4,.4],[.6,.4],[.6,.6],[.4,.4]]) await page.mouse.click(bounds.x + bounds.width*x, bounds.y + bounds.height*y)
+  await page.keyboard.press('Enter')
   await expect(page.getByLabel('Longitude, latitude coordinates')).not.toHaveValue('')
   await page.getByLabel('Geometry name').fill('Drawn target')
   await page.getByLabel('Source note and uncertainty', { exact: true }).fill('Drawn fixture only')
@@ -29,7 +35,7 @@ test('Terra Draw polygon saves and reloads as an explicitly local Demo draft', a
   await page.reload()
   await page.getByRole('button', { name: 'Open Browser Demo' }).click()
   await page.getByRole('button', { name: /Drawing fixture/ }).click()
-  await page.getByRole('button', { name: 'Open geometry workspace' }).click()
+  await openDetailedWorkspace(page)
   await expect(page.getByText('Drawn target · Quantity unavailable in Demo', { exact: true })).toBeVisible()
   expect(protectedCalls).toEqual([])
 })
@@ -59,7 +65,7 @@ test('both project purposes preserve selected site, reload, edit and archive in 
   await expect(page.getByRole('heading', { name: 'Find your first site.' })).toBeVisible()
   await expect(page.getByText('Local browser storage only', { exact: false })).toBeVisible()
   for (const [index, purpose] of ['Developer decision', 'Contractor proposal'].entries()) {
-    await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('button', { name: 'Explore Map' }).click()
+    await openExploreMap(page)
     await page.getByLabel('West longitude').fill('101.681')
     await page.getByLabel('South latitude').fill('3.131')
     await page.getByLabel('East longitude').fill('101.683')
@@ -78,8 +84,11 @@ test('both project purposes preserve selected site, reload, edit and archive in 
     await page.getByLabel('What problem should this project address?').fill('An observation requiring site verification.')
     await page.getByRole('button', { name: 'Save brief', exact: true }).click()
     await expect(page.getByText('An observation requiring site verification.', { exact: true })).toBeVisible()
-    await expect(page.getByText('Saved · revision 2', { exact: true })).toBeVisible()
+    await expect(page.getByText('Brief saved · version 2', { exact: true })).toBeVisible()
     await page.getByRole('button', { name: 'Reload saved project', exact: true }).click()
+    // Reloading reopens the immersive studio; brief and archive controls live in project details.
+    const details = page.getByRole('button', { name: 'Project details', exact: true })
+    await details.waitFor({ state: 'visible', timeout: 5000 }).then(() => details.click(), () => undefined)
     await expect(page.getByText('An observation requiring site verification.', { exact: true })).toBeVisible()
     if (index === 0) {
       await mkdir('artifacts', { recursive: true })
@@ -108,7 +117,7 @@ test('both project purposes preserve selected site, reload, edit and archive in 
 test('coordinate correction and unsaved navigation retain user input', async ({ page }) => {
   await page.goto('/')
   await page.getByRole('button', { name: 'Open Browser Demo' }).click()
-  await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('button', { name: 'Explore Map' }).click()
+  await openExploreMap(page)
   await page.getByLabel('East longitude').fill('100')
   await page.getByRole('button', { name: 'Apply coordinates' }).click()
   await expect(page.getByRole('alert')).toContainText('West must be less than east')
@@ -117,10 +126,10 @@ test('coordinate correction and unsaved navigation retain user input', async ({ 
   await page.getByRole('button', { name: 'Continue with this site' }).click()
   await page.getByLabel('Project name').fill('Unsaved fixture')
   page.once('dialog', (dialog) => dialog.dismiss())
-  await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('button', { name: 'Projects', exact: true }).click()
+  await navigate(page, 'Projects')
   await expect(page.getByLabel('Project name')).toHaveValue('Unsaved fixture')
   page.once('dialog', (dialog) => dialog.accept())
-  await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('button', { name: 'Projects', exact: true }).click()
+  await navigate(page, 'Projects')
   await expect(page.getByRole('heading', { name: 'Find your first site.' })).toBeVisible()
 })
 
@@ -143,7 +152,12 @@ test('keyboard can enter Demo and reach the labelled coordinate form', async ({ 
   await expect(page.locator('#main-content')).toBeFocused()
   await page.getByRole('button', { name: 'Open Browser Demo' }).focus()
   await page.keyboard.press('Enter')
-  const explore = page.getByRole('navigation', { name: 'Main navigation' }).getByRole('button', { name: 'Explore Map' })
+  const desktopExplore = page.getByRole('navigation', { name: 'Main navigation' }).getByRole('button', { name: 'Explore Map' })
+  if (!(await desktopExplore.isVisible())) {
+    await page.getByRole('button', { name: 'Open workspace navigation', exact: true }).focus()
+    await page.keyboard.press('Enter')
+  }
+  const explore = (await desktopExplore.isVisible()) ? desktopExplore : page.getByRole('navigation', { name: 'Mobile workspace navigation' }).getByRole('button', { name: 'Explore Map' })
   await explore.focus()
   await page.keyboard.press('Enter')
   await page.getByLabel('West longitude').focus()

@@ -1,0 +1,70 @@
+import { openDetailedWorkspace, openPrecisionTerrain } from '../studio-helpers.mjs'
+import {test,expect} from '@playwright/test'
+import {mkdir} from 'node:fs/promises'
+import {randomUUID} from 'node:crypto'
+
+test('L06 terrain brushes, pond, independent options and saved revisions',async({page,request})=>{
+  test.setTimeout(120000)
+  const login=await request.post('http://127.0.0.1:8001/auth/v1/token',{data:{email:'fixture@example.invalid',password:'fixture-only'}})
+  expect(login.ok()).toBeTruthy()
+  const headers={Authorization:`Bearer ${(await login.json()).access_token}`}
+  const org=(await (await request.get('/api/v1/session',{headers})).json()).organisations[0].id
+  const result=await request.post(`/api/v1/organisations/${org}/projects`,{headers,data:{name:'L06 synthetic terrain',purpose:'contractor_proposal',stakeholder:'Test only',site:{bounds:[101.681,3.131,101.683,3.133]}}})
+  expect(result.status()).toBe(201)
+  const project=await result.json(),endpoint=`/api/v1/organisations/${org}/projects/${project.id}`
+  const polygon={type:'Polygon',coordinates:[[[101.681,3.131],[101.683,3.131],[101.683,3.133],[101.681,3.133],[101.681,3.131]]]}
+  const target={id:randomUUID(),name:'Traced target',geometry:polygon,provenance:'estimated',source_note:'Synthetic control plan'}
+  const data={expected_revision:0,boundary:polygon,boundary_provenance:'estimated',boundary_source:'Synthetic',targets:[target],scenarios:{baseline:{name:'Baseline',items:[]},option_a:{name:'A',items:[{id:randomUUID(),name:'Concept bench',kind:'bench',geometry:{type:'Point',coordinates:[101.6815,3.1325]},provenance:'estimated',source_note:'Synthetic object'}]},option_b:{name:'B',items:[]}}}
+  expect((await request.post(`${endpoint}/workspace`,{headers,data})).ok()).toBeTruthy()
+  await page.goto('/')
+  await page.getByLabel('Email address').fill('fixture@example.invalid')
+  await page.getByLabel('Password',{exact:true}).fill('fixture-only')
+  await page.getByRole('button',{name:'Sign in',exact:true}).click()
+  const organisation=page.getByRole('combobox',{name:'Active organisation',exact:true})
+  await expect(organisation).toBeVisible()
+  if(await organisation.inputValue()!==org) await organisation.selectOption(org)
+  await page.getByRole('button',{name:/L06 synthetic terrain/}).click()
+  await openDetailedWorkspace(page)
+  await page.getByRole('group',{name:'Scenario selection'}).getByRole('button',{name:'A',exact:true}).click()
+  await openPrecisionTerrain(page)
+  await page.getByRole('button',{name:'Create concept terrain',exact:true}).click()
+  await expect(page.getByRole('alert').filter({hasText:'Declare the vertical datum'})).toBeVisible()
+  await page.getByLabel('Vertical datum',{exact:true}).fill('Assumed local datum; not surveyed')
+  await page.getByLabel('Terrain source or assumption').fill('Synthetic flat baseline for UI testing')
+  await page.getByRole('button',{name:'Create concept terrain',exact:true}).click()
+  await expect(page.getByRole('img',{name:'Interactive terrain height grid'})).toBeVisible()
+  await page.getByRole('button',{name:'Apply brush at node',exact:true}).click()
+  await expect(page.getByText('Edited terrain: flat-ground shade analysis is blocked.',{exact:true})).toBeVisible()
+  await page.getByRole('button',{name:'Undo workspace edit',exact:true}).click()
+  await expect(page.getByText('Edited terrain: flat-ground shade analysis is blocked.',{exact:true})).not.toBeVisible()
+  await page.getByRole('button',{name:'Redo workspace edit',exact:true}).click()
+  await page.getByLabel('Numeric elevation / pond bed (m)',{exact:true}).fill('-2')
+  await page.getByLabel('Pond water elevation (m)',{exact:true}).fill('-0.5')
+  await page.getByRole('button',{name:'Lower selected region and add concept pond',exact:true}).click()
+  await expect(page.getByText(/nominal node depth 1.50/)).toBeVisible()
+  await page.getByRole('button',{name:'Validate & save workspace'}).click()
+  await expect(page.getByText('Workspace revision 2 saved.',{exact:false})).toBeVisible()
+  const saved=(await (await request.get(`${endpoint}/workspace`,{headers})).json()).data
+  expect(saved.scenarios.option_a.terrain.ponds).toHaveLength(1)
+  expect(saved.scenarios.option_a.terrain_anchors[0].ground_elevation_m).toBeCloseTo(-2)
+  expect(saved.scenarios.baseline.terrain).toBeNull()
+  expect(saved.scenarios.option_b.terrain).toBeNull()
+  await page.reload();await openDetailedWorkspace(page)
+  await page.getByRole('group',{name:'Scenario selection'}).getByRole('button',{name:'A',exact:true}).click()
+  await openPrecisionTerrain(page)
+  await expect(page.getByText(/nominal node depth 1.50/)).toBeVisible()
+  await page.getByLabel('Show original flat surface (before)').check()
+  await expect(page.getByRole('button',{name:'Apply brush at node'})).toBeDisabled()
+  await page.getByLabel('Show original flat surface (before)').uncheck()
+  await page.getByRole('button',{name:'Reset terrain to original flat surface',exact:true}).click()
+  await expect(page.getByText(/nominal node depth 1.50/)).not.toBeVisible()
+  await page.getByRole('button',{name:'Undo workspace edit',exact:true}).click()
+  await expect(page.getByText(/nominal node depth 1.50/)).toBeVisible()
+  await mkdir('artifacts',{recursive:true})
+  await page.getByRole('img',{name:'Interactive terrain height grid'}).screenshot({path:'artifacts/l06-grid.png'})
+  await page.getByRole('img',{name:'Isometric concept terrain preview'}).screenshot({path:'artifacts/l06-preview.png'})
+  await page.setViewportSize({width:390,height:844})
+  const bounds=await page.getByRole('img',{name:'Isometric concept terrain preview'}).boundingBox()
+  expect(bounds.width).toBeLessThanOrEqual(390)
+  await page.getByRole('img',{name:'Isometric concept terrain preview'}).screenshot({path:'artifacts/l06-mobile-preview.png'})
+})

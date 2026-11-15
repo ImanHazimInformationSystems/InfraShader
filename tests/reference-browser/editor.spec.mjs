@@ -1,0 +1,113 @@
+import { openDetailedWorkspace, openPrecisionTerrain, openStudioTool } from '../studio-helpers.mjs'
+import {test,expect} from '@playwright/test'
+import {mkdir} from 'node:fs/promises'
+import {randomUUID} from 'node:crypto'
+
+test('Integrated scene stroke, cancellation, undo and persistence',async({page,request})=>{
+  test.setTimeout(120000)
+  const login=await request.post('http://127.0.0.1:8001/auth/v1/token',{data:{email:'fixture@example.invalid',password:'fixture-only'}})
+  expect(login.ok()).toBeTruthy()
+  const headers={Authorization:`Bearer ${(await login.json()).access_token}`}
+  const org=(await (await request.get('/api/v1/session',{headers})).json()).organisations[0].id
+  const result=await request.post(`/api/v1/organisations/${org}/projects`,{headers,data:{name:'Integrated scene terrain',purpose:'contractor_proposal',stakeholder:'Test only',site:{bounds:[101.681,3.131,101.683,3.133]}}})
+  expect(result.status()).toBe(201)
+  const project=await result.json(),endpoint=`/api/v1/organisations/${org}/projects/${project.id}`
+  const polygon={type:'Polygon',coordinates:[[[101.681,3.131],[101.683,3.131],[101.683,3.133],[101.681,3.133],[101.681,3.131]]]}
+  const target={id:randomUUID(),name:'Traced target',geometry:polygon,provenance:'estimated',source_note:'Synthetic control plan'}
+  const data={expected_revision:0,boundary:polygon,boundary_provenance:'estimated',boundary_source:'Synthetic',targets:[target],scenarios:{baseline:{name:'Baseline',items:[]},option_a:{name:'A',items:[{id:randomUUID(),name:'Concept bench',kind:'bench',geometry:{type:'Point',coordinates:[101.6815,3.1325]},provenance:'estimated',source_note:'Synthetic object'}]},option_b:{name:'B',items:[]}}}
+  expect((await request.post(`${endpoint}/workspace`,{headers,data})).ok()).toBeTruthy()
+  await page.goto('/')
+  await page.getByLabel('Email address').fill('fixture@example.invalid')
+  await page.getByLabel('Password',{exact:true}).fill('fixture-only')
+  await page.getByRole('button',{name:'Sign in',exact:true}).click()
+  const organisation=page.getByRole('combobox',{name:'Active organisation',exact:true})
+  await expect(organisation).toBeVisible()
+  if(await organisation.inputValue()!==org) await organisation.selectOption(org)
+  await page.getByRole('button',{name:/Integrated scene terrain/}).click()
+  await openDetailedWorkspace(page)
+  await page.getByRole('group',{name:'Scenario selection'}).getByRole('button',{name:'A',exact:true}).click()
+  await openPrecisionTerrain(page)
+  await page.getByRole('button',{name:'Create concept terrain',exact:true}).click()
+  await expect(page.getByRole('alert').filter({hasText:'Declare the vertical datum'})).toBeVisible()
+  await page.getByLabel('Vertical datum',{exact:true}).fill('Assumed local datum; not surveyed')
+  await page.getByLabel('Terrain source or assumption').fill('Synthetic flat baseline for UI testing')
+  await page.getByRole('button',{name:'Create concept terrain',exact:true}).click()
+  await expect(page.getByRole('img',{name:'Interactive terrain height grid'})).toBeVisible()
+  // The integrated Scene tool is offered in map view with Objects open (not while the Terrain
+  // builder brush is active, which is always the case in the one-page list view).
+  await page.getByRole('button',{name:'Map view',exact:true}).click()
+  // Undo/redo and Validate & save show in map view with precision tools, a toggle in the
+  // Layout panel that stays on when Objects opens.
+  await openStudioTool(page,'Layout')
+  await page.getByRole('button',{name:'Precision tools',exact:true}).click()
+  await openStudioTool(page,'Objects')
+  const panel=page.getByRole('group',{name:'Licensed object palette',exact:true})
+  // The 3D preview toggle is with the palette's precision controls (simple controls by default).
+  const precisionObjects=panel.getByRole('button',{name:'Precision object controls',exact:true})
+  if(await precisionObjects.isVisible()) await precisionObjects.click()
+  await panel.getByLabel('Show 3D object preview and layout').check()
+  await panel.getByRole('button',{name:'Place object',exact:true}).click()
+  await expect(panel.getByRole('button',{name:'Apply object changes',exact:true})).toBeEnabled()
+  const canvas=page.getByRole('region',{name:'Studio canvas'}).getByRole('img',{name:'Interactive 3D object scene'})
+  await expect(canvas).toBeVisible()
+  await page.getByRole('combobox',{name:'Scene tool',exact:true}).selectOption('raise')
+  await page.getByLabel('Scene brush radius (m)',{exact:true}).fill('60')
+  await page.getByLabel('Scene stroke strength (m)',{exact:true}).fill('3')
+  await canvas.scrollIntoViewIfNeeded()
+  const box=await canvas.boundingBox()
+  const x=box.x+box.width/2,y=box.y+box.height/2
+  await page.mouse.move(x,y);await page.mouse.down();await page.mouse.move(x+35,y,{steps:10});await page.mouse.up()
+  await expect(page.getByText('Edited terrain: flat-ground shade analysis is blocked.',{exact:true})).toHaveCount(1)
+  await page.getByRole('button',{name:'Undo workspace edit',exact:true}).click()
+  await expect(page.getByText('Edited terrain: flat-ground shade analysis is blocked.',{exact:true})).toHaveCount(0)
+  await page.getByRole('button',{name:'Redo workspace edit',exact:true}).click()
+  await expect(page.getByText('Edited terrain: flat-ground shade analysis is blocked.',{exact:true})).toHaveCount(1)
+  await page.getByRole('combobox',{name:'Scene tool',exact:true}).selectOption('move')
+  await canvas.scrollIntoViewIfNeeded()
+  const moveBox = await canvas.boundingBox()
+  await page.mouse.click(moveBox.x + moveBox.width/2, moveBox.y + moveBox.height/2)
+  await expect(panel.getByRole('button',{name:'Apply object changes',exact:true})).toBeEnabled()
+  await page.getByRole('combobox',{name:'Scene tool',exact:true}).selectOption('raise')
+  await page.getByRole('button',{name:'Validate & save workspace',exact:true}).click()
+  await expect(page.getByText('Workspace revision 2 saved.',{exact:false})).toBeVisible()
+  const saved=(await (await request.get(`${endpoint}/workspace`,{headers})).json()).data
+  expect(Math.max(...saved.scenarios.option_a.terrain.heights)).toBeGreaterThan(0)
+  expect(saved.scenarios.option_b.terrain).toBeNull()
+  const placed=saved.scenarios.option_a.items.find(i=>i.object_instance)
+  expect(placed.object_pose.ground_elevation_m).toBeGreaterThan(0)
+  expect(placed.quantity.value).toBe(1)
+  // Saving re-renders the scene; wait for the new canvas before measuring it.
+  await expect(canvas).toBeVisible()
+  await canvas.scrollIntoViewIfNeeded()
+  const nextBox=await canvas.boundingBox()
+  await page.mouse.move(nextBox.x+nextBox.width/2,nextBox.y+nextBox.height/2)
+  await page.mouse.down();await page.mouse.move(nextBox.x+nextBox.width/2+20,nextBox.y+nextBox.height/2,{steps:5})
+  await page.keyboard.press('Escape');await page.mouse.up()
+  await expect(page.getByRole('button',{name:'Validate & save workspace',exact:true})).toBeDisabled()
+  await page.getByRole('combobox',{name:'Scene tool',exact:true}).selectOption('navigate')
+  await canvas.scrollIntoViewIfNeeded()
+  const nav = await canvas.boundingBox()
+  await page.mouse.move(nav.x+nav.width/2,nav.y+nav.height/2)
+  await page.mouse.down();await page.mouse.move(nav.x+nav.width/2+25,nav.y+nav.height/2,{steps:3});await page.mouse.up()
+  await expect(page.getByRole('button',{name:'Validate & save workspace',exact:true})).toBeDisabled()
+  await mkdir('artifacts',{recursive:true})
+  await canvas.screenshot({path:'artifacts/l04-integrated-terrain.png'})
+  await page.reload();await openDetailedWorkspace(page)
+  await page.getByRole('group',{name:'Scenario selection'}).getByRole('button',{name:'A',exact:true}).click()
+  await expect(page.getByText('Edited terrain: flat-ground shade analysis is blocked.',{exact:true})).toHaveCount(1)
+  await page.getByRole('button',{name:'Duplicate Concept bench',exact:true}).click()
+  await page.getByLabel('Search work items',{exact:true}).fill('Concept bench copy')
+  await expect(page.getByRole('button',{name:'Edit Concept bench copy',exact:true})).toBeVisible()
+  await expect(page.getByRole('button',{name:'Edit Park bench',exact:true})).not.toBeVisible()
+  await page.getByLabel('Search work items',{exact:true}).fill('')
+  await page.getByRole('checkbox',{name:'Show category General',exact:true}).uncheck()
+  await page.getByRole('button',{name:'Validate & save workspace',exact:true}).click()
+  await expect(page.getByText('Workspace revision 3 saved.',{exact:false})).toBeVisible()
+  const duplicated=(await (await request.get(`${endpoint}/workspace`,{headers})).json()).data.scenarios.option_a.items
+  expect(duplicated).toHaveLength(3)
+  expect(new Set(duplicated.map(i=>i.id)).size).toBe(3)
+  expect(duplicated.every(i=>i.quantity.value===1)).toBe(true)
+
+})
+
+

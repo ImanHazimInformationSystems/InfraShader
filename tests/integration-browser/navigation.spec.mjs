@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 import { randomUUID } from 'node:crypto'
 
 test('project URLs reload, back navigation protects unsaved work and foreign routes deny access', async ({ page, request }) => {
-  const login = await request.post('http://127.0.0.1:8000/auth/v1/token', { data: { email: 'fixture@example.invalid', password: 'fixture-only' } })
+  const login = await request.post(`${process.env.INFRA_TEST_API_URL || 'http://127.0.0.1:8000'}/auth/v1/token`, { data: { email: 'fixture@example.invalid', password: 'fixture-only' } })
   const headers = { Authorization: `Bearer ${(await login.json()).access_token}` }
   const org = (await (await request.get('/api/v1/session', { headers })).json()).organisations[0].id
   const project = await (await request.post(`/api/v1/organisations/${org}/projects`, { headers, data: { name: 'URL navigation fixture', purpose: 'developer_decision', stakeholder: 'Route test', site: { bounds: [101.681, 3.131, 101.683, 3.133] } } })).json()

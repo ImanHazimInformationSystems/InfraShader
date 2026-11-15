@@ -1,3 +1,4 @@
+import { openExploreMap } from '../studio-helpers.mjs'
 import { test, expect } from '@playwright/test'
 
 test('failed place search preserves input and an explicit retry selects the site', async ({page}) => {
@@ -8,7 +9,7 @@ test('failed place search preserves input and an explicit retry selects the site
   })
   await page.goto('/')
   await page.getByRole('button',{name:'Open Browser Demo'}).click()
-  await page.getByRole('navigation').getByRole('button',{name:'Explore Map'}).click()
+  await openExploreMap(page)
   await page.getByLabel('Search for a place').fill('Retained query')
   await page.getByRole('button',{name:'Search places',exact:true}).click()
   await expect(page.getByText('Place search unavailable or rate limited. Use coordinates or retry later.',{exact:true})).toBeVisible()
@@ -23,19 +24,20 @@ test('failed place search preserves input and an explicit retry selects the site
 test('place search and two-corner map extent carry into project creation', async ({page}) => {
   await page.route('https://photon.komoot.io/api/**',route => route.fulfill({json:{features:[{geometry:{type:'Point',coordinates:[101.682,3.132]},properties:{name:'Controlled place fixture',city:'Fixture city'}}]}}))
   await page.goto('/'); await page.getByRole('button',{name:'Open Browser Demo'}).click()
-  await page.getByRole('navigation').getByRole('button',{name:'Explore Map'}).click()
+  await openExploreMap(page)
   await page.getByLabel('Search for a place').fill('Controlled fixture')
   await page.getByRole('button',{name:'Search places',exact:true}).click()
   await page.getByRole('button',{name:'Controlled place fixture, Fixture city'}).click()
   await expect(page.getByLabel('West longitude')).toHaveValue('101.681')
   const map=page.getByRole('region',{name:'Explore site map'})
+  // Current interaction: a planning site shape (rectangle preset) applied from the map view.
   await page.getByRole('button',{name:'Select site on map',exact:true}).click()
-  const canvas=map.locator('canvas');await canvas.scrollIntoViewIfNeeded();const bounds=await canvas.boundingBox()
-  await page.mouse.click(bounds.x+bounds.width*.4,bounds.y+bounds.height*.4)
-  await page.mouse.click(bounds.x+bounds.width*.6,bounds.y+bounds.height*.6)
-  await expect(map.getByRole('status').filter({hasText:'Site extent selected.'})).toHaveText('Site extent selected. Continue or refine the coordinates.')
+  const selection=page.getByRole('region',{name:'Site selection controls'})
+  await selection.getByRole('button',{name:'Rectangle',exact:true}).click()
+  await selection.getByRole('button',{name:'Apply site shape',exact:true}).click()
+  await expect(map.getByRole('status').filter({hasText:'Site shape applied.'})).toHaveText('Site shape applied. Continue to create your project.')
   const west=await page.getByLabel('West longitude').inputValue()
-  expect(Number(west)).toBeGreaterThan(101.681)
+  expect(Math.abs(Number(west)-101.682)).toBeLessThan(0.05)
   await page.getByRole('button',{name:'Continue with this site'}).click()
   await page.getByLabel('Project name').fill('Map selected fixture');await page.getByLabel('Internal sponsor').fill('Test only')
   await page.getByRole('button',{name:'Create project',exact:true}).click()
@@ -44,7 +46,7 @@ test('place search and two-corner map extent carry into project creation', async
 test('search quota failure leaves numeric site selection available', async ({page}) => {
   await page.route('https://photon.komoot.io/api/**',route=>route.fulfill({status:429,json:{message:'Fixture quota'}}))
   await page.goto('/');await page.getByRole('button',{name:'Open Browser Demo'}).click()
-  await page.getByRole('navigation').getByRole('button',{name:'Explore Map'}).click()
+  await openExploreMap(page)
   await page.getByLabel('Search for a place').fill('Quota fixture');await page.getByRole('button',{name:'Search places',exact:true}).click()
   await expect(page.getByText('Place search unavailable or rate limited. Use coordinates or retry later.',{exact:true})).toBeVisible()
   await page.getByLabel('West longitude').fill('101.681');await page.getByLabel('South latitude').fill('3.131');await page.getByLabel('East longitude').fill('101.683');await page.getByLabel('North latitude').fill('3.133')

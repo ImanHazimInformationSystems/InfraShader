@@ -1,3 +1,4 @@
+import { openDetailedWorkspace } from '../studio-helpers.mjs'
 import {test,expect} from '@playwright/test'
 import {readFile,mkdir} from 'node:fs/promises'
 import {createHash,randomUUID} from 'node:crypto'
@@ -10,18 +11,19 @@ test('real local Supabase login refresh private photo edit/download and foreign 
  const owner=await login(fixture.users[0]),foreign=await login(fixture.users[1])
  const headers={Authorization:`Bearer ${owner.access_token}`}
  const session=await request.get('/api/v1/session',{headers});expect(session.status()).toBe(200)
- const org=(await session.json()).organisations[0].id
+ const org=(await session.json()).organisations.find(org=>org.name==='Real local services fixture').id
  const base=`/api/v1/organisations/${org}/projects`
  const created=await request.post(base,{headers,data:{name:'Live private evidence fixture',purpose:'developer_decision',stakeholder:'Fixture only',site:{bounds:[101.681,3.131,101.683,3.133]}}})
  expect(created.status()).toBe(201);const project=await created.json();const endpoint=`${base}/${project.id}`
  const geometry={type:'Polygon',coordinates:[[[101.681,3.131],[101.683,3.131],[101.683,3.133],[101.681,3.133],[101.681,3.131]]]}
  const target={id:randomUUID(),name:'Courtyard fixture',geometry,provenance:'estimated',source_note:'Fixture only'}
  expect((await request.post(`${endpoint}/workspace`,{headers,data:{expected_revision:0,boundary:geometry,boundary_provenance:'estimated',boundary_source:'Fixture',targets:[target],scenarios:{baseline:{name:'Baseline',items:[]},option_a:{name:'Option A',items:[]},option_b:{name:'Option B',items:[]}}}})).status()).toBe(200)
- await page.goto('/')
+ // Deep link selects the organisation from the URL; sign-in otherwise lands on the Home start page.
+ await page.goto(`/studio/organisations/${org}/projects/${project.id}`)
  await page.getByLabel('Email address').fill(fixture.users[0].email);await page.getByLabel('Password',{exact:true}).fill(fixture.users[0].password)
  await page.getByRole('button',{name:'Sign in',exact:true}).click()
- await page.getByRole('button',{name:/Live private evidence fixture/}).click()
- await page.getByRole('button',{name:'Open geometry workspace'}).click()
+ await expect(page.getByRole('heading',{name:'Live private evidence fixture',exact:true})).toBeVisible()
+ await openDetailedWorkspace(page)
  await page.getByText('Private site evidence',{exact:true}).click()
  await page.getByLabel('Photo',{exact:true}).setInputFiles('.local/live-evidence-fixture.png')
  await page.getByLabel('Photo description',{exact:true}).fill('Green fixture')
@@ -51,7 +53,7 @@ test('real local Supabase login refresh private photo edit/download and foreign 
  expect(refreshed.status()).toBe(200)
  expect((await request.get('/api/v1/session',{headers:{Authorization:`Bearer ${(await refreshed.json()).access_token}`}})).status()).toBe(200)
  await mkdir('artifacts',{recursive:true});await page.getByRole('img',{name:'Green fixture',exact:true}).screenshot({path:'artifacts/live-private-photo.png'})
- await page.reload();await expect(page.getByRole('heading',{name:'Live private evidence fixture',exact:true})).toBeVisible();await page.getByRole('button',{name:'Open geometry workspace'}).click();await page.getByText('Private site evidence',{exact:true}).click()
+ await page.reload();await expect(page.getByRole('heading',{name:'Live private evidence fixture',exact:true})).toBeVisible();await openDetailedWorkspace(page);await page.getByText('Private site evidence',{exact:true}).click()
  await expect(page.getByText('Fixture observation saved through real services',{exact:true})).toBeVisible()
  page.once('dialog',dialog=>dialog.accept())
  await page.getByRole('button',{name:'Remove photo Green fixture',exact:true}).click()
@@ -89,15 +91,22 @@ test('real local recovery email and password update in browser',async({page,requ
  expect(new URL(link).origin).toBe(fixture.supabase_url)
  await page.goto(link)
  await expect(page.getByRole('heading',{name:'Choose a new password',exact:true})).toBeVisible()
+ // Recovery must return to the app under test, not another local server (redirect allow-list).
+ expect(new URL(page.url()).origin).toBe(new URL(test.info().project.use.baseURL).origin)
  const password=`Changed-${randomUUID()}`
  await page.getByLabel('New password',{exact:true}).fill(password)
  await page.getByRole('button',{name:'Update password',exact:true}).click()
- await expect(page.getByRole('heading',{name:'Your projects',exact:true})).toBeVisible()
+ await expect(page.getByRole('heading',{name:'Design Studio',exact:true})).toBeVisible()
+ // In the access run this account also belongs to the onboarding spec's organisation; with two
+ // memberships and no saved choice the app asks which one to use.
+ const chooser=page.getByRole('region',{name:'Active organisation and workspace'}).getByRole('combobox',{name:'Organisation',exact:true})
+ if(await chooser.isVisible()) await chooser.selectOption({label:'Real local services fixture / administrator'})
+ await expect(page.getByRole('heading',{level:1,name:/^Good (morning|afternoon|evening)/})).toBeVisible()
  await page.getByRole('button',{name:'Sign out',exact:true}).click()
  await page.getByLabel('Email address',{exact:true}).fill(user.email)
  await page.getByLabel('Password',{exact:true}).fill(password)
  await page.getByRole('button',{name:'Sign in',exact:true}).click()
- await expect(page.getByRole('heading',{name:'Your projects',exact:true})).toBeVisible()
+ await expect(page.getByRole('heading',{level:1,name:/^Good (morning|afternoon|evening)/})).toBeVisible()
  const old=await request.post(`${fixture.supabase_url}/auth/v1/token?grant_type=password`,{headers:{apikey:fixture.public_key},data:{email:user.email,password:user.password}})
  expect(old.status()).toBe(400)
  await request.delete('http://127.0.0.1:54334/api/v1/messages',{data:{IDs:[mail.ID]}})
@@ -115,7 +124,7 @@ test('real local recovery email and password update in browser',async({page,requ
  await page.getByLabel('Email address',{exact:true}).fill(user.email)
  await page.getByLabel('Password',{exact:true}).fill(changedPassword)
  await page.getByRole('button',{name:'Sign in',exact:true}).click()
- await expect(page.getByRole('heading',{name:'Your projects',exact:true})).toBeVisible()
+ await expect(page.getByRole('heading',{level:1,name:/^Good (morning|afternoon|evening)/})).toBeVisible()
  await page.getByRole('navigation').getByRole('button',{name:'Settings and members',exact:true}).click()
  await page.getByText('Account email and password',{exact:true}).click()
  const beforeMail=new Set((await (await request.get('http://127.0.0.1:54334/api/v1/messages')).json()).messages.map(item=>item.ID))

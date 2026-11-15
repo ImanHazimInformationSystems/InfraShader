@@ -1,5 +1,7 @@
+import { openDetailedWorkspace, signInFixture, openWorkspaceProjects, openStudiesStep } from '../studio-helpers.mjs'
+import {checkOutputPdf, pdfText} from '../check-output-pdf.mjs'
 import { test, expect } from '@playwright/test'
-import { mkdir, readFile } from 'node:fs/promises'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
 
 const boundary = '101.681, 3.131\n101.683, 3.131\n101.683, 3.133\n101.681, 3.133\n101.681, 3.131'
 const roof = '101.6812, 3.1312\n101.6813, 3.1312\n101.6813, 3.1313\n101.6812, 3.1313\n101.6812, 3.1312'
@@ -9,10 +11,8 @@ for (const purpose of ['Developer decision', 'Contractor proposal']) {
     test.setTimeout(90000)
     const errors = []; page.on('pageerror', error => errors.push(error.message))
     await page.goto('/')
-    await page.getByLabel('Email address').fill('fixture@example.invalid')
-    await page.getByLabel('Password', { exact: true }).fill('fixture-only')
-    await page.getByRole('button', { name: 'Sign in', exact: true }).click()
-    await expect(page.getByRole('heading', { name: 'Your projects' })).toBeVisible()
+    await signInFixture(page)
+    await openWorkspaceProjects(page, 'studio')
     await page.getByRole('navigation').getByRole('button', { name: 'Explore Map' }).click()
     await page.getByLabel('West longitude').fill('101.681')
     await page.getByLabel('South latitude').fill('3.131')
@@ -28,15 +28,16 @@ for (const purpose of ['Developer decision', 'Contractor proposal']) {
     await page.getByLabel('What outcome are you looking for?').fill('Compare supported scope')
     await page.getByLabel('Relevant use times').fill('Weekdays at noon')
     await page.getByRole('button', { name: 'Create project', exact: true }).click()
-    await page.getByRole('button', { name: 'Open geometry workspace' }).click()
-    await page.getByRole('button', { name: 'Start from selected locator' }).click()
+    await openDetailedWorkspace(page)
+    await page.getByRole('button', { name: 'Start building on this site' }).click()
+    await page.getByText('Draw and snap', { exact: true }).click()
     await expect(page.getByText('Ready to draw. Numeric coordinates are also available below.', { exact: true })).toBeVisible()
     await page.getByLabel('Geometry to add or replace').selectOption('target')
     await page.getByLabel('Geometry name').fill('Courtyard target')
     await page.getByLabel('Longitude, latitude coordinates').fill(boundary)
     await page.getByLabel('Source note and uncertainty', { exact: true }).fill('Integration fixture only')
     await page.getByRole('button', { name: 'Add to draft', exact: true }).click()
-    await page.getByRole('button', { name: 'Option A', exact: true }).click()
+    await page.getByRole('group', { name: 'Scenario selection' }).getByRole('button', { name: 'Option A', exact: true }).click()
     await page.getByLabel('Geometry to add or replace').selectOption('canopy')
     await page.getByLabel('Geometry name').fill('Fixture canopy')
     await page.getByText('Canopy dimensions and rotation',{exact:true}).click()
@@ -52,6 +53,7 @@ for (const purpose of ['Developer decision', 'Contractor proposal']) {
     await page.getByRole('button', { name: 'Validate & save workspace' }).click()
     await expect(page.getByText('Workspace revision 1 saved.', { exact: false })).toBeVisible()
     await expect(page.getByRole('cell', { name: /12[0-9]\.\d{2} m2/ })).toBeVisible()
+    await openStudiesStep(page, 'prices')
     await page.getByText('Catalogue: add an explicit dated rate', { exact: true }).click()
     await page.getByLabel('Rate code', { exact: true }).fill(`CANOPY-${purpose}`)
     await page.getByLabel('Rate category', { exact: true }).fill('Shade structures')
@@ -61,6 +63,8 @@ for (const purpose of ['Developer decision', 'Contractor proposal']) {
     await page.getByLabel('Rate source and exclusions', { exact: true }).fill('Integration fixture only')
     await page.getByLabel('labour', { exact: true }).check()
     await page.getByRole('button', { name: 'Save new rate version' }).click()
+    // The table of rate choices is an advanced disclosure; Pricing is the main route.
+    await page.getByText(/^Assign rates in a table \(advanced\)/).click()
     const rateSelect = page.getByRole('combobox', { name: 'Rate for Fixture canopy', exact: true })
     const createdRate = rateSelect.locator('option').filter({hasText:`CANOPY-${purpose} v1`})
     await expect(createdRate).toHaveCount(1)
@@ -81,9 +85,11 @@ for (const purpose of ['Developer decision', 'Contractor proposal']) {
     await expect(page.getByText('No matching rates.',{exact:true})).toBeVisible()
     await expect(rateSelect).toHaveValue(assignedVersion)
 
+    await openStudiesStep(page, 'shade')
     await page.getByLabel('Date/time with explicit timezone offset').fill('2026-03-21T12:00:00+08:00')
     await page.getByRole('button', { name: 'Calculate all three scenarios' }).click()
     await expect(page.getByText(/Option A: .*modeled coverage/)).toBeVisible()
+    await openStudiesStep(page, 'estimate')
     await page.getByRole('button', { name: 'Add labour charge', exact: true }).click()
     await page.getByLabel('labour charge (MYR)', { exact: true }).fill('75.50')
     await page.getByLabel('labour charge source and scope', { exact: true }).fill('Duplicate component fixture')
@@ -120,27 +126,70 @@ for (const purpose of ['Developer decision', 'Contractor proposal']) {
       await expect(comparison.getByText('transport: 75.50; One delivery fixture',{exact:true})).toBeVisible()
       await expect(comparison.getByText('transport: 100.50; One delivery fixture',{exact:true})).toBeVisible()
     }
+    await openStudiesStep(page, 'proposal')
     await page.getByText(`Review and issue ${purpose === 'Developer decision' ? 'developer decision brief' : 'contractor client proposal'}`, { exact: true }).click()
-    await page.getByLabel('Complete estimate for preferred option').selectOption({ index: 1 })
+    const totalPicker = page.getByLabel('Total to use')
+    await totalPicker.selectOption(await totalPicker.locator('option', { hasText: 'complete and current' }).first().getAttribute('value'))
+    // A draft can be previewed before the issue fields are filled; it lists what is missing.
+    await expect(page.getByRole('region', { name: 'Before you can issue' }).filter({ visible: true })).toContainText('Assumptions')
+    const early = page.waitForResponse((response) => response.url().includes('/output-preview'))
+    await page.getByRole('button', { name: 'Preview draft PDF', exact: true }).click()
+    const earlyDraft = await (await early).json()
+    expect(earlyDraft.draft).toBe(true)
+    expect(earlyDraft.draft_issues.join(' ')).toContain('Assumptions: not provided yet.')
+    await expect(page.getByTitle('Draft PDF preview', { exact: true })).toBeVisible({ timeout: 30000 })
+    await page.getByRole('button', { name: 'Close preview', exact: true }).click()
     await page.getByLabel('Review criteria (one per line)').fill('Scope suitability\nAffordability')
     await page.getByLabel('Reviewer notes', { exact: true }).fill('Reviewed fixture; requires site verification.')
     await page.getByLabel('Customer-facing scope narrative', { exact: true }).fill('A shaded waiting space with sourced scope.')
+    if (purpose === 'Contractor proposal') {
+      await page.getByLabel('Proposal valid until', {exact:true}).fill('2099-12-31')
+      await page.getByLabel('Programme and delivery assumptions', {exact:true}).fill('Start after agreed site verification.')
+      await page.getByLabel('Maintenance scope or exclusions', {exact:true}).fill('Establishment care only; ongoing maintenance excluded.')
+      // L22 structured checklist (issuer-supplied; template v3).
+      await page.getByRole('button', {name:'Add maintenance task', exact:true}).click()
+      const task = page.getByRole('group', {name:'Maintenance task 1'})
+      await task.getByLabel('Task', {exact:true}).fill('Inspect canopy fixings and clear gutters')
+      await task.getByLabel('Responsibility', {exact:true}).selectOption('contractor')
+      await expect(page.getByText(/Complete the task and frequency for each row/)).toBeVisible()
+      await task.getByLabel('Frequency', {exact:true}).fill('Every 6 months in year one')
+      await task.getByLabel('Included in this price', {exact:true}).check()
+      await task.getByLabel('Task assumptions', {exact:true}).fill('Access from the paved courtyard during working hours')
+      await page.getByLabel('Changes since previous proposal', {exact:true}).fill('Initial fixture proposal.')
+      await page.getByLabel('Internal pricing exception review reason', {exact:true}).fill('Unknown validity accepted for synthetic fixture only.')
+      // The estimate's saved pricing readiness lives in the Estimate step.
+      await openStudiesStep(page, 'estimate')
+      await expect(page.getByRole('region', {name:'Pricing readiness'}).first()).toContainText('rate validity is not recorded')
+      await openStudiesStep(page, 'proposal')
+    }
     await page.getByLabel('Assumptions', { exact: true }).fill('Level site. ' + 'A long review sentence for multi-page PDF pagination. '.repeat(55))
     await page.getByLabel('Exclusions', { exact: true }).fill('No numerical shade claims or tree coverage.')
     page.once('dialog', dialog => dialog.accept())
     await page.reload()
-    await page.getByRole('button',{name:'Open geometry workspace'}).click()
+    await openDetailedWorkspace(page)
+    await openStudiesStep(page, 'proposal')
     await page.getByText(`Review and issue ${purpose === 'Developer decision' ? 'developer decision brief' : 'contractor client proposal'}`, { exact: true }).click()
     await page.getByRole('button', { name: 'Recover form draft', exact: true }).click()
     await expect(page.getByLabel('Customer-facing scope narrative', { exact: true })).toHaveValue('A shaded waiting space with sourced scope.')
     await expect(page.getByLabel('Reviewer notes', { exact: true })).toHaveValue('Reviewed fixture; requires site verification.')
+    if (purpose === 'Contractor proposal') await expect(page.getByRole('group', {name:'Maintenance task 1'}).getByLabel('Frequency', {exact:true})).toHaveValue('Every 6 months in year one')
     await page.getByRole('button', { name: 'Preview draft PDF', exact: true }).click()
     await expect(page.getByRole('link', { name: 'Download draft PDF', exact: true })).toBeVisible()
     await expect(page.getByTitle('Draft PDF preview', { exact: true })).toBeVisible()
     await expect(page.getByRole('button', { name: /Download (decision brief|client proposal) PDF/ })).toHaveCount(0)
     await page.getByRole('button', { name: 'Close preview', exact: true }).click()
+    let interruptRetention = purpose === 'Contractor proposal'
+    await page.route('**/outputs/*/file', async route => {
+      if (interruptRetention && route.request().method() === 'POST') {
+        interruptRetention = false
+        await route.fulfill({status:503, contentType:'application/json', body: JSON.stringify({error:{code:'fixture_outage',message:'Simulated retention outage'}})})
+      } else await route.continue()
+    })
     page.once('dialog', dialog => dialog.accept())
     await page.getByRole('button', { name: 'Confirm and issue new version' }).click()
+    // Feedback appears beside the Issue button: success, or a stored-PDF failure with a retry.
+    if (purpose === 'Contractor proposal') await expect(page.getByRole('alert').filter({hasText:'Issued, but the PDF is not stored yet'})).toBeVisible()
+    else await expect(page.getByRole('status').filter({hasText:'issued and its PDF saved'})).toBeVisible()
     const downloadButton = page.getByRole('button', { name: purpose === 'Developer decision' ? 'Download decision brief PDF' : 'Download client proposal PDF' })
     await expect(downloadButton).toBeVisible()
     const downloadPromise = page.waitForEvent('download')
@@ -152,6 +201,26 @@ for (const purpose of ['Developer decision', 'Contractor proposal']) {
     const bytes = await readFile(file)
     expect(bytes.subarray(0, 5).toString()).toBe('%PDF-')
     expect(bytes.length).toBeGreaterThan(10000)
+    checkOutputPdf(file)
+    // Template v3 (L23): scaled plan with legend, edge dimensions and honest survey disclaimer.
+    const text = pdfText(file)
+    expect(text).toMatch(/Site plan and shared target zones/)
+    expect(text).toMatch(/approx\. 1:[\d,]+ at 100% A4/)
+    expect(text).toMatch(/EPSG:32647/)
+    expect(text).toMatch(/not a measured survey/)
+    expect(text).toMatch(/\d+\.\d{2} m/)
+    if (purpose === 'Contractor proposal') {
+      expect(text).toMatch(/Maintenance responsibilities and assumptions/)
+      expect(text).toMatch(/Inspect canopy fixings and clear gutters/)
+      expect(text).toMatch(/does not generate maintenance recommendations/)
+    }
+    await writeFile(`artifacts/v3-${purpose.split(' ')[0].toLowerCase()}.pdf`, bytes)
+    const repeat = page.waitForEvent('download')
+    await downloadButton.click()
+    const second = await repeat
+    await second.saveAs(`${file}.retry.pdf`)
+    expect(await readFile(`${file}.retry.pdf`)).toEqual(bytes)
+    await page.screenshot({path:`artifacts/pricing-${purpose.split(' ')[0]}.png`, fullPage:true})
     expect(errors).toEqual([])
   })
 }
