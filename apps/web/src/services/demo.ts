@@ -31,6 +31,14 @@ export class DemoStore {
     this.write(items.map((item) => item.id === id ? next : item))
     return next
   }
+  delete(id: string, expectedRevision: number, name: string) {
+    const items = this.list()
+    const current = items.find(item => item.id === id)
+    if (!current) throw new Error('This Demo project no longer exists.')
+    if (current.revision !== expectedRevision) throw new Error('This project changed in another tab. Reload before deleting.')
+    if (current.name !== name) throw new Error('Type the exact project name to confirm deletion.')
+    this.write(items.filter(item => item.id !== id))
+  }
   private write(items: Project[]) {
     try { this.browserStorage().setItem(DEMO_STORAGE_KEY, JSON.stringify(items)) }
     catch { throw new Error('Browser Demo could not save. Check browser storage access and available space, then retry.') }

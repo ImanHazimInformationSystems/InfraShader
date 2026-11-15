@@ -1,3 +1,4 @@
+import TeamInvitations from './TeamInvitations'
 import { useEffect, useState, type FormEvent } from 'react'
 import { z } from 'zod'
 import type { Organisation } from '../domain/projects'
@@ -27,6 +28,17 @@ const eventsSchema = z.object({
   ),
 })
 const capabilities = [
+  'studio',
+  'review',
+  'read_project',
+  'create_project',
+  'edit_project',
+  'edit_geometry',
+  'edit_evidence',
+  'analyse',
+  'estimate',
+  'review_project',
+  'manage_project_access',
   'manage_members',
   'change_catalogue',
   'internal_pricing',
@@ -58,7 +70,7 @@ export default function SettingsPage({
   const [dirty, setDirty] = useState(false)
   const [refresh, setRefresh] = useState(0)
   const endpoint = `/api/v1/organisations/${organisation.id}`
-  const admin = organisation.role === 'administrator'
+  const admin = organisation.capabilities.includes('manage_members')
   useEffect(() => {
     let active = true
     Promise.all([
@@ -118,6 +130,7 @@ export default function SettingsPage({
             body: JSON.stringify({
               expected_revision: record.revision,
               name: form.get('name'),
+              workspaces: form.getAll('workspaces'),
               settings: {
                 timezone: form.get('timezone'),
                 currency: 'MYR',
@@ -211,7 +224,26 @@ export default function SettingsPage({
           onChange={changed}
         >
           <h2>Organisation defaults</h2>
+          {record.workspace_setup_required && (
+            <p role="status">
+              Legacy workspace access was preserved. Confirm the workspaces this organisation uses.
+            </p>
+          )}
           <fieldset disabled={!admin || busy || Boolean(editingKey && editingKey !== 'settings')}>
+            <fieldset>
+              <legend>Enabled workspaces</legend>
+              {['studio', 'review'].map((w) => (
+                <label key={w}>
+                  <input
+                    type="checkbox"
+                    name="workspaces"
+                    value={w}
+                    defaultChecked={record.workspaces.includes(w as 'studio' | 'review')}
+                  />
+                  {w === 'studio' ? 'Design Studio' : 'Organisation Review'}
+                </label>
+              ))}
+            </fieldset>
             <label>
               Organisation name
               <input name="name" required maxLength={160} defaultValue={record.name} />
@@ -261,10 +293,11 @@ export default function SettingsPage({
       />
       {admin && (
         <>
+          <TeamInvitations org={organisation.id} token={token} />
           <h2>Organisation members</h2>
           <p>
-            Existing memberships only. New accounts are provisioned through local Supabase and the
-            operator bootstrap command; invitations are not sent here.
+            Assign working capabilities explicitly. New members join with a verified account and a
+            team invitation; projects require separate grants.
           </p>
           {members.map((member) => (
             <form
@@ -302,8 +335,8 @@ export default function SettingsPage({
                   ))}
                 </fieldset>
                 <p>
-                  Administrators have all capabilities. Only administrators can change roles and
-                  access.
+                  Administration grants membership management only. Financial, project and workspace
+                  access require explicit capabilities.
                 </p>
                 <Button>Save membership</Button>
               </fieldset>

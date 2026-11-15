@@ -1,0 +1,250 @@
+.explore-tutorial-trigger {
+  gap: 7px;
+}
+.explore-tutorial {
+  width: min(530px, calc(100vw - 24px));
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid #ffffffb0;
+  border-radius: 24px;
+  background: #faf9fc;
+  color: #322931;
+  box-shadow:
+    0 28px 100px #250b2b66,
+    inset 0 1px white;
+  font-family: 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+}
+.explore-tutorial[open] {
+  animation: tutorial-arrive 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.explore-tutorial::backdrop {
+  background: #24131e85;
+  backdrop-filter: blur(5px);
+}
+.explore-tutorial header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px 12px;
+}
+.explore-tutorial header > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  letter-spacing: 0.13em;
+  font-weight: 650;
+  color: var(--primary);
+}
+.tutorial-close {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #ded8e3;
+  border-radius: 50%;
+  background: white;
+}
+.tutorial-progress {
+  display: flex;
+  gap: 6px;
+  padding: 0 24px 18px;
+}
+.tutorial-progress span {
+  flex: 1;
+  height: 4px;
+  border-radius: 4px;
+  background: #dfdbe4;
+  transition: background-color 200ms;
+}
+.tutorial-progress .reached {
+  background: var(--primary);
+}
+.tutorial-step {
+  animation: tutorial-step-in 230ms ease-out;
+}
+.tutorial-illustration {
+  height: 150px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  margin: 0 24px;
+  border-radius: 16px;
+  overflow: hidden;
+  background-color: #eeebf1;
+  background-image:
+    linear-gradient(25deg, transparent 45%, #fff9 45%, #fff9 48%, transparent 48%),
+    linear-gradient(115deg, transparent 60%, #fff9 60%, #fff9 63%, transparent 63%);
+}
+.tutorial-site-outline {
+  display: grid;
+  place-items: center;
+  width: 120px;
+  height: 74px;
+  color: var(--primary);
+  border: 2px dashed #9f7589;
+  background: #701f360c;
+  transform: rotate(-8deg);
+  border-radius: 6px;
+  position: relative;
+}
+.tutorial-site-outline > svg {
+  transform: rotate(8deg);
+}
+.tutorial-corner {
+  position: absolute;
+  display: none;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  font-size: 11px;
+  box-shadow: 0 0 0 5px #701f3614;
+}
+.tutorial-corner.first {
+  top: -12px;
+  left: -12px;
+}
+.tutorial-corner.second {
+  bottom: -12px;
+  right: -12px;
+}
+.tutorial-scene-1 .tutorial-corner {
+  display: grid;
+  animation: tutorial-arrive 400ms ease-out;
+}
+.tutorial-scene-2 .tutorial-site-outline,
+.tutorial-scene-3 .tutorial-site-outline {
+  border-style: solid;
+}
+.tutorial-map-caption {
+  position: absolute;
+  bottom: 8px;
+  font-size: 10px;
+  color: #706474;
+}
+.tutorial-copy {
+  padding: 22px 24px;
+}
+.tutorial-copy h2 {
+  margin: 6px 0 12px;
+  font-size: 27px;
+  font-weight: 650;
+  letter-spacing: -0.035em;
+}
+.tutorial-copy > p {
+  font-size: 14px;
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+.tutorial-tip {
+  border-left: 3px solid #ac8195;
+  background: #efecf2;
+  border-radius: 0 10px 10px 0;
+  padding: 12px 14px;
+  font-size: 12px;
+  line-height: 1.65;
+  color: #625968;
+}
+.explore-tutorial footer {
+  border-top: 1px solid #e2dce6;
+  padding: 16px 24px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.explore-tutorial footer > div {
+  display: flex;
+  gap: 8px;
+}
+.explore-tutorial .button {
+  min-height: 42px;
+  border-radius: 12px;
+  font-size: 12px;
+  padding: 10px 14px;
+  transition:
+    transform 160ms,
+    box-shadow 160ms;
+}
+.explore-tutorial .button.primary {
+  background: linear-gradient(#8a354e, #701f36);
+  box-shadow:
+    inset 0 1px #ffffff30,
+    0 3px #471324;
+}
+.explore-tutorial button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+.explore-tutorial button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+@keyframes tutorial-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes tutorial-step-in {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (max-width: 480px) {
+  .explore-tutorial header,
+  .tutorial-copy {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  .tutorial-illustration {
+    height: 115px;
+    margin: 0 18px;
+  }
+  .explore-tutorial footer {
+    padding: 14px;
+    flex-wrap: wrap;
+  }
+  .explore-tutorial .button {
+    padding: 9px 11px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .explore-tutorial[open],
+  .explore-tutorial *,
+  .explore-tutorial::backdrop {
+    animation: none !important;
+    transition: none !important;
+  }
+  .explore-tutorial button:hover,
+  .explore-tutorial button:active {
+    transform: none;
+  }
+}
+@media (max-width: 480px) {
+  .explore-toolbar {
+    right: 14px;
+    gap: 5px;
+  }
+  .explore-toolbar > .button {
+    min-width: 0;
+    padding: 8px;
+    font-size: 11px;
+  }
+  .explore-tutorial-trigger svg {
+    width: 14px;
+  }
+}

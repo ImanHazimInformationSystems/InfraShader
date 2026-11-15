@@ -1,37 +1,143 @@
 import { z } from 'zod'
-import { projectListSchema, projectSchema, sessionSchema, type ProjectInput } from '../domain/projects'
+import {
+  projectListSchema,
+  projectSchema,
+  sessionSchema,
+  type ProjectInput,
+} from '../domain/projects'
 
 const baseUrl = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 export class ApiError extends Error {
-  constructor(message: string, public status: number, public code: string, public requestId?: string) { super(message); this.name = 'ApiError' }
+  constructor(
+    message: string,
+    public status: number,
+    public code: string,
+    public requestId?: string,
+  ) {
+    super(message)
+    this.name = 'ApiError'
+  }
 }
-export async function request<T>(path: string, schema: z.ZodType<T>, token?: string, init: RequestInit = {}): Promise<T> {
-  let response: Response
-  try {
-    response = await fetch(`${baseUrl}${path}`, {
-      ...init, signal: init.signal ?? AbortSignal.timeout(15000),
-      headers: { ...(typeof init.body === 'string' ? { 'Content-Type': 'application/json' } : {}), ...(token ? { Authorization: `Bearer ${token}` } : {}), ...init.headers },
-    })
-  } catch { throw new ApiError('The API could not be reached. Check the connection and retry.', 0, 'network_error') }
+export async function request<T>(
+  path: string,
+  schema: z.ZodType<T>,
+  token?: string,
+  init: RequestInit = {},
+): Promise<T> {
+  let response: Response | undefined
+  // Safe reads are retried once after a transient network failure (dropped keep-alive socket,
+  // brief connectivity loss). Writes are never retried automatically; caller aborts are respected.
+  const idempotent = ['GET', 'HEAD'].includes((init.method ?? 'GET').toUpperCase())
+  for (let attempt = 0; !response; attempt += 1) {
+    try {
+      response = await fetch(`${baseUrl}${path}`, {
+        ...init,
+        signal: init.signal ?? AbortSignal.timeout(15000),
+        headers: {
+          ...(typeof init.body === 'string' ? { 'Content-Type': 'application/json' } : {}),
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...init.headers,
+        },
+      })
+    } catch {
+      if (idempotent && attempt === 0 && !init.signal?.aborted) {
+        await new Promise((resolve) => setTimeout(resolve, 400))
+        continue
+      }
+      throw new ApiError(
+        'The API could not be reached. Check the connection and retry.',
+        0,
+        'network_error',
+      )
+    }
+  }
   const requestId = response.headers.get('X-Request-ID') ?? undefined
   const data: unknown = await response.json().catch(() => null)
   if (!response.ok) {
-    const parsed = z.object({ error: z.object({ code: z.string(), message: z.string(), details: z.array(z.object({field: z.string(), message: z.string()})).optional().catch(undefined) }), request_id: z.string().optional() }).safeParse(data)
-    const detail = parsed.success ? (parsed.data.error.details ?? []).slice(0, 10).map((item) => `${item.field.replace(/^body\./, '')}: ${item.message}`).join('; ') : ''
-    throw new ApiError(parsed.success ? [parsed.data.error.message, detail].filter(Boolean).join(' ') : 'The request failed. Please retry.', response.status, parsed.success ? parsed.data.error.code : 'request_failed', requestId)
+    if (response.status === 401 && token)
+      window.dispatchEvent(new CustomEvent('infrashader:session-expired', { detail: token }))
+    const parsed = z
+      .object({
+        error: z.object({
+          code: z.string(),
+          message: z.string(),
+          details: z
+            .array(z.object({ field: z.string(), message: z.string() }))
+            .optional()
+            .catch(undefined),
+        }),
+        request_id: z.string().optional(),
+      })
+      .safeParse(data)
+    const detail = parsed.success
+      ? (parsed.data.error.details ?? [])
+          .slice(0, 10)
+          .map((item) => `${item.field.replace(/^body\./, '')}: ${item.message}`)
+          .join('; ')
+      : ''
+    throw new ApiError(
+      parsed.success
+        ? [parsed.data.error.message, detail].filter(Boolean).join(' ')
+        : 'The request failed. Please retry.',
+      response.status,
+      parsed.success ? parsed.data.error.code : 'request_failed',
+      requestId,
+    )
   }
   const parsed = schema.safeParse(data)
-  if (!parsed.success) throw new ApiError('The API returned an unexpected response. Retry or report this request to your operator.', 502, 'invalid_response', requestId)
+  if (!parsed.success)
+    throw new ApiError(
+      'The API returned an unexpected response. Retry or report this request to your operator.',
+      502,
+      'invalid_response',
+      requestId,
+    )
   return parsed.data
 }
-export const healthSchema = z.object({ status: z.literal('ok'), service: z.literal('infrashader-api'), version: z.string() })
-export const readinessSchema = z.object({ status: z.enum(['ready', 'unavailable']), checks: z.record(z.string(), z.string()) })
+export const healthSchema = z.object({
+  status: z.literal('ok'),
+  service: z.literal('infrashader-api'),
+  version: z.string(),
+})
+export const readinessSchema = z.object({
+  status: z.enum(['ready', 'unavailable']),
+  checks: z.record(z.string(), z.string()),
+})
 export const api = {
   health: () => request('/api/v1/health', healthSchema),
   readiness: () => request('/api/v1/readiness', readinessSchema),
   session: (token: string) => request('/api/v1/session', sessionSchema, token),
-  projects: (org: string, token: string, archived = false, offset = 0, query = '', sort = 'updated', stage = '') => request(`/api/v1/organisations/${org}/projects?limit=100&offset=${offset}&archived=${archived}&query=${encodeURIComponent(query)}&sort=${sort}&stage=${stage}`, projectListSchema, token),
-  project: (org: string, id: string, token: string) => request(`/api/v1/organisations/${org}/projects/${id}`, projectSchema, token),
-  create: (org: string, input: ProjectInput, token: string) => request(`/api/v1/organisations/${org}/projects`, projectSchema, token, { method: 'POST', body: JSON.stringify(input) }),
-  update: (org: string, id: string, patch: Partial<ProjectInput> & { expected_revision: number; archived?: boolean }, token: string) => request(`/api/v1/organisations/${org}/projects/${id}`, projectSchema, token, { method: 'PATCH', body: JSON.stringify(patch) }),
+  projects: (
+    org: string,
+    token: string,
+    archived = false,
+    offset = 0,
+    query = '',
+    sort = 'updated',
+    stage = '',
+    opportunity = '',
+    purpose = '',
+  ) =>
+    request(
+      `/api/v1/organisations/${org}/projects?limit=100&offset=${offset}&archived=${archived}&query=${encodeURIComponent(query)}&sort=${sort}&stage=${stage}&opportunity=${opportunity}&purpose=${purpose}`,
+      projectListSchema,
+      token,
+    ),
+  project: (org: string, id: string, token: string) =>
+    request(`/api/v1/organisations/${org}/projects/${id}`, projectSchema, token),
+  create: (org: string, input: ProjectInput, token: string) =>
+    request(`/api/v1/organisations/${org}/projects`, projectSchema, token, {
+      method: 'POST',
+      body: JSON.stringify(input),
+    }),
+  update: (
+    org: string,
+    id: string,
+    patch: Partial<ProjectInput> & { expected_revision: number; archived?: boolean },
+    token: string,
+  ) =>
+    request(`/api/v1/organisations/${org}/projects/${id}`, projectSchema, token, {
+      method: 'PATCH',
+      body: JSON.stringify(patch),
+    }),
 }

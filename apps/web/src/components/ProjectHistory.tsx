@@ -98,6 +98,30 @@ export default function ProjectHistory({
           </p>
           <p>Priorities: {item.project.details?.priorities}</p>
           <p>Constraints: {item.project.details?.constraints}</p>
+          {item.project.details?.opportunity && (
+            <details>
+              <summary>Opportunity and client at this revision</summary>
+              <p>
+                Stage: {item.project.details.opportunity.stage}; owner:{' '}
+                {item.project.details.opportunity.owner || 'Unassigned'}; due:{' '}
+                {item.project.details.opportunity.due_date ?? 'Not set'}
+              </p>
+              <p>
+                Source: {item.project.details.opportunity.source || 'Not recorded'}; tags:{' '}
+                {item.project.details.opportunity.tags.join(', ')}
+              </p>
+              {item.project.details.opportunity.client && (
+                <dl>
+                  {Object.entries(item.project.details.opportunity.client).map(([key, value]) => (
+                    <div key={key}>
+                      <dt>{key}</dt>
+                      <dd>{value || 'Not recorded'}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+            </details>
+          )}
           {item.project.details?.stakeholders.map((person, index) => (
             <p key={index}>
               {person.name} / {person.role}: {person.needs}

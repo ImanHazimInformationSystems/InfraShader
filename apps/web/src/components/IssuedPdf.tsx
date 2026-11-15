@@ -1,26 +1,30 @@
 import { displayQuantity, type DisplayUnits } from '../services/display-units'
 import {
   Document,
+  Image,
   Page,
   Text,
   View,
   Svg,
   Polygon,
+  Path,
   Polyline,
   Circle,
   StyleSheet,
   Font,
 } from '@react-pdf/renderer'
+import { wholeWords } from '../services/plan-sheet'
 import type { Snapshot } from '../domain/calculations'
+import { MaintenanceChecklistView, PlanSheetView } from './PlanSheetPdf'
 
 Font.register({ family: 'Noto Sans', src: '/fonts/NotoSans-Regular.ttf' })
+Font.registerHyphenationCallback(wholeWords)
 const styles = StyleSheet.create({
   page: {
     padding: 40,
     paddingBottom: 60,
     fontFamily: 'Noto Sans',
     fontSize: 10,
-    lineHeight: 1.45,
     color: '#18382f',
   },
   title: { fontSize: 22, marginBottom: 10 },
@@ -34,7 +38,14 @@ const styles = StyleSheet.create({
   },
   name: { width: '65%', paddingRight: 12 },
   quantity: { width: '35%' },
-  footer: { position: 'absolute', bottom: 25, left: 40, right: 40, fontSize: 8, color: '#56655d' },
+  footer: {
+    position: 'absolute',
+    bottom: 25,
+    left: 40,
+    width: 515,
+    fontSize: 8,
+    color: '#56655d',
+  },
 })
 
 function Scope({
@@ -55,6 +66,9 @@ function Scope({
             <View style={styles.name}>
               <Text>
                 {item.name} ({item.status})
+                {item.pricing_status && item.pricing_status !== 'firm'
+                  ? ` - ${item.pricing_status}, included in total`
+                  : ''}
                 {item.manual_basis === 'fixed' ? ' - fixed-price scope' : ''}
               </Text>
               <Text style={styles.note}>
@@ -121,9 +135,12 @@ function SiteVisual({
           if (!geometry) return null
           if (geometry.type === 'Polygon')
             return (
-              <Polygon
+              <Path
                 key={item.id}
-                points={points(geometry.coordinates[0])}
+                d={geometry.coordinates
+                  .map((ring) => `M ${points(ring).replaceAll(' ', ' L ')} Z`)
+                  .join(' ')}
+                fillRule="evenodd"
                 fill="#75a7bd"
                 fillOpacity={0.65}
                 stroke="#214b60"
@@ -157,6 +174,16 @@ function SharedHeader({ snapshot, id }: { snapshot: Snapshot; id: string }) {
   return (
     <>
       {snapshot.draft && <Text style={styles.heading}>DRAFT PREVIEW - NOT ISSUED</Text>}
+      {snapshot.draft && (snapshot.draft_issues?.length ?? 0) > 0 && (
+        <View>
+          <Text style={styles.heading}>Not ready to issue yet</Text>
+          {snapshot.draft_issues!.map((issue, index) => (
+            <Text key={index} style={styles.note}>
+              - {issue}
+            </Text>
+          ))}
+        </View>
+      )}
       <Text style={styles.note}>INFRASHADER · {snapshot.title.toUpperCase()}</Text>
       <Text style={styles.title}>{snapshot.project_name}</Text>
       <Text>
@@ -174,25 +201,101 @@ function SharedHeader({ snapshot, id }: { snapshot: Snapshot; id: string }) {
       <Text>
         {snapshot.use_periods} · {snapshot.timezone}
       </Text>
-      <SiteVisual snapshot={snapshot} />
+      {snapshot.plan_sheet ? (
+        <PlanSheetView sheet={snapshot.plan_sheet} layer="none" title="Site plan and shared target zones" />
+      ) : (
+        <SiteVisual snapshot={snapshot} />
+      )}
       {snapshot.customer_narrative && (
         <View>
           <Text style={styles.heading}>Scope narrative</Text>
           <Text>{snapshot.customer_narrative}</Text>
         </View>
       )}
+      {snapshot.site_constraints && snapshot.site_constraints.total > 0 && (
+        <View>
+          <Text style={styles.heading}>Site evidence and constraints</Text>
+          <Text>
+            {snapshot.site_constraints.total} recorded; {snapshot.site_constraints.unverified}{' '}
+            unverified; {snapshot.site_constraints.critical_unverified} critical facts awaiting
+            verification.
+          </Text>
+          <Text style={styles.note}>{snapshot.site_constraints.notice}</Text>
+        </View>
+      )}
       {snapshot.site_evidence.length > 0 && (
         <View>
-          <Text style={styles.heading}>Selected site evidence references</Text>
-          {snapshot.site_evidence.map((item) => (
-            <View key={item.id}>
+          {snapshot.site_evidence.map((item, index) => (
+            <View key={item.id} wrap={false}>
+              {index === 0 && <Text style={styles.heading}>Selected site evidence references</Text>}
+              {item.image_data && (
+                <Image
+                  src={item.image_data}
+                  style={{ width: 430, height: 230, objectFit: 'contain' }}
+                />
+              )}
               <Text>{item.description}</Text>
               <Text>{item.observations}</Text>
               <Text style={styles.note}>
-                {item.source_note} · Record {item.id}, revision {item.revision}. Photo retained
-                privately in project gallery.
+                {item.source_note} · Record {item.id}, revision {item.revision}.{' '}
+                {item.image_data
+                  ? 'Approved photo copy frozen in this output.'
+                  : 'Photo retained privately in project gallery.'}
               </Text>
             </View>
+          ))}
+        </View>
+      )}
+      {snapshot.brief_checkpoint && (
+        <View>
+          <Text style={styles.heading}>Brief acknowledgement and scope</Text>
+          <Text>
+            {snapshot.brief_checkpoint.status === 'acknowledged'
+              ? 'Acknowledgement evidence recorded'
+              : 'NOT CONFIRMED'}{' '}
+            · brief revision {snapshot.brief_checkpoint.brief_revision} · checkpoint{' '}
+            {snapshot.brief_checkpoint.checkpoint_id ? snapshot.brief_checkpoint.checkpoint_version : 'not recorded for this revision'}
+          </Text>
+          <Text>{snapshot.brief_checkpoint.reason}</Text>
+          <Text>Issue policy: {snapshot.brief_checkpoint.issue_policy.replaceAll('_', ' ')}</Text>
+          {snapshot.brief_checkpoint.acknowledgement && (
+            <>
+              <Text>
+                Person: {snapshot.brief_checkpoint.acknowledgement.person || 'Not recorded'}; date:{' '}
+                {snapshot.brief_checkpoint.acknowledgement.confirmation_date || 'Not recorded'};
+                method: {snapshot.brief_checkpoint.acknowledgement.method || 'Not recorded'}
+              </Text>
+              <Text>{snapshot.brief_checkpoint.acknowledgement.note}</Text>
+              {snapshot.brief_checkpoint.acknowledgement.evidence.map((file) => (
+                <Text key={file.id}>
+                  {file.description} · evidence {file.id}, revision {file.revision}, SHA-256{' '}
+                  {file.sha256}
+                </Text>
+              ))}
+            </>
+          )}
+          <Text>
+            Budget range: {snapshot.brief_checkpoint.currency}{' '}
+            {snapshot.brief_checkpoint.budget_min ?? 'Not recorded'} to{' '}
+            {snapshot.brief_checkpoint.budget_max ?? 'Not recorded'}
+          </Text>
+          {(
+            [
+              'deliverables',
+              'inclusions',
+              'exclusions',
+              'intended_use',
+              'unresolved_questions',
+            ] as const
+          ).map((key) => (
+            <Text key={key}>
+              {key.replaceAll('_', ' ')}: {snapshot.brief_checkpoint!.scope[key] || 'Not recorded'}
+            </Text>
+          ))}
+          {snapshot.brief_checkpoint.scope.facts.map((fact, index) => (
+            <Text key={index}>
+              {fact.state}: {fact.text}; supplier/source: {fact.source}
+            </Text>
           ))}
         </View>
       )}
@@ -221,7 +324,7 @@ function SharedHeader({ snapshot, id }: { snapshot: Snapshot; id: string }) {
     </>
   )
 }
-function SharedEnd({ snapshot, id }: { snapshot: Snapshot; id: string }) {
+function SharedEnd({ snapshot }: { snapshot: Snapshot }) {
   return (
     <>
       <Text style={styles.heading}>Shade limitations</Text>
@@ -235,13 +338,6 @@ function SharedEnd({ snapshot, id }: { snapshot: Snapshot; id: string }) {
           ? 'Draft preview only. No output has been issued. Recheck the current inputs before issuance.'
           : 'Saved issue content is immutable. A new project revision requires a new review and issue. Site verification and commercial review remain necessary.'}
       </Text>
-      <Text
-        style={styles.footer}
-        fixed
-        render={({ pageNumber, totalPages }) =>
-          `${snapshot.draft ? 'DRAFT - NOT ISSUED' : id} · ${pageNumber} / ${totalPages}`
-        }
-      />
     </>
   )
 }
@@ -249,6 +345,13 @@ export function DeveloperBriefPdf({ snapshot, id }: { snapshot: Snapshot; id: st
   return (
     <Document title={`${snapshot.project_name} — Developer decision brief`}>
       <Page size="A4" style={styles.page}>
+        <View style={styles.footer} fixed>
+          <Text
+            render={({ pageNumber, totalPages }) =>
+              `${snapshot.draft ? 'DRAFT - NOT ISSUED' : id} - ${pageNumber} / ${totalPages}`
+            }
+          />
+        </View>
         <SharedHeader snapshot={snapshot} id={id} />
         <Text style={styles.heading}>Decision criteria</Text>
         {snapshot.criteria?.map((criterion, index) => (
@@ -257,23 +360,23 @@ export function DeveloperBriefPdf({ snapshot, id }: { snapshot: Snapshot; id: st
           </Text>
         ))}
         <Scope units={snapshot.display_units} title="Baseline" items={snapshot.baseline} />
-        <SiteVisual
-          snapshot={snapshot}
-          items={snapshot.baseline}
-          title="Baseline scope schematic"
-        />
+        {snapshot.plan_sheet ? (
+          <PlanSheetView sheet={snapshot.plan_sheet} layer="baseline" title="Baseline scope plan" showTargets={false} />
+        ) : (
+          <SiteVisual snapshot={snapshot} items={snapshot.baseline} title="Baseline scope schematic" />
+        )}
         <Scope units={snapshot.display_units} title="Option A" items={snapshot.option_a ?? []} />
-        <SiteVisual
-          snapshot={snapshot}
-          items={snapshot.option_a ?? []}
-          title="Option A scope schematic"
-        />
+        {snapshot.plan_sheet ? (
+          <PlanSheetView sheet={snapshot.plan_sheet} layer="option_a" title="Option A scope plan" showTargets={false} />
+        ) : (
+          <SiteVisual snapshot={snapshot} items={snapshot.option_a ?? []} title="Option A scope schematic" />
+        )}
         <Scope units={snapshot.display_units} title="Option B" items={snapshot.option_b ?? []} />
-        <SiteVisual
-          snapshot={snapshot}
-          items={snapshot.option_b ?? []}
-          title="Option B scope schematic"
-        />
+        {snapshot.plan_sheet ? (
+          <PlanSheetView sheet={snapshot.plan_sheet} layer="option_b" title="Option B scope plan" showTargets={false} />
+        ) : (
+          <SiteVisual snapshot={snapshot} items={snapshot.option_b ?? []} title="Option B scope schematic" />
+        )}
         {snapshot.option_budgets && (
           <View>
             <Text style={styles.heading}>Option budget comparison</Text>
@@ -298,7 +401,7 @@ export function DeveloperBriefPdf({ snapshot, id }: { snapshot: Snapshot; id: st
         <Text style={styles.note}>
           Reviewed {snapshot.reviewed_at} by {snapshot.reviewer_id}
         </Text>
-        <SharedEnd snapshot={snapshot} id={id} />
+        <SharedEnd snapshot={snapshot} />
       </Page>
     </Document>
   )
@@ -307,18 +410,27 @@ export function ContractorProposalPdf({ snapshot, id }: { snapshot: Snapshot; id
   return (
     <Document title={`${snapshot.project_name} — Contractor client proposal`}>
       <Page size="A4" style={styles.page}>
+        <View style={styles.footer} fixed>
+          <Text
+            render={({ pageNumber, totalPages }) =>
+              `${snapshot.draft ? 'DRAFT - NOT ISSUED' : id} - ${pageNumber} / ${totalPages}`
+            }
+          />
+        </View>
         <SharedHeader snapshot={snapshot} id={id} />
         <Scope units={snapshot.display_units} title="Existing baseline" items={snapshot.baseline} />
-        <SiteVisual
-          snapshot={snapshot}
-          items={snapshot.baseline}
-          title="Baseline scope schematic"
-        />
-        <SiteVisual
-          snapshot={snapshot}
-          items={snapshot.selected_scope}
-          title="Selected scope schematic"
-        />
+        {snapshot.plan_sheet ? (
+          snapshot.baseline.length > 0 && (
+            <PlanSheetView sheet={snapshot.plan_sheet} layer="baseline" title="Existing baseline plan" showTargets={false} />
+          )
+        ) : (
+          <SiteVisual snapshot={snapshot} items={snapshot.baseline} title="Baseline scope schematic" />
+        )}
+        {snapshot.plan_sheet ? (
+          <PlanSheetView sheet={snapshot.plan_sheet} layer="selected" title="Selected scope plan" showTargets={false} />
+        ) : (
+          <SiteVisual snapshot={snapshot} items={snapshot.selected_scope} title="Selected scope schematic" />
+        )}
         <Scope
           units={snapshot.display_units}
           title="Selected scope"
@@ -327,7 +439,89 @@ export function ContractorProposalPdf({ snapshot, id }: { snapshot: Snapshot; id
         <Text style={styles.heading}>
           Customer selling price: {snapshot.currency} {snapshot.selling_total}
         </Text>
-        <SharedEnd snapshot={snapshot} id={id} />
+        {snapshot.valid_until && (
+          <>
+            <Text style={styles.heading}>Proposal validity</Text>
+            <Text>Valid until {snapshot.valid_until}. Reconfirm after this date.</Text>
+          </>
+        )}
+        {snapshot.programme && (
+          <>
+            <Text style={styles.heading}>Programme and delivery assumptions</Text>
+            <Text>{snapshot.programme}</Text>
+          </>
+        )}
+        {snapshot.maintenance_plan ? (
+          <MaintenanceChecklistView plan={snapshot.maintenance_plan} summary={snapshot.maintenance} />
+        ) : (
+          snapshot.maintenance && (
+            <>
+              <Text style={styles.heading}>Maintenance scope</Text>
+              <Text>{snapshot.maintenance}</Text>
+            </>
+          )
+        )}
+        {snapshot.pricing_warnings.length > 0 && (
+          <View>
+            <Text style={styles.heading}>Pricing assumptions requiring review</Text>
+            {snapshot.pricing_warnings.map((warning, index) => (
+              <Text key={index}>{warning}</Text>
+            ))}
+          </View>
+        )}
+        {snapshot.quantity_schedule.length > 0 && (
+          <View>
+            <Text style={styles.heading}>Quantity schedule</Text>
+            {snapshot.quantity_schedule.map((row) => (
+              <View key={row.item_id} style={styles.row} wrap={false}>
+                <Text style={styles.name}>{row.description}</Text>
+                <Text style={styles.quantity}>
+                  {displayQuantity(Number(row.quantity), row.unit, snapshot.display_units)}
+                </Text>
+              </View>
+            ))}
+            <Text style={styles.note}>
+              Preliminary quantities for the selected scope; subject to site verification. Component
+              quantities do not add a second charge to the customer selling total.
+            </Text>
+          </View>
+        )}
+        {snapshot.change_summary && (
+          <>
+            <Text style={styles.heading}>Change appendix</Text>
+            <Text>{snapshot.change_summary}</Text>
+          </>
+        )}
+        {snapshot.previous_issue && (
+          <View>
+            <Text style={styles.heading}>Previous issue reference</Text>
+            <Text>
+              Version {snapshot.previous_issue.version}; {snapshot.previous_issue.id}; previous
+              customer total {snapshot.currency} {snapshot.previous_issue.selling_total}.
+            </Text>
+            {snapshot.scope_changes.length ? (
+              snapshot.scope_changes.map((row) => (
+                <Text key={row.id}>
+                  {row.name}: {row.change}
+                </Text>
+              ))
+            ) : (
+              <Text>No changes to the saved scope rows.</Text>
+            )}
+          </View>
+        )}
+        {snapshot.manifest && (
+          <View>
+            <Text style={styles.heading}>Source manifest</Text>
+            <Text style={styles.note}>
+              Schema {snapshot.manifest.schema}; estimate {snapshot.manifest.estimate_id}; workspace{' '}
+              {snapshot.manifest.workspace_revision}; brief {snapshot.manifest.project_revision}.
+              Selected evidence IDs and revisions are listed above. Original PDF bytes and digest
+              are retained against this issue.
+            </Text>
+          </View>
+        )}
+        <SharedEnd snapshot={snapshot} />
       </Page>
     </Document>
   )

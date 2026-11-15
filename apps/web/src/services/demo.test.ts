@@ -17,6 +17,15 @@ describe('Browser Demo storage boundary', () => {
     expect(localStorage.length).toBe(1)
     expect(localStorage.key(0)).toBe(DEMO_STORAGE_KEY)
   })
+  it('permanently deletes only the confirmed current Demo project', () => {
+    const store = new DemoStore()
+    const first = store.create(input)
+    const second = store.create({ ...input, name: 'Keep this project' })
+    expect(() => store.delete(first.id, 1, 'wrong')).toThrow('exact project name')
+    expect(() => store.delete(first.id, 2, first.name)).toThrow('changed in another tab')
+    store.delete(first.id, 1, first.name)
+    expect(store.list().map(project => project.id)).toEqual([second.id])
+  })
   it('never overwrites corrupt demo storage or reports a failed write as saved', () => {
     localStorage.setItem(DEMO_STORAGE_KEY, '{broken')
     expect(() => new DemoStore().create(input)).toThrow('could not be read')

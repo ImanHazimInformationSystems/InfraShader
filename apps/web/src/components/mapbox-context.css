@@ -1,0 +1,71 @@
+.mapbox-context-controls {
+  position: absolute;
+  top: 70px;
+  right: 62px;
+  z-index: 5;
+  max-width: min(310px, calc(100% - 80px));
+  border: 1px solid #d5cdd3;
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: #fcfbfdf5;
+  color: #402334;
+  box-shadow: 0 8px 24px #38172418;
+  font-size: 12px;
+}
+.mapbox-context-controls[hidden] {
+  display: none;
+}
+.mapbox-context-controls summary {
+  font-weight: 650;
+  cursor: pointer;
+}
+.mapbox-context-controls fieldset {
+  border: 0;
+  min-width: 0;
+  padding: 10px 0 0;
+}
+.mapbox-context-controls label {
+  display: block;
+  margin: 10px 0;
+}
+.mapbox-context-controls input[type='checkbox'] {
+  display: inline-block;
+  width: auto;
+  margin: 0 7px 0 0;
+  vertical-align: middle;
+  accent-color: #72233d;
+}
+.mapbox-context-controls select {
+  display: block;
+  width: 100%;
+  background: white;
+  color: #402334;
+  border: 1px solid #c1b7c0;
+  border-radius: 7px;
+  padding: 9px;
+  margin-top: 5px;
+}
+.mapbox-context-controls p {
+  margin: 8px 0 0;
+  max-width: 285px;
+  line-height: 1.5;
+}
+.mapbox-context-controls :is(summary, select, input):focus-visible {
+  outline: 3px solid #872f4c;
+  outline-offset: 3px;
+}
+.ground-studio .mapbox-context-controls {
+  top: 110px;
+  right: 62px;
+}
+@media (max-width: 720px) {
+  .mapbox-context-controls {
+    top: 105px;
+    right: 58px;
+    max-height: 50dvh;
+    overflow: auto;
+  }
+  .ground-studio .mapbox-context-controls {
+    top: 195px;
+  }
+}

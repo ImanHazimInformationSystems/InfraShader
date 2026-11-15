@@ -10,6 +10,7 @@ export default function CatalogueBrowser({
   refresh,
   onRates,
   onEdit,
+  canEdit = false,
 }: {
   endpoint: string
   token?: string
@@ -17,6 +18,7 @@ export default function CatalogueBrowser({
   refresh: number
   onRates: (rates: Rate[]) => void
   onEdit: (rate: Rate) => void
+  canEdit?: boolean
 }) {
   const [query, setQuery] = useState('')
   const [unit, setUnit] = useState('')
@@ -111,6 +113,8 @@ export default function CatalogueBrowser({
             <option value="">All units</option>
             <option value="m2">Square metres</option>
             <option value="m">Metres</option>
+            <option value="m3">Cubic metres</option>
+            <option value="h">Hours</option>
             <option value="item">Items</option>
           </select>
         </label>
@@ -163,7 +167,7 @@ export default function CatalogueBrowser({
                 {rate.amount === undefined
                   ? 'Internal amount restricted'
                   : `MYR ${rate.amount}/${rate.unit}`}{' '}
-                | effective {rate.effective_date}
+                | effective {rate.effective_date} | valid until {rate.valid_until ?? 'not recorded'}
               </p>
               <p>
                 {rate.category} / {rate.source_note}
@@ -171,7 +175,7 @@ export default function CatalogueBrowser({
               <Button
                 type="button"
                 variant="outline"
-                disabled={rate.amount === undefined}
+                disabled={!canEdit || rate.amount === undefined}
                 onClick={() => onEdit(rate)}
               >
                 Revise {rate.code} v{rate.version}
@@ -179,7 +183,7 @@ export default function CatalogueBrowser({
               <Button
                 type="button"
                 variant="outline"
-                disabled={changing || busy || rate.amount === undefined}
+                disabled={!canEdit || changing || busy || rate.amount === undefined}
                 onClick={() => void archive(rate)}
               >
                 {rate.archived ? 'Restore' : 'Archive'} {rate.code} v{rate.version}

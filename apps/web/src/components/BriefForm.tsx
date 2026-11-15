@@ -1,6 +1,15 @@
+import BriefScopeFields from './BriefScopeFields'
 import { useState, type FormEvent } from 'react'
 import { ArrowRight, Building2, ClipboardList } from 'lucide-react'
-import { projectInputSchema, type ProjectInput } from '../domain/projects'
+import {
+  opportunitySchema,
+  briefScopeSchema,
+  opportunityStages,
+  projectInputSchema,
+  type ProjectInput,
+} from '../domain/projects'
+import HubLibrary from './HubLibrary'
+import BriefGuide from './BriefGuide'
 type Props = {
   initial: ProjectInput
   saving: boolean
@@ -9,6 +18,8 @@ type Props = {
   onDirty: (dirty: boolean) => void
   onDraftChange: (input: ProjectInput) => void
   editing?: boolean
+  showGuide?: boolean
+  hub?: { org: string; token: string }
 }
 export default function BriefForm({
   initial,
@@ -18,6 +29,8 @@ export default function BriefForm({
   onDirty,
   onDraftChange,
   editing = false,
+  showGuide = false,
+  hub,
 }: Props) {
   const [draft, setDraft] = useState(initial)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -50,8 +63,10 @@ export default function BriefForm({
     stakeholders: [],
   }
   const contractor = draft.purpose === 'contractor_proposal'
+  const opportunity = details.opportunity ?? opportunitySchema.parse({})
   return (
     <form className="brief-form" onSubmit={submit}>
+      {showGuide && <BriefGuide />}
       <fieldset className="save-fieldset" disabled={saving}>
         <fieldset className="purpose-fieldset">
           <legend>What are you working towards?</legend>
@@ -116,6 +131,161 @@ export default function BriefForm({
           <h3>The brief</h3>
           <span>Complete now or return later</span>
         </div>
+        {hub && !editing && (
+          <details className="my-4">
+            <summary>Start from my brief templates</summary>
+            <HubLibrary
+              org={hub.org}
+              token={hub.token}
+              kind="template"
+              onTemplate={(template) => {
+                if (
+                  !window.confirm(
+                    'Replace the brief text with this template? Site, client and budget stay unchanged.',
+                  )
+                )
+                  return
+                const { name: _name, project_type, priorities, constraints, ...fields } = template
+                void _name
+                const next = {
+                  ...draft,
+                  ...fields,
+                  details: { ...details, project_type, priorities, constraints },
+                }
+                setDraft(next)
+                onDirty(true)
+                onDraftChange(next)
+              }}
+            />
+          </details>
+        )}
+        <details className="my-4" open>
+          <summary>Client and opportunity</summary>
+          <p className="fine-print">
+            Opportunity stage is a planning label, separate from saved design/proposal progress.
+            Owner is a responsibility label and does not grant access.
+          </p>
+          <div className="form-grid">
+            <label>
+              Opportunity owner
+              <input
+                maxLength={160}
+                value={opportunity.owner}
+                onChange={(e) =>
+                  change('details', {
+                    ...details,
+                    opportunity: { ...opportunity, owner: e.target.value },
+                  })
+                }
+              />
+            </label>
+            <label>
+              Opportunity due date
+              <input
+                type="date"
+                value={opportunity.due_date ?? ''}
+                onChange={(e) =>
+                  change('details', {
+                    ...details,
+                    opportunity: { ...opportunity, due_date: e.target.value || null },
+                  })
+                }
+              />
+            </label>
+            <label>
+              Opportunity stage
+              <select
+                aria-label="Opportunity stage"
+                value={opportunity.stage}
+                onChange={(e) =>
+                  change('details', {
+                    ...details,
+                    opportunity: {
+                      ...opportunity,
+                      stage: e.target.value as typeof opportunity.stage,
+                    },
+                  })
+                }
+              >
+                {opportunityStages.map((stage) => (
+                  <option key={stage} value={stage}>
+                    {stage.replaceAll('_', ' ')}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Opportunity source
+              <input
+                maxLength={1000}
+                value={opportunity.source}
+                onChange={(e) =>
+                  change('details', {
+                    ...details,
+                    opportunity: { ...opportunity, source: e.target.value },
+                  })
+                }
+              />
+            </label>
+            <label>
+              Tags (comma separated, up to 20)
+              <input
+                maxLength={820}
+                value={opportunity.tags.join(',')}
+                onChange={(e) =>
+                  change('details', {
+                    ...details,
+                    opportunity: { ...opportunity, tags: e.target.value.split(',') },
+                  })
+                }
+                onBlur={() =>
+                  change('details', {
+                    ...details,
+                    opportunity: {
+                      ...opportunity,
+                      tags: [...new Set(opportunity.tags.map((tag) => tag.trim()).filter(Boolean))],
+                    },
+                  })
+                }
+              />
+            </label>
+          </div>
+          {opportunity.client && (
+            <div className="notice small">
+              <strong>Project client: {opportunity.client.name}</strong>
+              <p>
+                {[opportunity.client.company, opportunity.client.email, opportunity.client.phone]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </p>
+              <p>{opportunity.client.source}</p>
+              <p>{opportunity.client.notes}</p>
+              <button
+                type="button"
+                className="button secondary"
+                onClick={() =>
+                  change('details', { ...details, opportunity: { ...opportunity, client: null } })
+                }
+              >
+                Remove contact from brief
+              </button>
+            </div>
+          )}
+          {hub && (
+            <details>
+              <summary>Choose or maintain my client contacts</summary>
+              <HubLibrary
+                org={hub.org}
+                token={hub.token}
+                kind="contact"
+                onContact={(client) =>
+                  change('details', { ...details, opportunity: { ...opportunity, client } })
+                }
+              />
+            </details>
+          )}
+          {errors.details && <p role="alert">{errors.details}</p>}
+        </details>
         <label>
           What problem should this project address?
           <textarea
@@ -302,6 +472,10 @@ export default function BriefForm({
           </button>
           {errors.details && <p role="alert">{errors.details}</p>}
         </details>
+        <BriefScopeFields
+          scope={details.scope ?? briefScopeSchema.parse({})}
+          onChange={(scope) => change('details', { ...details, scope })}
+        />
         <div className="form-actions">
           <button type="button" className="button secondary" disabled={saving} onClick={onCancel}>
             Cancel

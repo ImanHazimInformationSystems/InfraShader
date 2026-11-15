@@ -1,141 +1,168 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { mapStyle, safeMapError } from '../services/map'
 import { Compass, Layers } from 'lucide-react'
-import * as maplibregl from 'maplibre-gl'
-import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
-import 'maplibre-gl/dist/maplibre-gl.css'
-import { loadBasemap } from '../services/map'
-import { boundsSchema, boundsPolygon, type Bounds } from '../domain/projects'
+import mapboxgl from 'mapbox-gl'
+import workerUrl from 'mapbox-gl/dist/mapbox-gl-csp-worker.js?url'
+import 'mapbox-gl/dist/mapbox-gl.css'
+import {
+  hasMapboxContext,
+  loadBasemap,
+  mapOptions,
+  providerBuildings,
+  visibleProviderBuildings,
+} from '../services/map'
+import { boundsPolygon, type Bounds } from '../domain/projects'
 import ExploreSun from './ExploreSun'
+import SiteSelectionEditor from './SiteSelectionEditor'
+import type { SiteOutline } from '../domain/site-selection'
+import type { Clock } from '../services/environment'
+import type { Solar } from '../services/environment'
+import type { SiteTree } from '../domain/trees'
+import TreeWorkbench from './TreeWorkbench'
+import MapboxControls from './MapboxControls'
 
-// MapLibre 6 needs an explicit bundled worker URL under Vite.
-maplibregl.setWorkerUrl(workerUrl)
+// Explicit CSP worker keeps the renderer compatible with the Vite bundle.
+mapboxgl.workerUrl = workerUrl
 
 type Props = {
+  trees?: SiteTree[]
+  onTrees?: (trees: SiteTree[]) => void
+  onTreeDirty?: (dirty: boolean) => void
   bounds: Bounds
   onViewport?: (bounds: Bounds) => void
-  onSelect?: (bounds: Bounds) => void
+  onSelect?: (bounds: Bounds, outline: SiteOutline) => void
+  outline?: SiteOutline | null
+  onSelectionEnd?: () => void
   readOnly?: boolean
   onSelectionStart?: () => void
+  onClock?: (clock: Clock) => void
 }
 export default function SiteMap({
+  trees,
+  onTrees,
+  onTreeDirty,
   bounds,
   onViewport,
   onSelect,
   onSelectionStart,
+  onSelectionEnd,
+  outline,
+  onClock,
   readOnly = false,
 }: Props) {
   const container = useRef<HTMLDivElement>(null)
-  const map = useRef<maplibregl.Map | null>(null)
+  const map = useRef<mapboxgl.Map | null>(null)
   const boundsRef = useRef(bounds)
   const viewportRef = useRef(onViewport)
-  const selectRef = useRef(onSelect)
-  const selecting = useRef(false)
-  const firstCorner = useRef<[number, number] | null>(null)
-  const [threeD, setThreeD] = useState(false)
+  const outlineRef = useRef(outline)
+  const [selectingSite, setSelectingSite] = useState(false)
+  const [treesOpen, setTreesOpen] = useState(false)
+  const [providerMessage, setProviderMessage] = useState('Loading Mapbox context...')
+  const [solar, setSolar] = useState<Solar | null>(null)
+  const [threeD, setThreeD] = useState(!readOnly)
+  const threeDRef = useRef(false)
   const [context3D, setContext3D] = useState(false)
   const [renderedBuildings, setRenderedBuildings] = useState(0)
   const [selectionMessage, setSelectionMessage] = useState('')
   const [basemap, setBasemap] = useState(false)
   const [unavailable, setUnavailable] = useState(false)
+  const [contextLost, setContextLost] = useState(false)
   const [loaded, setLoaded] = useState(false)
-  const [loadedMap, setLoadedMap] = useState<maplibregl.Map | null>(null)
+  const [loadedMap, setLoadedMap] = useState<mapboxgl.Map | null>(null)
   const [contextFeatures, setContextFeatures] = useState(0)
   const [renderedFeatures, setRenderedFeatures] = useState(0)
+  const [renderAttempt, setRenderAttempt] = useState(0)
+  const [explorerClock, setExplorerClock] = useState<Clock | undefined>()
+  const rememberClock = useCallback(
+    (clock: Clock) => {
+      setExplorerClock(clock)
+      onClock?.(clock)
+    },
+    [onClock],
+  )
   useEffect(() => {
     boundsRef.current = bounds
     viewportRef.current = onViewport
-    selectRef.current = onSelect
-  }, [bounds, onViewport, onSelect])
+    outlineRef.current = outline
+  }, [bounds, onViewport, outline])
   useEffect(() => {
     if (!container.current) return
-    let view: maplibregl.Map | undefined
+    let view: mapboxgl.Map | undefined
     let observer: ResizeObserver | undefined
     let disposed = false
-    void loadBasemap()
-      .then(({ style, available }) => {
+    void loadBasemap(renderAttempt > 0)
+      .then(({ style, available, message }) => {
+        setProviderMessage(message)
         if (disposed || !container.current) return
         setBasemap(available)
         try {
-          view = new maplibregl.Map({
+          view = new mapboxgl.Map({
             container: container.current,
+            ...mapOptions(available),
             style,
+            pitch: readOnly ? 0 : 55,
+            bearing: readOnly ? 0 : -20,
             center: [
               (boundsRef.current[0] + boundsRef.current[2]) / 2,
               (boundsRef.current[1] + boundsRef.current[3]) / 2,
             ],
             zoom: 14,
-            maxPitch: 65,
-            attributionControl: { compact: false },
+            maxPitch: 85,
+            attributionControl: false,
           })
           const active = view
+          active.addControl(new mapboxgl.AttributionControl({ compact: false }))
           map.current = active
-          active.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right')
-          active.addControl(new maplibregl.ScaleControl({ unit: 'metric' }), 'bottom-left')
-          active.on('load', () => {
-            const buildingLayer = style.layers.find(
-              (layer) =>
-                'source-layer' in layer &&
-                layer['source-layer'] === 'building' &&
-                'source' in layer,
-            )
-            if (buildingLayer && 'source' in buildingLayer && 'source-layer' in buildingLayer) {
-              active.addLayer({
-                id: 'explore-buildings-3d',
-                type: 'fill-extrusion',
-                source: buildingLayer.source,
-                'source-layer': buildingLayer['source-layer'],
-                minzoom: 14,
-                layout: { visibility: 'none' },
-                filter: [
-                  '>',
-                  ['to-number', ['coalesce', ['get', 'render_height'], ['get', 'height']], 0],
-                  0,
-                ],
-                paint: {
-                  'fill-extrusion-color': '#b8afa1',
-                  'fill-extrusion-height': [
-                    'min',
-                    1000,
-                    [
-                      'max',
-                      0,
-                      ['to-number', ['coalesce', ['get', 'render_height'], ['get', 'height']], 0],
-                    ],
-                  ],
-                  'fill-extrusion-base': ['max', 0, ['to-number', ['get', 'render_min_height'], 0]],
-                  'fill-extrusion-opacity': 0.85,
+          active.addControl(new mapboxgl.NavigationControl({ showCompass: true }), 'top-right')
+          active.addControl(new mapboxgl.ScaleControl({ unit: 'metric' }), 'bottom-left')
+          let initialLoad = true
+          const installSite = () => {
+            // Standard imports a zoom-dependent DEM by default. Flat context remains
+            // explicit until the user enables elevation in Map layers.
+            active.setTerrain(null)
+            setContext3D(hasMapboxContext(active))
+            providerBuildings(active, threeDRef.current)
+            if (!active.getSource('selected-site')) {
+              active.addSource('selected-site', {
+                type: 'geojson',
+                data: {
+                  ...boundsPolygon(boundsRef.current),
+                  geometry: outlineRef.current ?? boundsPolygon(boundsRef.current).geometry,
                 },
               })
-              setContext3D(true)
+              active.addLayer({
+                id: 'site-fill',
+                type: 'fill',
+                source: 'selected-site',
+                paint: { 'fill-color': '#2d7258', 'fill-opacity': 0.13 },
+              })
+              active.addLayer({
+                id: 'site-edge',
+                type: 'line',
+                source: 'selected-site',
+                paint: { 'line-color': '#174d3d', 'line-width': 2.5, 'line-dasharray': [3, 2] },
+              })
             }
-            active.addSource('selected-site', {
-              type: 'geojson',
-              data: boundsPolygon(boundsRef.current),
-            })
-            active.addLayer({
-              id: 'site-fill',
-              type: 'fill',
-              source: 'selected-site',
-              paint: { 'fill-color': '#2d7258', 'fill-opacity': 0.13 },
-            })
-            active.addLayer({
-              id: 'site-edge',
-              type: 'line',
-              source: 'selected-site',
-              paint: { 'line-color': '#174d3d', 'line-width': 2.5, 'line-dasharray': [3, 2] },
-            })
-            active.fitBounds(
-              [
-                [boundsRef.current[0], boundsRef.current[1]],
-                [boundsRef.current[2], boundsRef.current[3]],
-              ],
-              { padding: 80, duration: 0 },
-            )
+            if (initialLoad)
+              active.fitBounds(
+                [
+                  [boundsRef.current[0], boundsRef.current[1]],
+                  [boundsRef.current[2], boundsRef.current[3]],
+                ],
+                { padding: 80, duration: 0 },
+              )
+            initialLoad = false
             setLoaded(true)
             setLoadedMap(active)
-          })
+          }
+          active.on('load', installSite)
+          active.on('style.load', installSite)
           active.on('moveend', () => {
-            const extent = active.getBounds()
+            const tilted = active.getPitch() > 0
+            threeDRef.current = tilted
+            setThreeD(tilted)
+            providerBuildings(active, tilted)
+            const extent = active.getBounds()!
             viewportRef.current?.([
               Math.max(-180, extent.getWest()),
               Math.max(-85, extent.getSouth()),
@@ -143,44 +170,26 @@ export default function SiteMap({
               Math.min(85, extent.getNorth()),
             ])
           })
-          active.on('click', (event) => {
-            if (!selecting.current) return
-            const point: [number, number] = [event.lngLat.lng, event.lngLat.lat]
-            if (!firstCorner.current) {
-              firstCorner.current = point
-              setSelectionMessage('Now click the opposite corner.')
-              return
-            }
-            const first = firstCorner.current
-            const parsed = boundsSchema.safeParse([
-              Math.min(first[0], point[0]),
-              Math.min(first[1], point[1]),
-              Math.max(first[0], point[0]),
-              Math.max(first[1], point[1]),
-            ])
-            if (!parsed.success) {
-              setSelectionMessage(parsed.error.issues[0].message)
-              firstCorner.current = null
-              return
-            }
-            selecting.current = false
-            firstCorner.current = null
-            active.getCanvas().style.cursor = ''
-            selectRef.current?.(parsed.data)
-            setSelectionMessage('Site extent selected. Continue or refine the coordinates.')
+          active.on('error', (event) => {
+            setUnavailable(true)
+            active.getContainer().dataset.mapError = safeMapError(event.error)
           })
-          active.on('error', () => setUnavailable(true))
-          active.on('idle', () => {
-            if (active.getLayer('explore-buildings-3d'))
-              setRenderedBuildings(
-                active.queryRenderedFeatures({ layers: ['explore-buildings-3d'] }).length,
-              )
-            setContextFeatures(
-              active.queryRenderedFeatures().filter((feature) => feature.source !== 'selected-site')
-                .length,
-            )
+          active.on('webglcontextlost', () => setContextLost(true))
+          active.on('webglcontextrestored', () => setContextLost(false))
+          let lastCount = 0
+          const updateCounts = () => {
+            if (!mapStyle(active)) return
+            if (performance.now() - lastCount < 800) return
+            lastCount = performance.now()
+            setRenderedBuildings(visibleProviderBuildings(active).length)
+            setContextFeatures(visibleProviderBuildings(active).length)
             if (active.getLayer('site-fill'))
               setRenderedFeatures(active.queryRenderedFeatures({ layers: ['site-fill'] }).length)
+          }
+          active.on('render', updateCounts)
+          active.on('idle', () => {
+            lastCount = 0
+            updateCounts()
           })
         } catch {
           // WebGL construction is an external capability check; expose its fallback.
@@ -199,12 +208,15 @@ export default function SiteMap({
       view?.remove()
       map.current = null
     }
-  }, [])
+  }, [renderAttempt, readOnly])
   useEffect(() => {
     const view = map.current
     if (!view?.getSource('selected-site')) return
-    const source = view.getSource('selected-site') as maplibregl.GeoJSONSource | undefined
-    source?.setData(boundsPolygon(bounds))
+    const source = view.getSource('selected-site') as mapboxgl.GeoJSONSource | undefined
+    source?.setData({
+      ...boundsPolygon(bounds),
+      geometry: outline ?? boundsPolygon(bounds).geometry,
+    })
     view.fitBounds(
       [
         [bounds[0], bounds[1]],
@@ -212,11 +224,11 @@ export default function SiteMap({
       ],
       { padding: 80, duration: 350 },
     )
-  }, [bounds])
+  }, [bounds, outline])
   return (
     <section
       className="site-map"
-      data-map-status={unavailable ? 'unavailable' : loaded ? 'ready' : 'loading'}
+      data-map-status={unavailable || contextLost ? 'unavailable' : loaded ? 'ready' : 'loading'}
       data-rendered-site-features={renderedFeatures}
       data-view-mode={threeD ? '3d' : '2d'}
       data-rendered-buildings={renderedBuildings}
@@ -224,27 +236,66 @@ export default function SiteMap({
       aria-label={readOnly ? 'Saved site extent map' : 'Explore site map'}
     >
       <div ref={container} className="map-canvas" />
-      {!readOnly && loadedMap && <ExploreSun map={loadedMap} />}
+      {!readOnly && (
+        <MapboxControls
+          map={loadedMap}
+          hidden={selectingSite || treesOpen}
+          onStatus={(message) => {
+            setUnavailable(!!message)
+            if (message) setProviderMessage(message)
+          }}
+        />
+      )}
+      {!readOnly && loadedMap && (
+        <ExploreSun
+          map={loadedMap}
+          initialClock={explorerClock}
+          onClock={rememberClock}
+          onSolar={setSolar}
+          controlsHidden={selectingSite || treesOpen}
+        />
+      )}
       <div className="map-chip">
         <Compass size={15} />{' '}
         {readOnly ? 'Site Plan / 2D' : threeD ? 'Explore Map / 3D context' : 'Explore Map / 2D'}
       </div>
       {!readOnly && (
         <div className="map-selection-tools">
+          {(unavailable || contextLost || (loaded && !basemap)) && (
+            <button
+              type="button"
+              className="button secondary compact"
+              onClick={() => {
+                setLoadedMap(null)
+                setLoaded(false)
+                setUnavailable(false)
+                setContextLost(false)
+                setBasemap(false)
+                setContext3D(false)
+                setRenderedBuildings(0)
+                setContextFeatures(0)
+                setRenderedFeatures(0)
+                setSelectingSite(false)
+                setSelectionMessage('')
+                setThreeD(false)
+                threeDRef.current = false
+                setRenderAttempt((value) => value + 1)
+              }}
+            >
+              Retry map loading
+            </button>
+          )}
           <button
             className="button secondary compact"
-            disabled={!loaded || !context3D}
+            disabled={!loaded || contextLost}
             aria-pressed={threeD}
             onClick={() => {
               const next = !threeD
               setThreeD(next)
-              map.current?.setLayoutProperty(
-                'explore-buildings-3d',
-                'visibility',
-                next ? 'visible' : 'none',
-              )
+              threeDRef.current = next
+              if (map.current) providerBuildings(map.current, next)
               map.current?.easeTo({
-                pitch: next ? 55 : 0,
+                pitch: next ? 65 : 0,
                 bearing: next ? -20 : 0,
                 zoom: next ? Math.max(16, map.current.getZoom()) : map.current.getZoom(),
                 duration: 450,
@@ -255,42 +306,80 @@ export default function SiteMap({
           </button>
           <button
             className="button secondary compact"
-            disabled={!loaded}
+            disabled={!loaded || contextLost}
             onClick={() => {
-              if (threeD) {
-                setThreeD(false)
-                map.current?.setLayoutProperty('explore-buildings-3d', 'visibility', 'none')
-                map.current?.jumpTo({ pitch: 0, bearing: 0 })
-              }
-              selecting.current = !selecting.current
-              if (selecting.current) onSelectionStart?.()
-              firstCorner.current = null
-              if (map.current)
-                map.current.getCanvas().style.cursor = selecting.current ? 'crosshair' : ''
-              setSelectionMessage(
-                selecting.current
-                  ? 'Click two opposite corners to select your site.'
-                  : 'Selection cancelled.',
-              )
+              // Stop any search animation and keep the location the user is viewing.
+              map.current?.stop()
+              map.current?.jumpTo({ pitch: 0, bearing: 0 })
+              setTreesOpen(false)
+              setSelectingSite(true)
+              onSelectionStart?.()
             }}
           >
             Select site on map
           </button>
+          {onTrees && (
+            <button
+              className="button secondary compact"
+              aria-expanded={treesOpen}
+              onClick={() => setTreesOpen(!treesOpen)}
+            >
+              {treesOpen ? 'Close site trees' : 'Review site trees'}
+            </button>
+          )}
           <span role="status">{selectionMessage}</span>
         </div>
+      )}
+      {!readOnly && onTrees && (
+        <aside
+          className="explore-tree-panel"
+          hidden={!treesOpen || selectingSite}
+          aria-label="Tree review panel"
+        >
+          <button type="button" className="tree-panel-close" onClick={() => setTreesOpen(false)}>
+            Close tree panel
+          </button>
+          <TreeWorkbench
+            site={{ bounds, outline, trees }}
+            map={loadedMap}
+            solar={solar}
+            onApply={onTrees}
+            onDirty={onTreeDirty}
+            active={treesOpen && !selectingSite}
+          />
+        </aside>
+      )}
+      {selectingSite && loadedMap && (
+        <SiteSelectionEditor
+          map={loadedMap}
+          bounds={bounds}
+          outline={outline}
+          unavailable={contextLost}
+          onCancel={() => {
+            setSelectingSite(false)
+            onSelectionEnd?.()
+            setSelectionMessage('Selection cancelled. Previous site kept.')
+          }}
+          onApply={(next, shape) => {
+            onSelect?.(next, shape)
+            setSelectingSite(false)
+            onSelectionEnd?.()
+            setSelectionMessage('Site shape applied. Continue to create your project.')
+          }}
+        />
       )}
       <div className="map-source">
         <Layers size={14} />
         <span>
-          {unavailable
-            ? 'Map provider unavailable. Geometry editing remains available.'
+          {unavailable || contextLost
+            ? 'Map context unavailable or incomplete. Your selected coordinates are kept; use site controls to continue.'
             : !loaded
               ? 'Loading map...'
               : basemap
                 ? threeD
-                  ? 'Provider heights may be estimated or missing. Explorer shadows are approximate; no verified project analysis.'
+                  ? `${context3D ? 'Provider heights may be estimated or missing.' : 'Provider building heights unavailable.'} Explorer shadows are approximate; no verified project analysis.`
                   : 'Basemap context only - verify boundaries on site'
-                : 'Basemap unavailable/offline - coordinate canvas remains usable'}
+                : providerMessage}
         </span>
       </div>
     </section>

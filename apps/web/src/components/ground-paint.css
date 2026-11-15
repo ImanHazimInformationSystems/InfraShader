@@ -1,0 +1,102 @@
+.ground-paint-panel {
+  margin-top: 18px;
+}
+.grass-texture-tray {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 14px 0;
+}
+.grass-texture-tray button {
+  display: grid;
+  gap: 7px;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid #dcd4dd;
+  border-radius: 12px;
+  box-shadow: none;
+}
+.grass-texture-tray button[aria-pressed='true'] {
+  border: 2px solid #701f36;
+  background: #f6edf2;
+}
+.grass-texture-tray button > span {
+  height: 61px;
+  border-radius: 7px;
+  background-size: 64px 64px;
+}
+.grass-texture-tray strong {
+  font-size: 11px;
+  text-align: center;
+}
+.ground-brush-settings {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 11px;
+  background: #efeaf1;
+}
+.ground-brush-settings label {
+  display: grid;
+  gap: 8px;
+  flex: 1;
+  font-size: 12px;
+}
+.ground-brush-settings input {
+  width: 100%;
+  accent-color: #701f36;
+}
+.ground-brush-settings button {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  border: 1px solid #d5cbd7;
+  border-radius: 9px;
+  padding: 8px;
+  font-size: 11px;
+}
+.ground-brush-settings button[aria-pressed='true'] {
+  background: #701f36;
+  color: #fff;
+}
+.ground-paint-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 10px 0;
+}
+.ground-paint-actions button {
+  font-size: 11px;
+  padding: 8px;
+}
+.ground-paint-actions span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: #887583;
+}
+.ground-brush-cursor {
+  position: absolute;
+  display: none;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 1px #426d37,
+    0 2px 7px #0003;
+  z-index: 4;
+  background: #82ad6520;
+}
+.ground-brush-cursor[data-erase='true'] {
+  box-shadow: 0 0 0 1px #701f36;
+  background: #701f3615;
+}
+.ground-paint-panel button:focus-visible {
+  outline: 3px solid #a24a68;
+  outline-offset: 2px;
+}

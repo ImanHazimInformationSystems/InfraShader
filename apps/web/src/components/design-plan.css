@@ -1,0 +1,149 @@
+.design-plan {
+  margin: 0;
+}
+.design-plan svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  background: #eef2e6;
+}
+.design-plan.is-compact svg {
+  border-radius: 10px;
+}
+.plan-site {
+  fill: #dfe8cf;
+  stroke: var(--brand-maroon, #701f36);
+  stroke-width: 0.6;
+  stroke-dasharray: 2 1.2;
+}
+.plan-paint {
+  opacity: 0.5;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.plan-lawn {
+  fill: #8fc46e;
+  stroke: #79ad5a;
+  stroke-width: 0.25;
+}
+.plan-bed {
+  fill: #5e9d4a;
+  stroke: #477d36;
+  stroke-width: 0.3;
+}
+.plan-paving {
+  fill: #ddd2bf;
+  stroke: #b6a68d;
+  stroke-width: 0.3;
+}
+.plan-play {
+  fill: #f2ab70;
+  stroke: #c9783c;
+  stroke-width: 0.3;
+}
+.plan-road {
+  fill: #6c6c70;
+  stroke: #4c4c50;
+  stroke-width: 0.3;
+}
+.plan-structure {
+  fill: #8b5e3c;
+  stroke: #5f3d24;
+  stroke-width: 0.3;
+}
+.plan-play-kit {
+  fill: #d4572a;
+  stroke: #8f3414;
+  stroke-width: 0.3;
+}
+.plan-path {
+  fill: none;
+  stroke: #f4f1eb;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.plan-hedge {
+  fill: none;
+  stroke: #b03a5b;
+  stroke-linecap: round;
+}
+.plan-drain {
+  fill: none;
+  stroke: #7aa0b8;
+  stroke-width: 0.8;
+  stroke-dasharray: 1.5 1;
+}
+.plan-existing {
+  fill: rgba(39, 86, 39, 0.32);
+  stroke: #2d5a2d;
+  stroke-width: 0.3;
+}
+.plan-tree-mature {
+  fill: rgba(63, 125, 63, 0.08);
+  stroke: #3f7d3f;
+  stroke-width: 0.2;
+  stroke-dasharray: 0.8 0.6;
+}
+.plan-tree {
+  stroke: #ffffff;
+  stroke-width: 0.35;
+}
+.plan-bench {
+  fill: #7a4b2a;
+}
+.plan-light {
+  fill: #f6c945;
+  stroke: #9a7408;
+  stroke-width: 0.2;
+}
+.plan-bin {
+  fill: #444;
+}
+.plan-bike {
+  fill: #777;
+}
+.plan-scale rect {
+  fill: #322931;
+}
+.plan-scale text {
+  font-size: 2.4px;
+  fill: #322931;
+  font-family: inherit;
+}
+.plan-legend {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 10px 0 4px;
+  padding: 0;
+  font-size: 12px;
+  color: #4a414a;
+}
+.plan-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.plan-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 10px;
+  border-radius: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+.plan-swatch.plan-lawn { background: #8fc46e; }
+.plan-swatch.plan-bed { background: #5e9d4a; }
+.plan-swatch.plan-paving { background: #ddd2bf; }
+.plan-swatch.plan-path { background: #f4f1eb; border-color: #b6a68d; }
+.plan-swatch.plan-road { background: #6c6c70; }
+.plan-swatch.plan-play { background: #f2ab70; }
+.plan-swatch.plan-play-kit { background: #d4572a; }
+.plan-swatch.plan-structure { background: #8b5e3c; }
+.plan-swatch.plan-hedge { background: #b03a5b; height: 4px; }
+.plan-swatch.plan-tree { background: #4b8f3f; border-radius: 50%; width: 11px; height: 11px; }
+.plan-swatch.plan-existing { background: rgba(39, 86, 39, 0.35); border-radius: 50%; width: 13px; height: 13px; }
+.plan-swatch.plan-bench { background: #7a4b2a; height: 5px; }
+.plan-swatch.plan-light { background: #f6c945; border-radius: 50%; width: 9px; height: 9px; }

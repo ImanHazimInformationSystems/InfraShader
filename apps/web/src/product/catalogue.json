@@ -1,0 +1,1709 @@
+[
+  {
+    "id": "L01",
+    "name": "Client, project and opportunity hub",
+    "priority": "CORE / NEXT",
+    "workspace": "Design Studio",
+    "scope": "CORE: project/client brief, intended outcome, budget, scope inclusions/exclusions, assumptions and exact-brief acknowledgement via K01; CRM/sales-pipeline expansion NEXT. Project purpose never grants workspace access.",
+    "implementation": "Implemented",
+    "group": "business",
+    "state": "UI-only + connected subset",
+    "template": "register",
+    "fields": [
+      "Client or contact",
+      "Opportunity stage",
+      "Next action"
+    ],
+    "tool": "projects",
+    "connection": "Existing client/project hub; sales-pipeline expansion remains separate. Studio /studio/create includes a plain-language brief guide and expandable fictional example after site selection. The Studio projects screen uses connected permitted project records, backend workflow/type filtering, truthful page-scoped status counts, and working grid/list and archive controls. Design Studio project page (15 Nov 2026): Edit brief and Open design map lead; brief agreement, change register, history, access and templates are in one closed disclosure below the site.; 15 Nov readiness: Proposal > Review and Proposal use the server Before you can issue checklist. Direct links open Site proposal-area confirmation, inline brief fields/agreement, Pricing, Total or proposal wording. The step bar counts blockers. docs/tracking/evidence/issue-readiness-2026-11-15.md Project details > Delete project: typed-name confirmation for permitted unissued projects; retained records explain Archive. Projects list displays pending uploaded-file cleanup with Retry file cleanup. docs/tracking/evidence/project-deletion-2026-11-15.md",
+    "related": "D03; D04; F01; K01",
+    "resources": "R01, R02, R03, R07, N01"
+  },
+  {
+    "id": "L02",
+    "name": "Site discovery and environment explorer",
+    "priority": "KEEP",
+    "workspace": "Design Studio",
+    "scope": "KEEP: discover/select a sourced WGS84 site and explore labelled 2D/3D context, solar/weather previews and provider limits. Site locator, synthetic campus model and provider context are not surveyed work geometry or automatically priced work. Provider switching and broader coverage stay deferred.",
+    "implementation": "Implemented",
+    "group": "site",
+    "state": "UI-only + connected subset",
+    "template": "canvas",
+    "fields": [
+      "Place or coordinates",
+      "Site boundary source",
+      "Environment layer"
+    ],
+    "tool": "explore",
+    "connection": "Existing Explore map, environment and site-selection workflow. Fresh site selection starts in the currently viewed map area after panning; applied outlines retain their geometry and Apply/Cancel remain explicit. Connected Review site trees panel adds bounded source lookup, attributed GeoJSON/manual fallback and project-draft handoff. Context/project visibility stays separate; optional DEM has no enabled dataset. See docs/tree-management.md. Current shared renderer is Mapbox Standard with Map layers controls for Satellite imagery, basemap trees and elevation. Project overlays, selection, editing and tree decisions remain connected. Satellite software uses explicit fixture verification while live raster requests are blocked by HTTP 429; native coverage is variable. See docs/mapbox-migration.md.",
+    "related": "E01; E02; E03; E04; E05; E06; E07; F03",
+    "resources": "R04, R06, R11, R18, N16"
+  },
+  {
+    "id": "L03",
+    "name": "Survey evidence and constraints register",
+    "priority": "CORE",
+    "workspace": "Design Studio",
+    "scope": "CORE: source/evidence/constraint register and K05 verification queue. Distinguish measured, sourced, estimated and unknown inputs; preserve source, uncertainty, photos and unresolved checks. Context constraints are not billable work or legal/survey certification.",
+    "implementation": "Implemented",
+    "group": "site",
+    "state": "UI-only + connected subset",
+    "template": "register",
+    "fields": [
+      "Observation or constraint",
+      "Evidence source",
+      "Verification owner"
+    ],
+    "tool": "sources",
+    "connection": "Existing private evidence and constraints; needs an authorised saved project. Step 1 Site (15 Nov 2026): site summary with estimated area/provenance, boundary source, metric CRS, facts to check and existing-site items above Site records.; 15 Nov readiness: Proposal > Review and Proposal use the server Before you can issue checklist. Direct links open Site proposal-area confirmation, inline brief fields/agreement, Pricing, Total or proposal wording. The step bar counts blockers. docs/tracking/evidence/issue-readiness-2026-11-15.md",
+    "related": "F01; F02; F04; F05; K01; K05",
+    "resources": "R02, R03, R04, R05, R06, R07, R08"
+  },
+  {
+    "id": "L04",
+    "name": "Professional spatial editing tools",
+    "priority": "CORE / NEXT",
+    "workspace": "Design Studio",
+    "scope": "CORE: dependable supported geometry/selection, numeric dimensions, duplication, undo and snapping; keep baseline/context separate from proposed work. Derive quantities only through declared geometry/CRS/method; a drawing or object is not automatically a cost. Broader split/merge/batch slice NEXT; integration and acceptance gaps remain separately tracked. 13 November 3D texture continuation: saved Dirt/Pavement/Stone/Gravel patterns and all six grass-paint looks now persist in geographic and local metric 3D, including scenario switches and reload. Original pixels/strokes are reused; paint keeps clipping/erasing and follows the terrain. Road triangles share rendered ground planes and update through sculpting, avoiding breaks at hills. Appearance is visual only; quantities, rates and issued report schematics remain unchanged.",
+    "implementation": "Partial",
+    "group": "design",
+    "state": "Connected subset",
+    "template": "canvas",
+    "fields": [
+      "Selection name",
+      "Snap spacing (m)",
+      "Dimension source"
+    ],
+    "tool": "layout",
+    "connection": "Opens the authorized saved-project spatial editor directly: metric tools, undo, revisioned persistence and quantities; no illustrative L04 form. Project readers can inspect scenarios/layers without edit grants. Boundary/target outlines share the backend metric frame in 3D. Browser Demo remains limited; wider reference/constraint layer parity and acceptance remain open. Site-tree project revisions stay separate from workspace quantity saves. Current shared renderer is Mapbox Standard with Map layers controls for Satellite imagery, basemap trees and elevation. Project overlays, selection, editing and tree decisions remain connected. Satellite software uses explicit fixture verification while live raster requests are blocked by HTTP 429; native coverage is variable. See docs/mapbox-migration.md. User-requested town-builder Layout: simple Select/Roads/Planting tray, private precision toggle, direct existing road handles, layout undo/redo, backend-projected selected-site and validated-boundary area labelled estimated. Real Studio starts Option A; Demo/Review retains its existing precision workflow. Saving, grants, revision checks and history remain connected. User-requested visual ground spray in Layout > Ground: six original procedural grass looks (Fresh lawn, Meadow, Fine turf, Dry grass, Deep green, Wild grass), metre-based brush radius, live drag/click painting, exact outline clipping on the Mercator canvas, eraser and clear. Up to 128 strokes per scenario, 64 geographic points per stroke; source is a bounded 1024px canvas. Paint is independent in Baseline/A/B, saved in existing workspace JSON/history/recovery, and uses existing undo/redo, grants and revision checks. Presentation only: no planting quantities, prices, species, terrain elevation, shade input or earthworks. Ground is rendered below project roads/plants; brush capture stops when Layout is hidden. The local metric 3D canvas now renders these saved looks; issued report schematics remain unchanged (13 November texture continuation). Tree continuation: Trees > Plant trees replaces Layout tree placement with four original procedural 3D forms: Canopy, Columnar, Evergreen and Palm. Repeated click placement with a cursor preview, size presets/slider, rotation, draggable move handle, keyboard map-centre movement, selection, removal, shared undo/redo and revisioned workspace saves. Existing site inventory remains separate in Trees > Existing site. Layout retains shrubs and flowers. Each new tree is one proposed count item; visual size/rotation do not change count or price. Purchased stock specification and explicit reviewed compatible per-item source rates feed the existing backend schedule and preliminary option estimate; unpriced items remain visible. Model dimensions are illustrative assumptions, not nursery stock, surveyed heights, growth predictions or analytical tree shade. 13 November landscape Objects continuation: simple category/preset cards and repeated click placement with a cursor thumbnail, drag-to-move handle and keyboard map-centre alternative. Preserve precision/group tools, duplicate/hide/lock/remove and source pricing. Add immutable original Shade canopy, Garden gazebo, Small path lamp and Ground lamp IDs to the original twelve MIT presets (16 total). Uniform scale 0.5?2, per-axis multipliers 0.25?4, yaw, tilt/lean ?80 degrees and offset ?10 m are saved and backend-validated; complete tilted bounding footprints stay inside the site. Draw proposed straight fence runs 0.6?100 m by drag or two clicks; the backend uses the declared projected CRS to create an atomic ordinary grouped segment chain with derived metre quantities, not engineered fencing. Object part-bound sun-shadow silhouettes and warm fixture glows/pools follow shared Sun context. Lighting fades in from sun elevation +6 to -6 degrees; all enabled fixtures glow, with at most eight PointLights illuminating Three objects. Flat-ground shadows/pools pause with terrain; unknown solar data disables preview illumination. No lux, electrical/safety design, validated analytical shade, solar output or construction completeness claim. Unpriced work stays visible; no prices are invented. 13 November 3D texture continuation: saved Dirt/Pavement/Stone/Gravel patterns and all six grass-paint looks now persist in geographic and local metric 3D, including scenario switches and reload. Original pixels/strokes are reused; paint keeps clipping/erasing and follows the terrain. Road triangles share rendered ground planes and update through sculpting, avoiding breaks at hills. Appearance is visual only; quantities, rates and issued report schematics remain unchanged. Journey (15 Nov 2026): 1 Site / 2 Design / 3 Prices / 4 Proposal step bar; dock shows the current step only; one Option being edited picker on the map; List view, Terrain and Shade study under More tools.",
+    "related": "F04; F15; K02; K05",
+    "resources": "R04, R05, R06, R11"
+  },
+  {
+    "id": "L05",
+    "name": "Calibrated existing-plan overlay",
+    "priority": "CORE (LIMITED)",
+    "workspace": "Design Studio",
+    "scope": "CORE (LIMITED): calibrate a supplied raster/selected PDF page from known points and units, preserve source/uncertainty and review traced work after calibration changes. Reference-only, not automatic CAD extraction or survey-grade geometry.",
+    "implementation": "Implemented",
+    "group": "site",
+    "state": "UI-only + connected subset",
+    "template": "canvas",
+    "fields": [
+      "Plan reference name",
+      "Calibration length (m)",
+      "Calibration source"
+    ],
+    "tool": "sources",
+    "connection": "Existing bounded plan calibration; not CAD extraction.",
+    "related": "F17; K05",
+    "resources": "R07, R08, R13, N03"
+  },
+  {
+    "id": "L06",
+    "name": "Terrain sculpting and concept ponds",
+    "priority": "LATER",
+    "workspace": "Design Studio",
+    "scope": "Later 13 November explicit user authorization: supplied aligned existing-ground grids or a declared flat start support projected site-clipped signed TIN cut/fill and pond storage. Automatic m3 site-work quantities ignore client-submitted volume and deliberately use compatible sourced rates with terrain-change review. A retained revisioned surface-water screening study uses explicit rain, constant wet-cell infiltration, roughness and optional capacity/inlet-based drains, with mass balance, limited cell-average Manning routing, water/direction playback and stale overlays. Actual Mapbox Standard tiles/rendering were exercised; synthetic ground/storm/rates do not establish field accuracy. No full hydraulic network, certified flood/velocity, geotechnical design, productivity or soil conversion is inferred. 13 November 3D texture continuation: saved Dirt/Pavement/Stone/Gravel patterns and all six grass-paint looks now persist in geographic and local metric 3D, including scenario switches and reload. Original pixels/strokes are reused; paint keeps clipping/erasing and follows the terrain. Road triangles share rendered ground planes and update through sculpting, avoiding breaks at hills. Appearance is visual only; quantities, rates and issued report schematics remain unchanged.",
+    "implementation": "Implemented",
+    "group": "design",
+    "state": "UI-only + connected subset",
+    "template": "canvas",
+    "fields": [
+      "Terrain operation",
+      "Vertical datum",
+      "Concept elevation (m)",
+      "Circle/square brush",
+      "Target offset",
+      "Site work and manual sourced costs",
+      "Ground quantities and rain test",
+      "Supplied existing ground",
+      "Automatic cut/fill quantities"
+    ],
+    "tool": "terrain",
+    "connection": "Existing concept terrain; not engineering earthworks or drainage analysis. Current shared renderer is Mapbox Standard with Map layers controls for Satellite imagery, basemap trees and elevation. Project overlays, selection, editing and tree decisions remain connected. Satellite software uses explicit fixture verification while live raster requests are blocked by HTTP 429; native coverage is variable. See docs/mapbox-migration.md. User-requested visual ground spray in Layout > Ground: six original procedural grass looks (Fresh lawn, Meadow, Fine turf, Dry grass, Deep green, Wild grass), metre-based brush radius, live drag/click painting, exact outline clipping on the Mercator canvas, eraser and clear. Up to 128 strokes per scenario, 64 geographic points per stroke; source is a bounded 1024px canvas. Paint is independent in Baseline/A/B, saved in existing workspace JSON/history/recovery, and uses existing undo/redo, grants and revision checks. Presentation only: no planting quantities, prices, species, terrain elevation, shade input or earthworks. Ground is rendered below project roads/plants; brush capture stops when Layout is hidden. The local metric 3D canvas now renders these saved looks; issued report schematics remain unchanged (13 November texture continuation). 13 November user-authorized terrain builder: timed hold-and-sweep Raise/Dig/Smooth/Level/Erase with circle/square footprints, graphical speed, explicit target offset, one-stroke undo/redo/cancel, reset, keyboard centre dab and round/square concept pond water. The site-clipped Three scene uses the existing declared flat-start heightfield and does not rewrite provider elevation. Manual proposed site-work records capture activity, labour/equipment/material/transport, tools, supplied h/m3/item quantities and assumptions with explicit compatible sourced rates. Backend terrain signatures mark old work stale after ground/water changes; missing or stale work remains outside complete preliminary estimates. No automatic cut/fill, pond volume, productivity, hydrology, engineering or field acceptance claim. Precision controls and existing access/revision/history are retained. Later 13 November explicit user authorization: supplied aligned existing-ground grids or a declared flat start support projected site-clipped signed TIN cut/fill and pond storage. Automatic m3 site-work quantities ignore client-submitted volume and deliberately use compatible sourced rates with terrain-change review. A retained revisioned surface-water screening study uses explicit rain, constant wet-cell infiltration, roughness and optional capacity/inlet-based drains, with mass balance, limited cell-average Manning routing, water/direction playback and stale overlays. Actual Mapbox Standard tiles/rendering were exercised; synthetic ground/storm/rates do not establish field accuracy. No full hydraulic network, certified flood/velocity, geotechnical design, productivity or soil conversion is inferred. 13 November control-visibility fix: Terrain brush cards stay visible before setup with an explicit disabled-state explanation; preparation selects Raise hills and brings shape/size/speed/target controls into view. Site-map/read-only/pending states are explained. Clicking Terrain returns the inspector to the brush tray. 13 November 3D texture continuation: saved Dirt/Pavement/Stone/Gravel patterns and all six grass-paint looks now persist in geographic and local metric 3D, including scenario switches and reload. Original pixels/strokes are reused; paint keeps clipping/erasing and follows the terrain. Road triangles share rendered ground planes and update through sculpting, avoiding breaks at hills. Appearance is visual only; quantities, rates and issued report schematics remain unchanged.",
+    "related": "F18",
+    "resources": "R03, R06, R11, R13, R14"
+  },
+  {
+    "id": "L07",
+    "name": "Expanded licensed 3d object palette",
+    "priority": "LATER",
+    "workspace": "Design Studio",
+    "scope": "LATER: retain bounded basic placeable categories; defer large detailed licensed libraries. Supported footprint/length/count methods and compatible explicit rates are separate from visual placement; no inferred complete installation, services or engineering cost.",
+    "implementation": "Implemented",
+    "group": "design",
+    "state": "UI-only + connected subset",
+    "template": "canvas",
+    "fields": [
+      "Object category",
+      "Asset licence/source",
+      "Object label"
+    ],
+    "tool": "objects",
+    "connection": "Existing bounded preset palette; not a large supplier library. Current shared renderer is Mapbox Standard with Map layers controls for Satellite imagery, basemap trees and elevation. Project overlays, selection, editing and tree decisions remain connected. Satellite software uses explicit fixture verification while live raster requests are blocked by HTTP 429; native coverage is variable. See docs/mapbox-migration.md. 13 November landscape Objects continuation: simple category/preset cards and repeated click placement with a cursor thumbnail, drag-to-move handle and keyboard map-centre alternative. Preserve precision/group tools, duplicate/hide/lock/remove and source pricing. Add immutable original Shade canopy, Garden gazebo, Small path lamp and Ground lamp IDs to the original twelve MIT presets (16 total). Uniform scale 0.5?2, per-axis multipliers 0.25?4, yaw, tilt/lean ?80 degrees and offset ?10 m are saved and backend-validated; complete tilted bounding footprints stay inside the site. Draw proposed straight fence runs 0.6?100 m by drag or two clicks; the backend uses the declared projected CRS to create an atomic ordinary grouped segment chain with derived metre quantities, not engineered fencing. Object part-bound sun-shadow silhouettes and warm fixture glows/pools follow shared Sun context. Lighting fades in from sun elevation +6 to -6 degrees; all enabled fixtures glow, with at most eight PointLights illuminating Three objects. Flat-ground shadows/pools pause with terrain; unknown solar data disables preview illumination. No lux, electrical/safety design, validated analytical shade, solar output or construction completeness claim. Unpriced work stays visible; no prices are invented.",
+    "related": "F15; F19",
+    "resources": "R04, R05, R06, R07, R11, R14"
+  },
+  {
+    "id": "L08",
+    "name": "Private custom object and glb library",
+    "priority": "LATER",
+    "workspace": "Design Studio",
+    "scope": "LATER: private licensed/rights-reviewed GLB file/version/mesh intake and admitted placement require asset gates. HTML metadata markers without original bytes or uploaded mesh rendering are only a concept preview, not this completed library.",
+    "implementation": "Not audited",
+    "group": "design",
+    "state": "Planned",
+    "template": "register",
+    "fields": [
+      "Asset name",
+      "Rights declaration",
+      "Units and pivot"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "F20",
+    "resources": "R07, R11, R14"
+  },
+  {
+    "id": "L09",
+    "name": "Plant palette and planting plan",
+    "priority": "CORE (LIMITED)",
+    "workspace": "Design Studio",
+    "scope": "CORE (LIMITED): sourced plants/nursery sizes, explicit counts or declared nominal area/line spacing and revision-bound planting schedule. Existing trees, proposed trees and planted areas are distinct. Price only supported derived units linked to compatible rates; tree crowns remain outside analytical shade.",
+    "implementation": "Implemented",
+    "group": "design",
+    "state": "UI-only + connected subset",
+    "template": "register",
+    "fields": [
+      "Plant name",
+      "Nursery size",
+      "Spacing method"
+    ],
+    "tool": "trees",
+    "connection": "Trees > Plant trees replaces Layout tree placement with four original procedural 3D forms: Canopy, Columnar, Evergreen and Palm. Repeated click placement with a cursor preview, size presets/slider, rotation, draggable move handle, keyboard map-centre movement, selection, removal, shared undo/redo and revisioned workspace saves. Existing site inventory remains separate in Trees > Existing site. Layout retains shrubs and flowers. Each new tree is one proposed count item; visual size/rotation do not change count or price. Purchased stock specification and explicit reviewed compatible per-item source rates feed the existing backend schedule and preliminary option estimate; unpriced items remain visible. Model dimensions are illustrative assumptions, not nursery stock, surveyed heights, growth predictions or analytical tree shade. Existing full planting schedules remain connected through Materials. 13 November proposed-tree shadow continuation: simple translucent crown silhouettes follow the displayed Sun context, point away from the sun, and update with visual model size and placement in the geographic and metric scenes. The preview assumes a solid crown centred at 65% of model height with a 35% vertical half-extent, is hidden below 5 degrees or without solar data, and pauses with elevation/concept terrain. These illustrative flat-ground shadows never enter analytical shade, quantities, costs or issued outputs; model dimensions are assumptions, not measured tree dimensions. 13 November shrub/flower continuation: Layout > Planting offers three original 3D shrub looks (Leafy shrub, Low hedge, Ornamental grass) and three flower looks (Daisies, Tulips, Lavender), saved as optional per-item plant_variant metadata. Geographic and metric scenes render branches/leaves/blades/stems/petals instead of balls or flat sprites. Older markers default to leafy shrubs or daisies. Repeated placement, scenario isolation, selection, removal, undo, save/history and existing specification/rate links are preserved. Each placement remains one unpriced concept planting item until explicitly specified/rated; multiple rendered stems or flowers do not establish purchased plant counts, nursery size, suitability or analytical shade.",
+    "related": "F15; K02",
+    "resources": "R01, R02, R03, R04, R05, R06, R09, R11"
+  },
+  {
+    "id": "L10",
+    "name": "Hardscape and material assemblies",
+    "priority": "CORE / NEXT",
+    "workspace": "Design Studio",
+    "scope": "CORE: basic paving, edging, deck and fence materials with explicit dimensions and user-approved inclusive or component quantity recipes. Paths retain length basis; width/height/thickness components use stated derived units and reviewed rates. Extensive assemblies NEXT; generic layer volumes do not establish vehicle-road construction.",
+    "implementation": "Implemented",
+    "group": "design",
+    "state": "UI-only + connected subset",
+    "template": "register",
+    "fields": [
+      "Material assembly",
+      "Measurement unit",
+      "Included components"
+    ],
+    "tool": "materials",
+    "connection": "Existing user-approved assembly schedules; broader library remains separate.",
+    "related": "F04; F09; F10; K02",
+    "resources": "R02, R03, R04, R05, R06, R09, N01"
+  },
+  {
+    "id": "L11",
+    "name": "Shade and use-time studies",
+    "priority": "KEEP / NEXT",
+    "workspace": "Design Studio",
+    "scope": "KEEP / NEXT: supported single-time and explicitly requested bounded multi-time building/canopy studies, same target/time/source basis and honest stale/unavailable states. Tree crowns, terrain-aware shadows, temperature and comfort analysis are excluded; illustrative visuals never establish field-valid numerical coverage.",
+    "implementation": "Implemented",
+    "group": "studies",
+    "state": "UI-only + connected subset",
+    "template": "comparison",
+    "fields": [
+      "Study date",
+      "Local time and UTC offset",
+      "Target zone"
+    ],
+    "tool": "shade",
+    "connection": "Existing bounded sun/shade studies; field validation remains open. Tree models/shadows are explicitly contextual; site inventories are excluded from existing analytical studies and issued quantities. Sun context in the geographic studio is collapsible. Current shared renderer is Mapbox Standard with Map layers controls for Satellite imagery, basemap trees and elevation. Project overlays, selection, editing and tree decisions remain connected. Satellite software uses explicit fixture verification while live raster requests are blocked by HTTP 429; native coverage is variable. See docs/mapbox-migration.md. 13 November proposed-tree shadow continuation: simple translucent crown silhouettes follow the displayed Sun context, point away from the sun, and update with visual model size and placement in the geographic and metric scenes. The preview assumes a solid crown centred at 65% of model height with a 35% vertical half-extent, is hidden below 5 degrees or without solar data, and pauses with elevation/concept terrain. These illustrative flat-ground shadows never enter analytical shade, quantities, costs or issued outputs; model dimensions are assumptions, not measured tree dimensions. 13 November landscape Objects continuation: simple category/preset cards and repeated click placement with a cursor thumbnail, drag-to-move handle and keyboard map-centre alternative. Preserve precision/group tools, duplicate/hide/lock/remove and source pricing. Add immutable original Shade canopy, Garden gazebo, Small path lamp and Ground lamp IDs to the original twelve MIT presets (16 total). Uniform scale 0.5?2, per-axis multipliers 0.25?4, yaw, tilt/lean ?80 degrees and offset ?10 m are saved and backend-validated; complete tilted bounding footprints stay inside the site. Draw proposed straight fence runs 0.6?100 m by drag or two clicks; the backend uses the declared projected CRS to create an atomic ordinary grouped segment chain with derived metre quantities, not engineered fencing. Object part-bound sun-shadow silhouettes and warm fixture glows/pools follow shared Sun context. Lighting fades in from sun elevation +6 to -6 degrees; all enabled fixtures glow, with at most eight PointLights illuminating Three objects. Flat-ground shadows/pools pause with terrain; unknown solar data disables preview illumination. No lux, electrical/safety design, validated analytical shade, solar output or construction completeness claim. Unpriced work stays visible; no prices are invented. Moved to More tools > Shade study (optional) on 15 Nov 2026; same bounded study.",
+    "related": "E01; E02; F06; F07; K02",
+    "resources": "R03, R04, R05, R06, N02, N06"
+  },
+  {
+    "id": "L12",
+    "name": "Scenario library and controlled option revisions",
+    "priority": "CORE / LATER",
+    "workspace": "Design Studio",
+    "scope": "CORE: preserve existing-site Baseline and proposed A/B options, current source revisions and downstream quantity/estimate change impact. Deliberately revise outputs without rewriting earlier issues. Unlimited scenario library LATER.",
+    "implementation": "Implemented",
+    "group": "studies",
+    "state": "UI-only + connected subset",
+    "template": "comparison",
+    "fields": [
+      "Option name",
+      "Revision reason",
+      "Source revision"
+    ],
+    "tool": "layout",
+    "connection": "Existing Baseline/A/B options and workspace history; not unlimited scenarios.",
+    "related": "F08; K02; K03",
+    "resources": "R01, R02, R03, R04, R05, R06, N01, N02"
+  },
+  {
+    "id": "L13",
+    "name": "Professional boq and takeoff workbook",
+    "priority": "CORE",
+    "workspace": "Design Studio",
+    "scope": "CORE: trace visual work -> declared geometry/method quantity -> compatible sourced dated rate -> preliminary estimate. Show scope, units, sources, billable lines, unpriced/invalid work and partial subtotal; preserve overrides/revisions and admitted BOQ export. Full takeoff hierarchy/allowance review remains separately partial.",
+    "implementation": "Partial",
+    "group": "pricing",
+    "state": "UI-only + connected subset",
+    "template": "register",
+    "fields": [
+      "BOQ item",
+      "Measurement method",
+      "Measurement source"
+    ],
+    "tool": "pricing",
+    "connection": "Connected Pricing tool (2026-11-15): one pricing home per option with API-calculated quantities, line and item subtotals, rate source and status chips, Price this item dialog, visible rate reuse and reviewed bulk apply. Plant/material schedules remain in Materials; full BOQ hierarchy remains. Step 3 Prices (15 Nov 2026): Pricing is the single pricing place; the old table is an advanced disclosure in Saved rates.; 15 Nov readiness: Proposal > Review and Proposal use the server Before you can issue checklist. Direct links open Site proposal-area confirmation, inline brief fields/agreement, Pricing, Total or proposal wording. The step bar counts blockers. docs/tracking/evidence/issue-readiness-2026-11-15.md",
+    "related": "F04; F09; F10; K02; K04; K05",
+    "resources": "R02, R03, R04, R05, R06, R09, N01, N07"
+  },
+  {
+    "id": "L14",
+    "name": "Supplier and rate source management",
+    "priority": "CORE / NEXT",
+    "workspace": "Design Studio",
+    "scope": "CORE: deliberately select versioned rate/source/effective date/validity/unit/currency/basis/inclusions and K04 review. Demo rates are fictional; new rates never silently rebind selected versions. Full supplier/quotation management NEXT.",
+    "implementation": "Implemented",
+    "group": "pricing",
+    "state": "UI-only + connected subset",
+    "template": "register",
+    "fields": [
+      "Supplier or rate source",
+      "Valid until date",
+      "Included charges"
+    ],
+    "tool": "pricing",
+    "connection": "Pricing tool rate cards show source type, supplier, quotation reference, validity, inclusions and exclusions; new rate versions can record a supplier from the Price this item dialog. User-entered records only; contact/quotation files, comparison and CSV import remain. Step 3 Prices > Saved rates (15 Nov 2026) holds the dated organisation price list.",
+    "related": "F09; K04",
+    "resources": "R02, R03, R07, R09, N01, N07"
+  },
+  {
+    "id": "L15",
+    "name": "Labour, equipment and cost build-ups",
+    "priority": "CORE (LIMITED)",
+    "workspace": "Design Studio",
+    "scope": "CORE (LIMITED): explicit sourced material/labour/equipment/transport/overhead components and permitted charges, with declared waste/inclusions and no duplicate billing or invented productivity. Unrecorded work stays visible; generic layer arithmetic is not roadwork or earthworks engineering.",
+    "implementation": "Implemented",
+    "group": "pricing",
+    "state": "UI-only + connected subset",
+    "template": "register",
+    "fields": [
+      "Cost component",
+      "Rate unit",
+      "Productivity source"
+    ],
+    "tool": "analysis",
+    "connection": "Existing explicit cost build-ups; no assumed productivity rates.",
+    "related": "F10; F11; K04",
+    "resources": "R02, R03, R09, N01"
+  },
+  {
+    "id": "L16",
+    "name": "Markup, margin and pricing explanations",
+    "priority": "CORE",
+    "workspace": "Design Studio",
+    "scope": "CORE: explain cost basis versus selling amount, markup versus margin/fixed selling, Decimal rounding and explicit charges/tax assumptions. No automatic supplier pricing, implicit tax or net-profit claim; private pricing stays capability-protected.",
+    "implementation": "Implemented",
+    "group": "pricing",
+    "state": "UI-only + connected subset",
+    "template": "brief",
+    "fields": [
+      "Pricing method",
+      "Markup or margin (%)",
+      "Pricing explanation"
+    ],
+    "tool": "analysis",
+    "connection": "Existing internal pricing explanations subject to project grants.",
+    "related": "F11; K04",
+    "resources": "R01, R02, R03, R09"
+  },
+  {
+    "id": "L17",
+    "name": "Phasing, work programme and constructability checklist",
+    "priority": "NEXT",
+    "workspace": "Design Studio",
+    "scope": "NEXT: plan conceptual work phases, milestones, durations, dependencies, access/temporary constraints and accountable checks. User-supplied delivery assumptions may appear in proposals; the feature does not certify site safety, permits or resource feasibility.",
+    "implementation": "Not audited",
+    "group": "delivery",
+    "state": "Planned",
+    "template": "schedule",
+    "fields": [
+      "Work phase",
+      "Delivery assumption",
+      "Dependency"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "",
+    "resources": "R01, R02, R03, R04, R05, R06, N02, N06"
+  },
+  {
+    "id": "L18",
+    "name": "Irrigation and drainage concept coordination",
+    "priority": "LATER",
+    "workspace": "Design Studio",
+    "scope": "LATER: coordinate concept irrigation/drainage zones, demand assumptions, corridors, equipment and specialist evidence. Hydraulic sizing, flood analysis, pond volume and excavation pricing require separate validated methods and are not included.",
+    "implementation": "Not audited",
+    "group": "design",
+    "state": "Planned",
+    "template": "canvas",
+    "fields": [
+      "Coordination zone",
+      "Specialist reference",
+      "Design limitation"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "",
+    "resources": "R03, R04, R05, R06, R09, R11"
+  },
+  {
+    "id": "L19",
+    "name": "Rooftop, terrace and podium planning",
+    "priority": "LATER",
+    "workspace": "Design Studio",
+    "scope": "LATER: plan landscaping on a manually defined building surface, with levels, obstacles, access and usable area; gated IFC/DXF intake may follow sample, alignment and rights review. No structural, waterproofing or roof-compliance certification.",
+    "implementation": "Not audited",
+    "group": "design",
+    "state": "Planned",
+    "template": "canvas",
+    "fields": [
+      "Building surface",
+      "Source file reference",
+      "Structural assumption"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "F13",
+    "resources": "R02, R03, R06, R07, R11, R12"
+  },
+  {
+    "id": "L20",
+    "name": "Design quality and constraint checks",
+    "priority": "CORE / NEXT",
+    "workspace": "Design Studio",
+    "scope": "CORE: deterministic missing-source/quantity/price, stale-input and admitted boundary checks before estimate/proposal readiness. Wider clearance/route and design-compliance checks NEXT; names such as Accessible walkway do not certify compliance.",
+    "implementation": "Not audited",
+    "group": "studies",
+    "state": "UI-only + connected subset",
+    "template": "register",
+    "fields": [
+      "Check name",
+      "Rule or requirement",
+      "Source evidence"
+    ],
+    "tool": "analysis",
+    "connection": "Existing validation/readiness subset; full design rules are not connected.",
+    "related": "F04; F05; F06; F07; F08; F09; F10",
+    "resources": "R02, R03, R04, R05, R06, N02"
+  },
+  {
+    "id": "L21",
+    "name": "Sustainability and maintenance indicators",
+    "priority": "KEEP / NEXT",
+    "workspace": "Design Studio",
+    "scope": "KEEP / NEXT: compare source-backed planted/permeable areas, retained-tree counts, supported shade and declared maintenance assumptions. Carbon, temperature, biodiversity, water-saving and comfort claims require separately validated methods and data.",
+    "implementation": "Not audited",
+    "group": "studies",
+    "state": "UI-only + connected subset",
+    "template": "comparison",
+    "fields": [
+      "Indicator name",
+      "Measurement method",
+      "Evidence source"
+    ],
+    "tool": "analysis",
+    "connection": "Existing source-labelled shade/quantity subset only; broader indicators not connected.",
+    "related": "F08; F14; O21",
+    "resources": "R02, R03, R04, R05, R06, R09, N02, N08"
+  },
+  {
+    "id": "L22",
+    "name": "Maintenance and whole-life cost proposal",
+    "priority": "CORE / NEXT",
+    "workspace": "Design Studio",
+    "scope": "CORE: show declared maintenance responsibilities, frequencies and assumptions with the proposal. NEXT: compare recurring/replacement/installation costs over a chosen period using explicit rates, lifespan and discount assumptions; no forecast certainty is implied.",
+    "implementation": "Partial",
+    "group": "pricing",
+    "state": "UI-only/demo",
+    "template": "schedule",
+    "fields": [
+      "Maintenance responsibility",
+      "Service frequency",
+      "Cost basis"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "O24",
+    "resources": "R02, R03, R09, N02, N07"
+  },
+  {
+    "id": "L23",
+    "name": "Presentation sheets and client walkthrough",
+    "priority": "CORE / NEXT",
+    "workspace": "Design Studio",
+    "scope": "CORE: readable selected plan/schedule sheets with scale, dimensions, north/date/time/source legends and uncertainty. Cinematic walkthrough NEXT. Schematic/print preview is not survey or verified analysis; approved export rights and private-data exclusion remain necessary.",
+    "implementation": "Partial",
+    "group": "delivery",
+    "state": "UI-only + connected subset",
+    "template": "document",
+    "fields": [
+      "Sheet title",
+      "Scale and legend",
+      "Client walkthrough note"
+    ],
+    "tool": "analysis",
+    "connection": "Existing proposal preview subset; presentation sheets/walkthrough not connected.",
+    "related": "F12",
+    "resources": "R01, R04, R10, R11, N02, N03"
+  },
+  {
+    "id": "L24",
+    "name": "Proposal builder and issue completion",
+    "priority": "CORE",
+    "workspace": "Design Studio",
+    "scope": "CORE: readiness-checked client proposal with selected priced scope, quantity methods/sources, selling basis, assumptions/exclusions, evidence/validity and frozen issue/change manifest. Unpriced quoted work/stale inputs block complete issue; retained PDF state is separate from snapshot saved. No automatic sending or field-unvalidated shade claim.",
+    "implementation": "Implemented",
+    "group": "delivery",
+    "state": "UI-only + connected subset",
+    "template": "document",
+    "fields": [
+      "Proposal title",
+      "Validity and exclusions",
+      "Issue revision"
+    ],
+    "tool": "analysis",
+    "connection": "Existing proposal readiness and retained issuance under current grants. Step 4 Proposal (15 Nov 2026): Review (needs attention, Option A/B comparison) > Total > Proposal preview/issue/retained PDF.; 15 Nov readiness: Proposal > Review and Proposal use the server Before you can issue checklist. Direct links open Site proposal-area confirmation, inline brief fields/agreement, Pricing, Total or proposal wording. The step bar counts blockers. docs/tracking/evidence/issue-readiness-2026-11-15.md",
+    "related": "F12; K01; K02; K04",
+    "resources": "R02, R03, R07, R10, N07"
+  },
+  {
+    "id": "L25",
+    "name": "Invited opportunity and submission workspace",
+    "priority": "NEXT",
+    "workspace": "Design Studio",
+    "scope": "NEXT: provide invited project packages, briefs and common BOQ templates to authorised contractors; support private draft preparation, deadline-bound submission, receipt, withdrawal and superseding revisions under owner policy. Independent proposal/PDF workflow comes first; no cross-bidder disclosure.",
+    "implementation": "Partial",
+    "group": "delivery",
+    "state": "UI-only + connected subset",
+    "template": "register",
+    "fields": [
+      "Opportunity reference",
+      "Submission due date",
+      "Package version"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged. Connected subset 15 Nov 2026: invitation link acceptance after sign-in; Design Studio Projects > Invited opportunities (brief, files, link/create project, receipts); project Proposal step > Submit to organisation.",
+    "related": "F12; O03",
+    "resources": "R01, R02, R03, R07, N06"
+  },
+  {
+    "id": "L26",
+    "name": "Clarifications, revisions and alternatives",
+    "priority": "CORE / NEXT",
+    "workspace": "Design Studio",
+    "scope": "CORE: record requester/date/reason, clarification and original versus changed scope, quantity/commercial impact and deliberate revised issue while preserving prior versions. Automated external messaging/submission portal NEXT.",
+    "implementation": "Partial",
+    "group": "delivery",
+    "state": "UI-only + connected subset",
+    "template": "register",
+    "fields": [
+      "Change or clarification",
+      "Requester and reason",
+      "Commercial impact basis"
+    ],
+    "tool": "project",
+    "connection": "Changed-since-last-issue view and change register on the Design Studio project screen; clarification replies and alternatives remain.",
+    "related": "K03; O15; S03; S05",
+    "resources": "R02, R03, R07, N01, N06"
+  },
+  {
+    "id": "L27",
+    "name": "Designer and estimator ai assistant",
+    "priority": "NEXT",
+    "workspace": "Design Studio",
+    "scope": "NEXT: assist designers/estimators with source-linked scope drafts, missing-input questions and change reviews. Suggestions require human approval and cannot silently change geometry, quantities, rates or prices; optional AI remains gated by privacy and quality evidence.",
+    "implementation": "Not audited",
+    "group": "assistant",
+    "state": "Planned",
+    "template": "assistant",
+    "fields": [
+      "Drafting task",
+      "Authorised sources",
+      "Reviewer instruction"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "F16",
+    "resources": "N03, N04, N05, N08, N09, N10"
+  },
+  {
+    "id": "L28",
+    "name": "Handover, snagging and maintenance transition",
+    "priority": "NEXT",
+    "workspace": "Design Studio",
+    "scope": "NEXT: turn an authorised selected scope into a handover record with asset/plant schedules, manuals, warranties, photo-linked defects, responsible parties, dates and maintenance plan. This is not a payment, accounting or full site-management system.",
+    "implementation": "Not audited",
+    "group": "delivery",
+    "state": "Planned",
+    "template": "schedule",
+    "fields": [
+      "Handover item",
+      "Responsible person",
+      "Acceptance evidence"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "O23; O24",
+    "resources": "R02, R03, R07, R10, N06"
+  },
+  {
+    "id": "L29",
+    "name": "Offline site capture and later synchronisation",
+    "priority": "LATER",
+    "workspace": "Design Studio",
+    "scope": "LATER: support permitted offline site notes/photos in bounded local storage, explicit sync/conflict review, retention limits and cleanup on logout/revocation when possible. It does not promise offline basemap redistribution; field-device/privacy testing is required.",
+    "implementation": "Not audited",
+    "group": "site",
+    "state": "Planned",
+    "template": "register",
+    "fields": [
+      "Capture title",
+      "Capture time",
+      "Synchronisation note"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "",
+    "resources": "R01, R02, R03, R07, R08, N17"
+  },
+  {
+    "id": "L30",
+    "name": "Business pipeline and estimate learning dashboard",
+    "priority": "NEXT",
+    "workspace": "Design Studio",
+    "scope": "NEXT: help a contractor review its own proposal deadlines/status, recorded wins/losses, preparation times and comparable historical estimate revisions. Define denominators and match scope/source/date; no fabricated ROI or cross-company benchmark.",
+    "implementation": "Not audited",
+    "group": "business",
+    "state": "Planned",
+    "template": "dashboard",
+    "fields": [
+      "Reporting period",
+      "Opportunity stage",
+      "Estimate learning question"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "F09; F10; F11; F12",
+    "resources": "R02, R03, R09, N01, N02"
+  },
+  {
+    "id": "O01",
+    "name": "Portfolio and multi-site project dashboard",
+    "priority": "KEEP / NEXT",
+    "workspace": "Organisation Review",
+    "scope": "Existing permitted project list CORE foundation; portfolio/department dashboard NEXT.",
+    "implementation": "Not audited",
+    "group": "portfolio",
+    "state": "UI-only + connected subset",
+    "template": "dashboard",
+    "fields": [
+      "Portfolio view",
+      "Reporting period",
+      "Department"
+    ],
+    "tool": "projects",
+    "connection": "Existing permitted project list only; aggregated portfolio analytics not connected.",
+    "related": "D03; F01",
+    "resources": "R01, R02, R03, R04, N01, N02"
+  },
+  {
+    "id": "O02",
+    "name": "Owner project brief and shared baseline",
+    "priority": "CORE",
+    "workspace": "Organisation Review",
+    "scope": "CORE: owner brief/site/requirements and confirmed published baseline. Shared facts may originate in Design Studio, but purpose selection or an internal option brief does not establish procurement access or a complete owner review workflow.",
+    "implementation": "Partial",
+    "group": "briefs",
+    "state": "UI-only + connected subset",
+    "template": "brief",
+    "fields": [
+      "Project outcome",
+      "Common site baseline",
+      "Budget and assumptions"
+    ],
+    "tool": "project",
+    "connection": "Owner proposal review on the Review project screen (basis, rubric, offers, scores, clarifications, evaluation and decision). Remaining scope is listed in the feature register.",
+    "related": "F01; F02; F03; F04; F05; K01",
+    "resources": "R02, R03, R04, R05, R06, R07, R08"
+  },
+  {
+    "id": "O03",
+    "name": "Brief library and invitation packages",
+    "priority": "CORE / NEXT",
+    "workspace": "Organisation Review",
+    "scope": "Reusable manual response/BOQ template CORE; invitation delivery/lifecycle NEXT.",
+    "implementation": "Not audited",
+    "group": "briefs",
+    "state": "UI-only/demo",
+    "template": "document",
+    "fields": [
+      "Brief template name",
+      "Response requirements",
+      "Invitation note"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "L25; S02; S03",
+    "resources": "R02, R03, R07, N06, N07"
+  },
+  {
+    "id": "O04",
+    "name": "Eligibility and document checklist",
+    "priority": "CORE (LIMITED)",
+    "workspace": "Organisation Review",
+    "scope": "Owner-defined document checklist and human eligibility review; registry integrations not required.",
+    "implementation": "Partial",
+    "group": "briefs",
+    "state": "UI-only + connected subset",
+    "template": "register",
+    "fields": [
+      "Required document",
+      "Eligibility rule",
+      "Reviewer"
+    ],
+    "tool": "project",
+    "connection": "Owner proposal review on the Review project screen (basis, rubric, offers, scores, clarifications, evaluation and decision). Remaining scope is listed in the feature register.",
+    "related": "",
+    "resources": "R02, R03, R07, N03"
+  },
+  {
+    "id": "O05",
+    "name": "Proposal inbox and controlled receipt",
+    "priority": "CORE",
+    "workspace": "Organisation Review",
+    "scope": "Authorised external/native package upload and immutable received-version record.",
+    "implementation": "Partial",
+    "group": "briefs",
+    "state": "UI-only + connected subset",
+    "template": "register",
+    "fields": [
+      "Submission reference",
+      "Received version",
+      "Receipt evidence"
+    ],
+    "tool": "project",
+    "connection": "Owner proposal review on the Review project screen (basis, rubric, offers, scores, clarifications, evaluation and decision). Remaining scope is listed in the feature register. Connected 15 Nov 2026: Review project > Invite contractors to submit (draft, shared-brief preview, files, link, revoke, received/superseded history); native offers appear in step 3 Offers.",
+    "related": "",
+    "resources": "R02, R03, R07, N01, N03, N06"
+  },
+  {
+    "id": "O06",
+    "name": "Document reader and reviewed data extraction",
+    "priority": "CORE / NEXT",
+    "workspace": "Organisation Review",
+    "scope": "PDF viewer/manual source-linked entry CORE; OCR/AI extraction NEXT after pilot sample evaluation.",
+    "implementation": "Partial",
+    "group": "briefs",
+    "state": "UI-only + connected subset",
+    "template": "document",
+    "fields": [
+      "Document reference",
+      "Page or section",
+      "Reviewed extracted field"
+    ],
+    "tool": "project",
+    "connection": "Owner proposal review on the Review project screen (basis, rubric, offers, scores, clarifications, evaluation and decision). Remaining scope is listed in the feature register.",
+    "related": "A01; A02; K06",
+    "resources": "R07, N01, N03, N04, N06, N07"
+  },
+  {
+    "id": "O07",
+    "name": "Common scope and boq normalisation",
+    "priority": "CORE",
+    "workspace": "Organisation Review",
+    "scope": "CORE: human-confirmed common scope/unit mapping of received proposal versions, source links and original versus adjusted totals. Keep omissions, assumptions, exclusions and incompatible/unpriced items visible; never silently invent supplier prices.",
+    "implementation": "Partial",
+    "group": "briefs",
+    "state": "UI-only + connected subset",
+    "template": "register",
+    "fields": [
+      "Common scope item",
+      "Original unit",
+      "Confirmed mapping"
+    ],
+    "tool": "project",
+    "connection": "Owner proposal review on the Review project screen (basis, rubric, offers, scores, clarifications, evaluation and decision). Remaining scope is listed in the feature register.",
+    "related": "K04; K06",
+    "resources": "R02, R03, R09, N01, N03, N07, N08"
+  },
+  {
+    "id": "O08",
+    "name": "Synchronised spatial and proposal comparison",
+    "priority": "KEEP / CORE",
+    "workspace": "Organisation Review",
+    "scope": "KEEP / CORE: compare admitted spatial geometry and independently received proposal evidence on a compatible site/scope/version basis, with document-only fallback. Internal Baseline/A/B exploration alone is not the full procurement comparison workflow.",
+    "implementation": "Partial",
+    "group": "evaluation",
+    "state": "UI-only + connected subset",
+    "template": "comparison",
+    "fields": [
+      "Comparison basis",
+      "Admitted geometry source",
+      "Proposal versions"
+    ],
+    "tool": "analysis",
+    "connection": "Owner proposal review on the Review project screen (basis, rubric, offers, scores, clarifications, evaluation and decision). Remaining scope is listed in the feature register.",
+    "related": "F08; F14; K06",
+    "resources": "R01, R02, R03, R04, R05, R06, R11, N01, N02"
+  },
+  {
+    "id": "O09",
+    "name": "Criteria template and weighted scorecard builder",
+    "priority": "CORE",
+    "workspace": "Organisation Review",
+    "scope": "Small locked criteria/rubric/weight/evidence template with declared missing-data rules. Audited subset: Append-only preferred-option review records with criteria text, notes, revision conflicts and same-project/current-source checks exist.",
+    "implementation": "Partial",
+    "group": "evaluation",
+    "state": "UI-only + connected subset",
+    "template": "scorecard",
+    "fields": [
+      "Rubric title",
+      "Missing-data policy",
+      "Evidence requirement"
+    ],
+    "tool": "project",
+    "connection": "Owner proposal review on the Review project screen (basis, rubric, offers, scores, clarifications, evaluation and decision). Remaining scope is listed in the feature register.",
+    "related": "F14; K06",
+    "resources": "R02, R03, R09, N01, N08"
+  },
+  {
+    "id": "O10",
+    "name": "Independent technical and financial evaluations",
+    "priority": "CORE / NEXT",
+    "workspace": "Organisation Review",
+    "scope": "Basic assigned reviewer score/rationale CORE; blind/multi-envelope process NEXT only with policy. Audited subset: Append-only preferred-option review records with criteria text, notes, revision conflicts and same-project/current-source checks exist.",
+    "implementation": "Partial",
+    "group": "evaluation",
+    "state": "UI-only + connected subset",
+    "template": "scorecard",
+    "fields": [
+      "Evaluation assignment",
+      "Technical rationale",
+      "Financial rationale"
+    ],
+    "tool": "project",
+    "connection": "Owner proposal review on the Review project screen (basis, rubric, offers, scores, clarifications, evaluation and decision). Remaining scope is listed in the feature register.",
+    "related": "K06",
+    "resources": "R02, R03, R07, N01, N08"
+  },
+  {
+    "id": "O11",
+    "name": "Moderation and committee consensus",
+    "priority": "NEXT",
+    "workspace": "Organisation Review",
+    "scope": "Formal committee moderation after basic review/signoff is tested.",
+    "implementation": "Not audited",
+    "group": "evaluation",
+    "state": "Planned",
+    "template": "scorecard",
+    "fields": [
+      "Committee session",
+      "Moderation question",
+      "Consensus rationale"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "K06",
+    "resources": "R02, R03, N01, N02, N08"
+  },
+  {
+    "id": "O12",
+    "name": "Deterministic ranking and sensitivity analysis",
+    "priority": "CORE / NEXT",
+    "workspace": "Organisation Review",
+    "scope": "Deterministic calculation/ties/explanations CORE; sensitivity exploration NEXT.",
+    "implementation": "Partial",
+    "group": "evaluation",
+    "state": "UI-only + connected subset",
+    "template": "comparison",
+    "fields": [
+      "Ranking rule",
+      "Tie policy",
+      "Sensitivity assumption"
+    ],
+    "tool": "project",
+    "connection": "Owner proposal review on the Review project screen (basis, rubric, offers, scores, clarifications, evaluation and decision). Remaining scope is listed in the feature register.",
+    "related": "K06",
+    "resources": "R02, R03, R09, N02, N08"
+  },
+  {
+    "id": "O13",
+    "name": "Financial and whole-life comparison",
+    "priority": "CORE / NEXT",
+    "workspace": "Organisation Review",
+    "scope": "CORE: compare quoted/normalised costs and budget gaps on explicit units/currency/tax/scope assumptions. Fictional scene costs do not prove affordability or bid comparability. Discounted whole-life cost model NEXT.",
+    "implementation": "Partial",
+    "group": "evaluation",
+    "state": "UI-only + connected subset",
+    "template": "comparison",
+    "fields": [
+      "Budget basis",
+      "Normalisation assumption",
+      "Lifecycle basis"
+    ],
+    "tool": "project",
+    "connection": "Owner proposal review on the Review project screen (basis, rubric, offers, scores, clarifications, evaluation and decision). Remaining scope is listed in the feature register.",
+    "related": "F10; F14; K04; K06",
+    "resources": "R02, R03, R09, N01, N02, N07, N08"
+  },
+  {
+    "id": "O14",
+    "name": "Requirements and evidence coverage matrix",
+    "priority": "CORE",
+    "workspace": "Organisation Review",
+    "scope": "Manual requirement/evidence links, unresolved questions and K06 readiness gate.",
+    "implementation": "Partial",
+    "group": "evaluation",
+    "state": "UI-only + connected subset",
+    "template": "register",
+    "fields": [
+      "Requirement reference",
+      "Evidence link",
+      "Outstanding question"
+    ],
+    "tool": "project",
+    "connection": "Owner proposal review on the Review project screen (basis, rubric, offers, scores, clarifications, evaluation and decision). Remaining scope is listed in the feature register.",
+    "related": "A03; K06",
+    "resources": "R02, R03, N01, N03, N04, N05, N08, N09, N10"
+  },
+  {
+    "id": "O15",
+    "name": "Clarifications, addenda and revised submissions",
+    "priority": "CORE / NEXT",
+    "workspace": "Organisation Review",
+    "scope": "Record clarification/questions and supplied answers CORE; automated external exchanges NEXT.",
+    "implementation": "Partial",
+    "group": "decisions",
+    "state": "UI-only + connected subset",
+    "template": "register",
+    "fields": [
+      "Clarification question",
+      "Addendum reference",
+      "Supplied answer"
+    ],
+    "tool": "project",
+    "connection": "Owner proposal review on the Review project screen (basis, rubric, offers, scores, clarifications, evaluation and decision). Remaining scope is listed in the feature register.",
+    "related": "K03; L26; S05",
+    "resources": "R02, R03, R07, N06, N07"
+  },
+  {
+    "id": "O16",
+    "name": "Approval routing and delegation",
+    "priority": "CORE (LIMITED)",
+    "workspace": "Organisation Review",
+    "scope": "One reviewer-to-authorised-approver transition, return/reject reason and revision check; complex routing NEXT. Audited subset: Append-only preferred-option review records with criteria text, notes, revision conflicts and same-project/current-source checks exist.",
+    "implementation": "Partial",
+    "group": "decisions",
+    "state": "UI-only + connected subset",
+    "template": "schedule",
+    "fields": [
+      "Review step",
+      "Authorised approver",
+      "Return or rejection reason"
+    ],
+    "tool": "project",
+    "connection": "Owner proposal review on the Review project screen (basis, rubric, offers, scores, clarifications, evaluation and decision). Remaining scope is listed in the feature register.",
+    "related": "F14",
+    "resources": "R02, R03, R07, N06, N08, N18"
+  },
+  {
+    "id": "O17",
+    "name": "Decision memorandum and auditable report pack",
+    "priority": "CORE",
+    "workspace": "Organisation Review",
+    "scope": "CORE: separate owner recommendation/decision pack with received sources, rubric/input versions, scores, human rationale, approval and retained report/manifest. F14 internal option brief is a bounded foundation, not the complete Organisation Review procurement workflow.",
+    "implementation": "Partial",
+    "group": "decisions",
+    "state": "UI-only + connected subset",
+    "template": "document",
+    "fields": [
+      "Decision title",
+      "Recommendation rationale",
+      "Source versions"
+    ],
+    "tool": "project",
+    "connection": "Owner proposal review on the Review project screen (basis, rubric, offers, scores, clarifications, evaluation and decision). Remaining scope is listed in the feature register.",
+    "related": "F14; K06; S04",
+    "resources": "R02, R03, R07, R10, N07, N08, N09, N10"
+  },
+  {
+    "id": "O18",
+    "name": "Management and evaluation dashboard",
+    "priority": "CORE (LIMITED)",
+    "workspace": "Organisation Review",
+    "scope": "Small verified submission/budget/completion dashboard; broad management BI NEXT.",
+    "implementation": "Partial",
+    "group": "portfolio",
+    "state": "UI-only + connected subset",
+    "template": "dashboard",
+    "fields": [
+      "Dashboard scope",
+      "Budget source",
+      "Completion evidence"
+    ],
+    "tool": "projects",
+    "connection": "Owner review dashboard on the Review home; filters and drillthrough remain.",
+    "related": "D03; K06",
+    "resources": "R02, R03, N01, N02, N08"
+  },
+  {
+    "id": "O19",
+    "name": "Ai proposal-analysis workbench",
+    "priority": "NEXT",
+    "workspace": "Organisation Review",
+    "scope": "Evidence-linked AI assistance after deterministic manual workflow and evaluation set work.",
+    "implementation": "Not audited",
+    "group": "assistant",
+    "state": "Planned",
+    "template": "assistant",
+    "fields": [
+      "Analysis question",
+      "Proposal sources",
+      "Review instruction"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "F16",
+    "resources": "N03, N04, N05, N06, N08, N09, N10"
+  },
+  {
+    "id": "O20",
+    "name": "Portfolio budget allocation and prioritisation",
+    "priority": "LATER",
+    "workspace": "Organisation Review",
+    "scope": "Portfolio optimisation deferred until sufficient comparable approved project data exists.",
+    "implementation": "Not audited",
+    "group": "portfolio",
+    "state": "Planned",
+    "template": "comparison",
+    "fields": [
+      "Portfolio objective",
+      "Budget constraint",
+      "Allocation assumption"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "",
+    "resources": "R02, R03, R09, N02, N08, N11"
+  },
+  {
+    "id": "O21",
+    "name": "Landscaping outcome and sustainability comparison",
+    "priority": "KEEP / NEXT",
+    "workspace": "Organisation Review",
+    "scope": "Show supported source-labelled metrics; broader owner sustainability scoring NEXT after validation.",
+    "implementation": "Not audited",
+    "group": "evaluation",
+    "state": "UI-only/demo",
+    "template": "comparison",
+    "fields": [
+      "Outcome indicator",
+      "Source method",
+      "Comparability limitation"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "F14; L21",
+    "resources": "R02, R03, R04, R05, R06, N02, N08"
+  },
+  {
+    "id": "O22",
+    "name": "Supplier evidence and performance history",
+    "priority": "NEXT",
+    "workspace": "Organisation Review",
+    "scope": "Only project-relevant supplied records now; historical supplier performance module later.",
+    "implementation": "Not audited",
+    "group": "portfolio",
+    "state": "Planned",
+    "template": "register",
+    "fields": [
+      "Supplier evidence",
+      "Project reference",
+      "Evidence date"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "",
+    "resources": "R02, R03, R07, N01"
+  },
+  {
+    "id": "O23",
+    "name": "Selection handoff and milestone monitoring",
+    "priority": "NEXT",
+    "workspace": "Organisation Review",
+    "scope": "Selection handoff/milestone tracking follows successful review pilot.",
+    "implementation": "Not audited",
+    "group": "portfolio",
+    "state": "Planned",
+    "template": "schedule",
+    "fields": [
+      "Selection handoff",
+      "Milestone",
+      "Responsible person"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "L28",
+    "resources": "R02, R03, R07, N01, N02, N06"
+  },
+  {
+    "id": "O24",
+    "name": "Asset handover and maintenance portfolio",
+    "priority": "NEXT",
+    "workspace": "Organisation Review",
+    "scope": "Maintenance/asset portfolio after accepted handover data and user demand.",
+    "implementation": "Not audited",
+    "group": "portfolio",
+    "state": "Planned",
+    "template": "register",
+    "fields": [
+      "Asset reference",
+      "Handover evidence",
+      "Maintenance owner"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "L22; L28",
+    "resources": "R02, R03, R04, R07, N01, N02"
+  },
+  {
+    "id": "O25",
+    "name": "Stakeholder consultation and feedback",
+    "priority": "LATER",
+    "workspace": "Organisation Review",
+    "scope": "Public consultation deferred; simple owner-recorded user requirements remain in brief.",
+    "implementation": "Not audited",
+    "group": "portfolio",
+    "state": "Planned",
+    "template": "register",
+    "fields": [
+      "Stakeholder group",
+      "Consultation question",
+      "Consent note"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "",
+    "resources": "R01, R02, R03, R07, N02, N06"
+  },
+  {
+    "id": "O26",
+    "name": "Reusable evaluation policy and templates",
+    "priority": "CORE / NEXT",
+    "workspace": "Organisation Review",
+    "scope": "One reusable rubric/brief template CORE; department policy administration NEXT.",
+    "implementation": "Not audited",
+    "group": "decisions",
+    "state": "UI-only/demo",
+    "template": "scorecard",
+    "fields": [
+      "Policy template",
+      "Rubric version",
+      "Department scope"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "",
+    "resources": "R02, R03, N01, N08"
+  },
+  {
+    "id": "O27",
+    "name": "Enterprise access and deployment options",
+    "priority": "LATER",
+    "workspace": "Organisation Review",
+    "scope": "Use existing identity/local pilot; enterprise SSO/private hosting needs customer-specific requirements.",
+    "implementation": "Not audited",
+    "group": "organisation",
+    "state": "Planned",
+    "template": "settings",
+    "fields": [
+      "Access option",
+      "Hosting requirement",
+      "Identity provider requirement"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "D01; D02",
+    "resources": "R02, R03, R07, R17, N19"
+  },
+  {
+    "id": "O28",
+    "name": "Interoperability and management exports",
+    "priority": "CORE / LATER",
+    "workspace": "Organisation Review",
+    "scope": "Usable PDF/CSV/XLSX decision exports CORE; ERP/BI/webhook adapters deferred.",
+    "implementation": "Not audited",
+    "group": "decisions",
+    "state": "UI-only/demo",
+    "template": "document",
+    "fields": [
+      "Export package name",
+      "Export format",
+      "Disclosure boundary"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "S09",
+    "resources": "R02, R03, N07, N19"
+  },
+  {
+    "id": "O29",
+    "name": "Controlled opening, confidentiality and conflict safeguards",
+    "priority": "LATER",
+    "workspace": "Organisation Review",
+    "scope": "No sealed-tender claim in pilot; real key custody/opening requirements need separate design.",
+    "implementation": "Not audited",
+    "group": "decisions",
+    "state": "Planned",
+    "template": "settings",
+    "fields": [
+      "Opening requirement",
+      "Conflict declaration",
+      "Confidentiality policy"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "",
+    "resources": "R02, R03, R07, R17, N08, N19"
+  },
+  {
+    "id": "O30",
+    "name": "Process performance and continuous improvement",
+    "priority": "NEXT",
+    "workspace": "Organisation Review",
+    "scope": "Measure pilot task performance manually now; ongoing process analytics follows records.",
+    "implementation": "Not audited",
+    "group": "portfolio",
+    "state": "Planned",
+    "template": "dashboard",
+    "fields": [
+      "Process measure",
+      "Measurement period",
+      "Improvement question"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "",
+    "resources": "R02, R03, N01, N02, N08"
+  },
+  {
+    "id": "S01",
+    "name": "Two workspace shells and capability-driven navigation",
+    "priority": "CORE",
+    "workspace": "Shared Platform",
+    "scope": "Implement sections 00.11/00.12 next: onboarding, organisation selection, login routing, permitted workspace shells/switching and actual backend grants. Audited subset: Verified-email organisation creation, hashed expiring one-use team invitations, revoked-issuer check and explicit membership/project grants are present.",
+    "implementation": "Partial",
+    "group": "organisation",
+    "state": "UI-only + connected subset",
+    "template": "settings",
+    "fields": [
+      "Workspace preference",
+      "Capability boundary",
+      "Navigation note"
+    ],
+    "tool": "switcher",
+    "connection": "Existing organisation/workspace grants drive available workspaces. Signed-in /home is the shared orientation page and workspace chooser; choices follow active-organisation workspace grants. Home includes account greeting, permitted Studio/Review choices, recent permitted projects, quick guide and existing account/service controls; it does not add mock notifications.",
+    "related": "D01; D02; D03; F01; F14",
+    "resources": "R01, R02, R03, R07"
+  },
+  {
+    "id": "S02",
+    "name": "Organisation onboarding and complete membership lifecycle",
+    "priority": "CORE / NEXT",
+    "workspace": "Shared Platform",
+    "scope": "Existing team/project grants plus organisation onboarding and secure team invitation lifecycle are NEXT-INCREMENT CORE. Bid/project invitation portal remains NEXT. Audited subset: Verified-email organisation creation, hashed expiring one-use team invitations, revoked-issuer check and explicit membership/project grants are present.",
+    "implementation": "Partial",
+    "group": "organisation",
+    "state": "UI-only + connected subset",
+    "template": "register",
+    "fields": [
+      "Member or invitation",
+      "Requested access",
+      "Invitation expiry"
+    ],
+    "tool": "settings",
+    "connection": "Existing member, invitation and organisation setup under current grants.",
+    "related": "D01; D02; O03",
+    "resources": "R01, R02, R03, R07"
+  },
+  {
+    "id": "S03",
+    "name": "Separate private designs from published submission packages",
+    "priority": "CORE / NEXT",
+    "workspace": "Shared Platform",
+    "scope": "CORE: preserve private design/internal cost boundaries and publish only deliberate immutable recipient-safe submission content. HTML visibility/purpose toggles are not backend permission enforcement. Interactive cross-party exchange NEXT.",
+    "implementation": "Partial",
+    "group": "records",
+    "state": "UI-only + connected subset",
+    "template": "document",
+    "fields": [
+      "Published package",
+      "Recipient audience",
+      "Disclosure boundary"
+    ],
+    "tool": "analysis",
+    "connection": "Existing audience-specific immutable issue; cross-party exchange not connected. Connected 15 Nov 2026: contractor Proposal step > Submit to organisation (package preview, receipt); owner package viewer under Invite contractors to submit.",
+    "related": "F12; K03; L26; O03",
+    "resources": "R02, R03, R07, R10"
+  },
+  {
+    "id": "S04",
+    "name": "Retained document and file lifecycle",
+    "priority": "CORE",
+    "workspace": "Shared Platform",
+    "scope": "CORE: retained issued bytes/manifests, authorised file access and coordinated database/Auth/private-evidence recovery. Browser localStorage, HTML snapshots and print states are not proof of production retention or restore acceptance.",
+    "implementation": "Partial",
+    "group": "records",
+    "state": "UI-only + connected subset",
+    "template": "register",
+    "fields": [
+      "File reference",
+      "Retention basis",
+      "Access classification"
+    ],
+    "tool": "sources",
+    "connection": "Existing private evidence and retained issued-file workflows. Project details > Delete project: typed-name confirmation for permitted unissued projects; retained records explain Archive. Projects list displays pending uploaded-file cleanup with Retry file cleanup. docs/tracking/evidence/project-deletion-2026-11-15.md",
+    "related": "D09; F02; F12; F14; O17",
+    "resources": "R03, R07, R08, R10, R17"
+  },
+  {
+    "id": "S05",
+    "name": "Discussion, annotations, tasks and notifications",
+    "priority": "CORE / NEXT",
+    "workspace": "Shared Platform",
+    "scope": "Simple notes/clarification register CORE; mentions/live collaboration/notifications NEXT.",
+    "implementation": "Not audited",
+    "group": "inbox",
+    "state": "UI-only/demo",
+    "template": "register",
+    "fields": [
+      "Discussion or task",
+      "Context reference",
+      "Responsible person"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "L26; O15",
+    "resources": "R01, R02, R03, R07, N06"
+  },
+  {
+    "id": "S06",
+    "name": "Recovery, version checks and operational hardening",
+    "priority": "CORE",
+    "workspace": "Shared Platform",
+    "scope": "Complete saving, expiry recovery, conflict handling and necessary operational safeguards.",
+    "implementation": "Partial",
+    "group": "system",
+    "state": "UI-only + connected subset",
+    "template": "settings",
+    "fields": [
+      "Recovery scenario",
+      "Source revision",
+      "Recovery evidence"
+    ],
+    "tool": "project",
+    "connection": "Existing guarded revisions/history; broader operations still require acceptance.",
+    "related": "D06; D07; D08; D09; D10; K02",
+    "resources": "R01, R02, R03, R16, R17, N19"
+  },
+  {
+    "id": "S07",
+    "name": "Large-table and map performance",
+    "priority": "CORE / NEXT",
+    "workspace": "Shared Platform",
+    "scope": "Measure pilot table/map performance CORE; large-portfolio tuning NEXT.",
+    "implementation": "Partial",
+    "group": "system",
+    "state": "UI-only/demo",
+    "template": "dashboard",
+    "fields": [
+      "Performance surface",
+      "Dataset size",
+      "Measurement method"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "",
+    "resources": "R03, R04, R05, R06, R11, N01, N06, N19"
+  },
+  {
+    "id": "S08",
+    "name": "Language, units and accessibility",
+    "priority": "CORE / NEXT",
+    "workspace": "Shared Platform",
+    "scope": "Existing metric/MYR/timezone and accessible controls CORE; full bilingual UI NEXT.",
+    "implementation": "Partial",
+    "group": "preferences",
+    "state": "UI-only + connected subset",
+    "template": "settings",
+    "fields": [
+      "Display units",
+      "Language preference",
+      "Accessibility preference"
+    ],
+    "tool": "settings",
+    "connection": "Existing organisation units/timezone settings; full localisation not connected.",
+    "related": "D05; D08",
+    "resources": "R01, R09, R10, R16, N20"
+  },
+  {
+    "id": "S09",
+    "name": "Import/export contracts and integrations",
+    "priority": "CORE / LATER",
+    "workspace": "Shared Platform",
+    "scope": "Small admitted JSON/CSV/XLSX/PDF paths CORE; broad API/ERP adapters LATER.",
+    "implementation": "Partial",
+    "group": "records",
+    "state": "UI-only + connected subset",
+    "template": "register",
+    "fields": [
+      "Import or export name",
+      "Data contract",
+      "Validation source"
+    ],
+    "tool": "analysis",
+    "connection": "Existing admitted output/export subset; broad integration adapters not connected.",
+    "related": "F04; F10; O28",
+    "resources": "R02, R03, R04, R05, R06, R07, N07"
+  },
+  {
+    "id": "S10",
+    "name": "Audit, retention and decision records",
+    "priority": "CORE",
+    "workspace": "Shared Platform",
+    "scope": "Revision/audit trail and actual authorised retention/recovery workflows.",
+    "implementation": "Partial",
+    "group": "records",
+    "state": "UI-only + connected subset",
+    "template": "register",
+    "fields": [
+      "Audit event reference",
+      "Decision version",
+      "Retention basis"
+    ],
+    "tool": "project",
+    "connection": "Existing project and workspace histories; wider retention policy not connected.",
+    "related": "D02; D04; D09; D10; K01; K03",
+    "resources": "R02, R03, R07, R17, N19"
+  },
+  {
+    "id": "S11",
+    "name": "Asynchronous jobs and reproducible results",
+    "priority": "CORE / NEXT",
+    "workspace": "Shared Platform",
+    "scope": "Reliable retained-export job only if needed now; distributed OCR/AI workers NEXT.",
+    "implementation": "Not audited",
+    "group": "system",
+    "state": "UI-only/demo",
+    "template": "schedule",
+    "fields": [
+      "Background job type",
+      "Input revision",
+      "Reproducibility note"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "",
+    "resources": "R02, R03, N06, N19"
+  },
+  {
+    "id": "S12",
+    "name": "Reviewer feedback and product acceptance",
+    "priority": "CORE",
+    "workspace": "Shared Platform",
+    "scope": "Observe both customer workflows, compare outputs and retain acceptance evidence.",
+    "implementation": "Partial",
+    "group": "help",
+    "state": "UI-only + connected subset",
+    "template": "register",
+    "fields": [
+      "Workflow tested",
+      "Reviewer feedback",
+      "Acceptance evidence"
+    ],
+    "tool": "settings",
+    "connection": "Existing support/data request subset; formal product acceptance not connected.",
+    "related": "",
+    "resources": "R16, R17, N19"
+  },
+  {
+    "id": "A01",
+    "name": "Document extraction and proposal summaries",
+    "priority": "NEXT",
+    "workspace": "AI and Analysis",
+    "scope": "Manual typed fields/source reader first; optional tested extraction and summary next.",
+    "implementation": "Not audited",
+    "group": "assistant",
+    "state": "Planned",
+    "template": "assistant",
+    "fields": [
+      "Document summary task",
+      "Source pages",
+      "Human review instruction"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "F16; O06",
+    "resources": "N03, N04, N05, N06, N09, N10"
+  },
+  {
+    "id": "A02",
+    "name": "Reviewed line matching and unit normalisation",
+    "priority": "NEXT",
+    "workspace": "AI and Analysis",
+    "scope": "Human mapping first; matching suggestions only after real line-item samples.",
+    "implementation": "Not audited",
+    "group": "assistant",
+    "state": "Planned",
+    "template": "assistant",
+    "fields": [
+      "Line matching task",
+      "Source schedules",
+      "Unit assumptions"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "F16; O06",
+    "resources": "N01, N03, N04, N05, N07, N08, N09, N10"
+  },
+  {
+    "id": "A03",
+    "name": "Requirement response and evidence-gap analyser",
+    "priority": "NEXT",
+    "workspace": "AI and Analysis",
+    "scope": "Deterministic required-field/evidence checks CORE; AI retrieval suggestions NEXT.",
+    "implementation": "Not audited",
+    "group": "assistant",
+    "state": "Planned",
+    "template": "assistant",
+    "fields": [
+      "Requirement question",
+      "Evidence collection",
+      "Review instruction"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "F16; O14",
+    "resources": "N03, N04, N05, N08, N09, N10"
+  },
+  {
+    "id": "A04",
+    "name": "Proposal and decision narrative drafting",
+    "priority": "CORE / NEXT",
+    "workspace": "AI and Analysis",
+    "scope": "Deterministic approved templates CORE; source-grounded model drafting NEXT.",
+    "implementation": "Not audited",
+    "group": "assistant",
+    "state": "Planned",
+    "template": "assistant",
+    "fields": [
+      "Narrative purpose",
+      "Approved template",
+      "Authorised facts"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "F16",
+    "resources": "N04, N05, N08, N09, N10"
+  },
+  {
+    "id": "A05",
+    "name": "Price and scope anomaly assistant",
+    "priority": "CORE / NEXT",
+    "workspace": "AI and Analysis",
+    "scope": "Arithmetic/missing-price/duplicate rules CORE; statistical or language-model anomaly suggestions NEXT.",
+    "implementation": "Not audited",
+    "group": "assistant",
+    "state": "Planned",
+    "template": "assistant",
+    "fields": [
+      "Price or scope concern",
+      "Source line items",
+      "Rule basis"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "F16",
+    "resources": "R09, N02, N07, N08, N12"
+  },
+  {
+    "id": "A06",
+    "name": "Source-grounded project question answering",
+    "priority": "NEXT",
+    "workspace": "AI and Analysis",
+    "scope": "Grounded question answering after scoped source data, retrieval and acceptance work.",
+    "implementation": "Not audited",
+    "group": "assistant",
+    "state": "Planned",
+    "template": "assistant",
+    "fields": [
+      "Project question",
+      "Authorised sources",
+      "Citation requirement"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "F16",
+    "resources": "N03, N04, N05, N06, N09, N10"
+  },
+  {
+    "id": "A07",
+    "name": "Evaluation explanation and sensitivity narration",
+    "priority": "CORE / NEXT",
+    "workspace": "AI and Analysis",
+    "scope": "Formula-driven contribution explanation CORE; LLM narration optional NEXT.",
+    "implementation": "Not audited",
+    "group": "assistant",
+    "state": "Planned",
+    "template": "assistant",
+    "fields": [
+      "Evaluation explanation",
+      "Formula source",
+      "Sensitivity question"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "F16",
+    "resources": "N02, N04, N08, N09, N10"
+  },
+  {
+    "id": "A08",
+    "name": "Clarification and response drafting",
+    "priority": "CORE / NEXT",
+    "workspace": "AI and Analysis",
+    "scope": "Manual structured clarification/template CORE; AI reply drafting NEXT.",
+    "implementation": "Not audited",
+    "group": "assistant",
+    "state": "Planned",
+    "template": "assistant",
+    "fields": [
+      "Clarification purpose",
+      "Original question",
+      "Response sources"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "F16",
+    "resources": "N03, N04, N05, N09, N10"
+  },
+  {
+    "id": "A09",
+    "name": "Explainable design improvement suggestions",
+    "priority": "LATER",
+    "workspace": "AI and Analysis",
+    "scope": "Generative design suggestions deferred until deterministic rules and analysis are validated.",
+    "implementation": "Not audited",
+    "group": "assistant",
+    "state": "Planned",
+    "template": "assistant",
+    "fields": [
+      "Design improvement goal",
+      "Current option",
+      "Constraint sources"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "F16",
+    "resources": "R04, R05, R06, R11, N04, N08, N09, N10, N11"
+  },
+  {
+    "id": "A10",
+    "name": "Executive dashboard briefing",
+    "priority": "NEXT",
+    "workspace": "AI and Analysis",
+    "scope": "Verified dashboard numbers first; AI executive narration later.",
+    "implementation": "Not audited",
+    "group": "assistant",
+    "state": "Planned",
+    "template": "assistant",
+    "fields": [
+      "Briefing audience",
+      "Verified dashboard sources",
+      "Reporting period"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "F16",
+    "resources": "N02, N04, N08, N09, N10"
+  },
+  {
+    "id": "A11",
+    "name": "Ai review, privacy and reproducibility controls",
+    "priority": "CORE / NEXT",
+    "workspace": "AI and Analysis",
+    "scope": "Privacy/source boundaries CORE for all data; model evaluation becomes mandatory before any AI release.",
+    "implementation": "Not audited",
+    "group": "privacy",
+    "state": "Planned",
+    "template": "settings",
+    "fields": [
+      "AI processing boundary",
+      "Allowed source scope",
+      "Human review requirement"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "F16",
+    "resources": "R02, R03, R07, N03, N04, N05, N06, N09, N10, N19"
+  },
+  {
+    "id": "A12",
+    "name": "Portfolio optimisation and predictive analytics",
+    "priority": "LATER",
+    "workspace": "AI and Analysis",
+    "scope": "No predictive winner/supplier trust model or portfolio predictor in pilot.",
+    "implementation": "Not audited",
+    "group": "assistant",
+    "state": "Planned",
+    "template": "assistant",
+    "fields": [
+      "Portfolio objective",
+      "Available dataset",
+      "Prediction limitation"
+    ],
+    "tool": "",
+    "connection": "UI preview only. Domain service and persistence are not connected; functional status is unchanged.",
+    "related": "F16",
+    "resources": "N02, N08, N11, N12"
+  },
+  {
+    "id": "L31",
+    "name": "Road and driveway planning and construction cost takeoff",
+    "priority": "CORE (LIMITED) / NEXT",
+    "workspace": "Design Studio - contractor/landscaper; civil reviewer for supplied standards",
+    "scope": "Bounded road/driveway concept drawing: drag or click a line route, smooth curve or area shape; edit up to 12 control points and explicit constant width; preview and confirm a proposed option-owned footprint. Backend derives the footprint in the site UTM CRS with flat caps/rounded joins, rejects invalid/out-of-bound or overlapping separate roads, and reuses revisioned saves, road layers, compatible sourced component rates, preliminary estimates and BOQ export. No engineered alignment, pavement design, earthworks, drainage, compaction or certification. 13 November 3D texture continuation: saved Dirt/Pavement/Stone/Gravel patterns and all six grass-paint looks now persist in geographic and local metric 3D, including scenario switches and reload. Original pixels/strokes are reused; paint keeps clipping/erasing and follows the terrain. Road triangles share rendered ground planes and update through sculpting, avoiding breaks at hills. Appearance is visual only; quantities, rates and issued report schematics remain unchanged.",
+    "implementation": "Partial",
+    "group": "design",
+    "state": "UI-only + connected subset",
+    "template": "schedule",
+    "fields": [
+      "Road surface geometry",
+      "Layer specification and thickness",
+      "Quantity basis/source",
+      "Rate source and validity"
+    ],
+    "tool": "layout",
+    "connection": "Bounded road/driveway concept drawing: drag or click a line route, smooth curve or area shape; edit up to 12 control points and explicit constant width; preview and confirm a proposed option-owned footprint. Backend derives the footprint in the site UTM CRS with flat caps/rounded joins, rejects invalid/out-of-bound or overlapping separate roads, and reuses revisioned saves, road layers, compatible sourced component rates, preliminary estimates and BOQ export. No engineered alignment, pavement design, earthworks, drainage, compaction or certification. L31 remains Partial for broader road scope and acceptance. Dedicated client proposal road-layer/source disclosure, qualified local specification/quantity review, physical touch and assistive technology, real Supabase/provider and customer acceptance remain open. Unconfirmed road sketches are local component drafts; confirm into workspace before saving/recovery. Separate road intersections/overlaps are rejected; route edits use Roads and driveways rather than generic spatial transforms. No cut/fill, grade, density/compaction, traffic/geotechnical, drainage, compliance or certification calculations. Town-builder road UI adds Dirt/Pavement/Stone/Gravel visual surface tiles, straight/bends/curve/area buttons, visible editable 4 m concept drawing-width preset and slider. Source notes default explicitly to estimated concept sketch, with detailed notes and numeric coordinates expandable. Surface metadata and procedural textures persist on map roads; appearance does not assign assembly, thickness or price. Existing footprint validation, layer quantities and pricing remain authoritative. 13 November 3D texture continuation: saved Dirt/Pavement/Stone/Gravel patterns and all six grass-paint looks now persist in geographic and local metric 3D, including scenario switches and reload. Original pixels/strokes are reused; paint keeps clipping/erasing and follows the terrain. Road triangles share rendered ground planes and update through sculpting, avoiding breaks at hills. Appearance is visual only; quantities, rates and issued report schematics remain unchanged.",
+    "related": "L04; L06; L10; L13; L14; L15; L17; L18; L20; L24; K02; K04; K05; F04; F10",
+    "resources": "R02, R03, R04, R05, R06, R09, R11, R13, N13, N15, N21"
+  }
+]

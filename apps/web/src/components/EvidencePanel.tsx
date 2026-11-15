@@ -223,7 +223,15 @@ export default function EvidencePanel({
         Reload evidence
       </Button>
       <form onSubmit={(event) => void upload(event)} className="grid gap-3 my-4">
-        <fieldset disabled={busy || project.archived || Boolean(editing) || archived}>
+        <fieldset
+          disabled={
+            !project.capabilities?.includes('edit_evidence') ||
+            busy ||
+            project.archived ||
+            Boolean(editing) ||
+            archived
+          }
+        >
           <label>
             Photo
             <input name="photo" type="file" accept="image/png,image/jpeg" required />
@@ -282,7 +290,12 @@ export default function EvidencePanel({
             </Button>
             <Button
               variant="outline"
-              disabled={busy || project.archived || item.archived}
+              disabled={
+                !project.capabilities?.includes('edit_evidence') ||
+                busy ||
+                project.archived ||
+                item.archived
+              }
               onClick={() => {
                 if (discard()) setEditing(item.id)
               }}
@@ -291,7 +304,9 @@ export default function EvidencePanel({
             </Button>
             <Button
               variant="outline"
-              disabled={busy || project.archived}
+              disabled={
+                !project.capabilities?.includes('edit_evidence') || busy || project.archived
+              }
               onClick={() => void toggleArchive(item)}
             >
               {item.archived ? 'Restore photo' : 'Remove photo'} {item.description}

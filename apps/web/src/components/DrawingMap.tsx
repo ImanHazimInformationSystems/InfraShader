@@ -1,6 +1,8 @@
+import { readBuildingContext } from '../services/building-context'
+import type { FeatureCollection, Polygon } from 'geojson'
 import { useEffect, useRef, useState } from 'react'
-import * as maplibregl from 'maplibre-gl'
-import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
+import mapboxgl from 'mapbox-gl'
+import workerUrl from 'mapbox-gl/dist/mapbox-gl-csp-worker.js?url'
 import {
   TerraDraw,
   TerraDrawPolygonMode,
@@ -8,15 +10,32 @@ import {
   TerraDrawPointMode,
   TerraDrawSelectMode,
 } from 'terra-draw'
-import { TerraDrawMapLibreGLAdapter } from 'terra-draw-maplibre-gl-adapter'
+import { TerraDrawMapboxGLAdapter } from 'terra-draw-mapbox-gl-adapter'
 import type { Feature } from 'geojson'
 import type { Bounds } from '../domain/projects'
 import { geometrySchema, type Geometry } from '../domain/workspace'
-import { loadBasemap } from '../services/map'
+import { snapPosition } from '../domain/snapping'
+import {
+  loadBasemap,
+  mapOptions,
+  providerBuildings,
+  visibleProviderBuildings,
+} from '../services/map'
 import { Button } from './ui/button'
-maplibregl.setWorkerUrl(workerUrl)
+import MapboxControls from './MapboxControls'
+import { addLayoutImages } from '../services/layout-textures'
+import type { PlanReference } from '../domain/plan-reference'
+mapboxgl.workerUrl = workerUrl
 
 type Props = {
+  selectionBlocked?: boolean
+  designActive?: boolean
+  onMapReady?: (map: mapboxgl.Map | null) => void
+  selectedIds?: string[]
+  onToggleSelection?: (id: string) => void
+  terrainEdited?: boolean
+  reference?: PlanReference | null
+  referenceImage?: string
   bounds: Bounds
   features: Feature[]
   type: Geometry['type']
@@ -26,6 +45,14 @@ type Props = {
   disabled?: boolean
 }
 export default function DrawingMap({
+  selectionBlocked = false,
+  designActive = false,
+  onMapReady,
+  selectedIds = [],
+  onToggleSelection,
+  terrainEdited = false,
+  reference,
+  referenceImage,
   bounds,
   features,
   type,
@@ -34,35 +61,110 @@ export default function DrawingMap({
   onSelect,
   disabled = false,
 }: Props) {
+  const mapReadyCallback = useRef(onMapReady)
+  useEffect(() => {
+    mapReadyCallback.current = onMapReady
+  }, [onMapReady])
   const container = useRef<HTMLDivElement>(null)
-  const map = useRef<maplibregl.Map | null>(null)
+  const map = useRef<mapboxgl.Map | null>(null)
   const draw = useRef<TerraDraw | null>(null)
-  const latest = useRef({ bounds, features, type, onGeometry, selected, onSelect, disabled })
+  const latest = useRef({ bounds, features, type, onGeometry, selected, onSelect, disabled, selectionBlocked })
+  const toggleSelection = useRef(onToggleSelection)
+  useEffect(() => {
+    toggleSelection.current = onToggleSelection
+  }, [onToggleSelection])
   const editing = useRef(false)
-  const [rendered, setRendered] = useState({ buildings: 0, shadows: 0 })
+  const snapEnabled = useRef(false)
+  const edgeEnabled = useRef(false)
+  const [edgeSnapping, setEdgeSnapping] = useState(false)
+  const [snapping, setSnapping] = useState(false)
+  const [rendered, setRendered] = useState({ buildings: 0, shadows: 0, context: 0 })
+  const [supplement, setSupplement] = useState<FeatureCollection<Polygon> | null>(null)
+  const [attribution, setAttribution] = useState(
+    'Overture Maps / OpenStreetMap contributors (ODbL)',
+  )
+  const [contextError, setContextError] = useState('')
   const [ready, setReady] = useState(false)
+  const [loadedMap, setLoadedMap] = useState<mapboxgl.Map | null>(null)
   const [status, setStatus] = useState('Loading drawing canvas...')
-  const [threeD, setThreeD] = useState(false)
+  const [requestedThreeD, setThreeD] = useState(true)
+  const threeD = requestedThreeD || designActive
   const [buildings, setBuildings] = useState(true)
   const [shadows, setShadows] = useState(true)
   const [basemapState, setBasemapState] = useState('Loading basemap...')
   useEffect(() => {
-    latest.current = { bounds, features, type, onGeometry, selected, onSelect, disabled }
-  }, [bounds, features, type, onGeometry, selected, onSelect, disabled])
+    const active = map.current
+    if (!ready || !active) return
+    if (!active.getSource('supplemental-buildings')) {
+      active.addSource('supplemental-buildings', {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: [] },
+      })
+      active.addLayer({
+        id: 'supplemental-footprints',
+        type: 'fill',
+        source: 'supplemental-buildings',
+        paint: { 'fill-color': '#a99063', 'fill-opacity': 0.3 },
+      })
+      active.addLayer({
+        id: 'supplemental-buildings-3d',
+        type: 'fill-extrusion',
+        source: 'supplemental-buildings',
+        filter: ['>', ['get', 'height'], 0],
+        paint: {
+          'fill-extrusion-height': ['get', 'height'],
+          'fill-extrusion-color': '#b5ad9e',
+          'fill-extrusion-opacity': 0.9,
+        },
+      })
+    }
+    ;(active.getSource('supplemental-buildings') as mapboxgl.GeoJSONSource).setData(
+      supplement ?? { type: 'FeatureCollection', features: [] },
+    )
+    active.setLayoutProperty(
+      'supplemental-buildings-3d',
+      'visibility',
+      threeD && buildings ? 'visible' : 'none',
+    )
+    providerBuildings(active, !supplement && threeD && buildings)
+  }, [ready, supplement, threeD, buildings])
+  useEffect(() => {
+    const view = map.current
+    if (!ready || !view) return
+    if (view.getLayer('plan-reference')) view.removeLayer('plan-reference')
+    if (view.getSource('plan-reference')) view.removeSource('plan-reference')
+    if (referenceImage && reference?.visible && reference.corners?.length === 4) {
+      const [a, b, c, d] = reference.corners
+      view.addSource('plan-reference', {
+        type: 'image',
+        url: referenceImage,
+        coordinates: [a, b, c, d],
+      })
+      view.addLayer(
+        {
+          id: 'plan-reference',
+          type: 'raster',
+          source: 'plan-reference',
+          paint: { 'raster-opacity': reference.opacity, 'raster-fade-duration': 0 },
+        },
+        'workspace-fill',
+      )
+    }
+  }, [ready, reference, referenceImage])
+  useEffect(() => {
+    latest.current = { bounds, features, type, onGeometry, selected, onSelect, disabled, selectionBlocked }
+  }, [bounds, features, type, onGeometry, selected, onSelect, disabled, selectionBlocked])
   useEffect(() => {
     let disposed = false
-    let view: maplibregl.Map | undefined
+    let view: mapboxgl.Map | undefined
     let observer: ResizeObserver | undefined
-    void loadBasemap().then(({ style, available }) => {
+    void loadBasemap().then(({ style, available, message }) => {
       if (disposed || !container.current) return
-      setBasemapState(
-        available
-          ? 'Basemap context only. Verify site dimensions.'
-          : 'Basemap unavailable/offline. Your geometry remains editable.',
-      )
+      setBasemapState(message)
       try {
-        const active = new maplibregl.Map({
+        const active = new mapboxgl.Map({
           container: container.current,
+          ...mapOptions(available),
           style,
           center: [
             (latest.current.bounds[0] + latest.current.bounds[2]) / 2,
@@ -70,13 +172,15 @@ export default function DrawingMap({
           ],
           zoom: 16,
           maxPitch: 65,
-          attributionControl: { compact: false },
+          attributionControl: false,
         })
         view = active
+        active.addControl(new mapboxgl.AttributionControl({ compact: false }))
         map.current = active
-        active.addControl(new maplibregl.NavigationControl(), 'top-right')
-        active.addControl(new maplibregl.ScaleControl({ unit: 'metric' }))
+        active.addControl(new mapboxgl.NavigationControl(), 'top-right')
+        active.addControl(new mapboxgl.ScaleControl({ unit: 'metric' }))
         active.on('load', () => {
+          active.setTerrain(null)
           active.addSource('workspace', {
             type: 'geojson',
             data: { type: 'FeatureCollection', features: latest.current.features },
@@ -102,17 +206,27 @@ export default function DrawingMap({
             filter: ['==', '$type', 'Point'],
             paint: {
               'circle-radius': 8,
-              'circle-color': '#174d3d',
-              'circle-stroke-color': '#fff',
-              'circle-stroke-width': 2,
+              'circle-color': ['coalesce', ['get', 'color'], '#174d3d'],
+              // Selection stays data-driven from the first frame, including while buckets load.
+              'circle-stroke-color': ['case', ['==', ['get', 'item_id'], ''], '#e58a19', '#ffffff'],
+              'circle-stroke-width': ['case', ['==', ['get', 'item_id'], ''], 4, 2],
             },
           })
+          addLayoutImages(active)
+          active.addLayer({
+            id: 'workspace-road-texture', type: 'fill', source: 'workspace',
+            filter: ['has', 'road_surface'],
+            paint: { 'fill-pattern': ['concat', 'layout-', ['get', 'road_surface']], 'fill-opacity': 0.95 },
+          }, 'workspace-line')
           active.addLayer({
             id: 'workspace-shadow',
             type: 'fill',
             source: 'workspace',
             filter: ['==', 'kind', 'shadow'],
-            paint: { 'fill-color': '#544080', 'fill-opacity': 0.45 },
+            paint: {
+              'fill-color': ['coalesce', ['get', 'color'], '#544080'],
+              'fill-opacity': 0.65,
+            },
           })
           active.addLayer({
             id: 'workspace-buildings',
@@ -141,7 +255,7 @@ export default function DrawingMap({
             { padding: 45, duration: 0 },
           )
           const drawing = new TerraDraw({
-            adapter: new TerraDrawMapLibreGLAdapter({ map: active }),
+            adapter: new TerraDrawMapboxGLAdapter({ map: active }),
             modes: [
               new TerraDrawPolygonMode(),
               new TerraDrawLineStringMode(),
@@ -168,7 +282,33 @@ export default function DrawingMap({
             const feature =
               id === undefined ? drawing.getSnapshot()[0] : drawing.getSnapshotFeature(id)
             const parsed = geometrySchema.safeParse(feature?.geometry)
-            if (parsed.success) latest.current.onGeometry(parsed.data)
+            if (parsed.success) {
+              const result = structuredClone(parsed.data)
+              if (snapEnabled.current) {
+                const candidates = latest.current.features
+                  .filter(
+                    (f) => f.id !== latest.current.selected?.id && f.properties?.kind !== 'shadow',
+                  )
+                  .map((f) => geometrySchema.safeParse(f.geometry))
+                  .flatMap((g) => (g.success ? [g.data] : []))
+                const snap = (point: [number, number]) =>
+                  snapPosition(
+                    point,
+                    candidates,
+                    (c) => active.project(c),
+                    (p) => {
+                      const c = active.unproject([p.x, p.y])
+                      return [c.lng, c.lat]
+                    },
+                    edgeEnabled.current,
+                  )
+                if (result.type === 'Point') result.coordinates = snap(result.coordinates)
+                else if (result.type === 'LineString')
+                  result.coordinates = result.coordinates.map(snap)
+                else result.coordinates = result.coordinates.map((ring) => ring.map(snap))
+              }
+              latest.current.onGeometry(result)
+            }
           }
           drawing.on('finish', (id) => {
             transfer(id)
@@ -179,7 +319,18 @@ export default function DrawingMap({
             if (editing.current && change === 'update' && drawing.getMode() === 'select') transfer()
           })
           active.on('click', (event) => {
-            if (editing.current || latest.current.disabled || drawing.getMode() !== 'select') return
+            if (latest.current.selectionBlocked) return
+            if (event.originalEvent.shiftKey && toggleSelection.current) {
+              const hits = active.queryRenderedFeatures(event.point, {
+                layers: ['workspace-point', 'workspace-line', 'workspace-fill'],
+              })
+              const hit = hits.find((f) => f.properties?.item_id && f.properties?.kind !== 'target')
+              if (hit) toggleSelection.current(String(hit.properties?.item_id))
+              return
+            }
+            // Viewing a project's geometry does not require a geometry-edit grant.
+            // Drawing and vertex updates retain their separate disabled checks.
+            if (editing.current || drawing.getMode() !== 'select') return
             const hits = active.queryRenderedFeatures(event.point, {
               layers: [
                 'workspace-buildings',
@@ -189,19 +340,24 @@ export default function DrawingMap({
               ],
             })
             const hit = hits.find((feature) => feature.properties?.item_id)
-            if (hit) latest.current.onSelect?.(String(hit.properties.item_id))
+            if (hit) latest.current.onSelect?.(String(hit.properties?.item_id))
           })
           setReady(true)
+          setLoadedMap(active)
+          mapReadyCallback.current?.(active)
           setStatus('Ready to draw. Numeric coordinates are also available below.')
         })
         active.on('idle', () => {
           if (!active.getLayer('workspace-buildings')) return
           const next = {
+            context: visibleProviderBuildings(active).length,
             buildings: active.queryRenderedFeatures({ layers: ['workspace-buildings'] }).length,
             shadows: active.queryRenderedFeatures({ layers: ['workspace-shadow'] }).length,
           }
           setRendered((previous) =>
-            previous.buildings === next.buildings && previous.shadows === next.shadows
+            previous.buildings === next.buildings &&
+            previous.shadows === next.shadows &&
+            previous.context === next.context
               ? previous
               : next,
           )
@@ -222,12 +378,13 @@ export default function DrawingMap({
       observer?.disconnect()
       draw.current?.stop()
       draw.current = null
+      mapReadyCallback.current?.(null)
       view?.remove()
       map.current = null
     }
   }, [])
   useEffect(() => {
-    ;(map.current?.getSource('workspace') as maplibregl.GeoJSONSource | undefined)?.setData({
+    ;(map.current?.getSource('workspace') as mapboxgl.GeoJSONSource | undefined)?.setData({
       type: 'FeatureCollection',
       features,
     })
@@ -238,7 +395,14 @@ export default function DrawingMap({
     editing.current = false
     drawing.clear()
     drawing.setMode('select')
-    if (!selected || disabled) return
+    if (
+      !selected ||
+      disabled ||
+      selected.properties?.preset ||
+      selected.properties?.locked ||
+      (selected.geometry.type === 'Polygon' && selected.geometry.coordinates.length > 1)
+    )
+      return
     const parsed = geometrySchema.safeParse(selected.geometry)
     if (!parsed.success) return
     const feature = {
@@ -258,7 +422,7 @@ export default function DrawingMap({
         : parsed.data.type === 'Polygon'
           ? parsed.data.coordinates[0]
           : parsed.data.coordinates
-    const extent = new maplibregl.LngLatBounds()
+    const extent = new mapboxgl.LngLatBounds()
     coordinates.forEach((point) => extent.extend(point))
     map.current?.fitBounds(extent, {
       padding: 75,
@@ -267,21 +431,44 @@ export default function DrawingMap({
       bearing: threeD ? -20 : 0,
       duration: 350,
     })
-  }, [selected, ready, disabled, threeD])
+  }, [selected, ready, disabled, threeD, terrainEdited])
   useEffect(() => {
     if (!ready) return
     map.current?.setLayoutProperty(
       'workspace-buildings',
       'visibility',
-      threeD && buildings ? 'visible' : 'none',
+      threeD && buildings && !terrainEdited ? 'visible' : 'none',
     )
+    if (map.current) providerBuildings(map.current, threeD && buildings && !supplement)
     map.current?.setLayoutProperty('workspace-shadow', 'visibility', shadows ? 'visible' : 'none')
-    map.current?.easeTo({ pitch: threeD ? 55 : 0, bearing: threeD ? -20 : 0, duration: 450 })
-  }, [ready, threeD, buildings, shadows])
+    map.current?.easeTo({
+      pitch: threeD ? 55 : 0,
+      bearing: threeD ? -20 : 0,
+      duration: 450,
+    })
+  }, [ready, threeD, buildings, shadows, terrainEdited, supplement])
+  useEffect(() => {
+    const view = map.current
+    if (!ready || !view) return
+    const chosen = [
+      'in',
+      ['get', 'item_id'],
+      ['literal', selectedIds],
+    ] as mapboxgl.ExpressionSpecification
+    view.setPaintProperty('workspace-line', 'line-width', ['case', chosen, 4, 2])
+    view.setPaintProperty('workspace-point', 'circle-stroke-color', [
+      'case',
+      chosen,
+      '#e58a19',
+      '#ffffff',
+    ])
+    view.setPaintProperty('workspace-point', 'circle-stroke-width', ['case', chosen, 4, 2])
+  }, [selectedIds, ready])
   function start() {
     const drawing = draw.current
     if (!drawing) return
     editing.current = false
+    setThreeD(false)
     drawing.clear()
     drawing.setMode(type.toLowerCase())
     editing.current = true
@@ -300,33 +487,145 @@ export default function DrawingMap({
   return (
     <section
       aria-label="Geometry drawing canvas"
+      data-design-active={designActive}
+      data-terrain-edited={terrainEdited}
       data-view-mode={threeD ? '3d' : '2d'}
+      data-context-buildings={rendered.context}
       data-known-buildings={known}
       data-rendered-buildings={rendered.buildings}
       data-rendered-shadows={rendered.shadows}
       data-unknown-buildings={unknown}
     >
-      <div className="flex flex-wrap items-center gap-3 py-3">
-        <Button type="button" disabled={!ready || disabled} onClick={start}>
-          Draw {type === 'LineString' ? 'line' : type.toLowerCase()}
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => {
-            editing.current = false
-            draw.current?.clear()
-            draw.current?.setMode('select')
-            setStatus('Drawing cancelled. Saved geometry is unchanged.')
-          }}
-        >
-          Cancel drawing
-        </Button>
-        <span className="text-sm" role="status">
-          {status}
-        </span>
-      </div>
-      <div className="flex flex-wrap items-center gap-3 pb-3">
+      <MapboxControls
+        map={loadedMap}
+        elevationDisabled={designActive || terrainEdited}
+        onStatus={(message) =>
+          setBasemapState(message || 'Mapbox context only. Verify site dimensions.')
+        }
+      />
+      <span className="studio-map-state" role="status">
+        {ready ? basemapState : status}
+        {supplement && ` Local building context: ${supplement.features[0]?.properties?.source}.`}
+      </span>
+      <details className="studio-context-controls">
+        <summary>Building coverage & sources</summary>
+        <p>
+          Provider coverage is partial. A local GeoJSON extract replaces the provider building layer
+          for this tab; it never creates project quantities or shade inputs.
+        </p>
+        <label>
+          Dataset attribution
+          <input
+            value={attribution}
+            onChange={(e) => setAttribution(e.target.value)}
+            maxLength={300}
+          />
+        </label>
+        <label>
+          Building context GeoJSON
+          <input
+            type="file"
+            accept=".geojson,.json,application/geo+json"
+            onChange={async (event) => {
+              const file = event.target.files?.[0]
+              if (!file) return
+              try {
+                if (file.size > 8000000) throw new Error('Use a file under 8 MB.')
+                const value = readBuildingContext(await file.text(), bounds, attribution)
+                setSupplement(value)
+                setContextError('')
+              } catch (error) {
+                setContextError(
+                  error instanceof Error ? error.message : 'Unable to read context file.',
+                )
+              }
+              event.target.value = ''
+            }}
+          />
+        </label>
+        {contextError && <p role="alert">{contextError}</p>}
+        {supplement && (
+          <>
+            <p role="status">
+              {supplement.features.length} local footprints;{' '}
+              {supplement.features.filter((f) => !f.properties?.height).length} unknown heights stay
+              flat. Source: {supplement.features[0]?.properties?.source}. Reload clears this local
+              overlay.
+            </p>
+            <Button onClick={() => setSupplement(null)}>Use provider buildings</Button>
+          </>
+        )}
+        <a href="https://explore.overturemaps.org/" target="_blank" rel="noreferrer">
+          Download a site extract from Overture Explorer
+        </a>
+      </details>
+      <details className="studio-drawing-controls">
+        <summary>Draw and snap</summary>
+        <div className="flex flex-wrap items-center gap-3 py-3">
+          <label>
+            <input
+              type="checkbox"
+              checked={snapping}
+              onChange={(e) => {
+                setSnapping(e.target.checked)
+                snapEnabled.current = e.target.checked
+              }}
+            />{' '}
+            Snap drafted coordinates to visible vertices (12 px)
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={edgeSnapping}
+              disabled={!snapping}
+              onChange={(e) => {
+                setEdgeSnapping(e.target.checked)
+                edgeEnabled.current = e.target.checked
+              }}
+            />{' '}
+            Include visible edges in snapping
+          </label>
+          <Button type="button" disabled={!ready || disabled} onClick={start}>
+            Draw {type === 'LineString' ? 'line' : type.toLowerCase()}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              editing.current = false
+              draw.current?.clear()
+              draw.current?.setMode('select')
+              setStatus('Drawing cancelled. Saved geometry is unchanged.')
+            }}
+          >
+            Cancel drawing
+          </Button>
+          <span className="text-sm" role="status">
+            {status}
+          </span>
+        </div>
+      </details>
+      <div className="studio-view-controls flex flex-wrap items-center gap-3 pb-3">
+        {reference?.corners && referenceImage && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              const extent = new mapboxgl.LngLatBounds()
+              reference.corners!.forEach((point) => extent.extend(point))
+              map.current?.fitBounds(extent, {
+                padding: 50,
+                maxZoom: 22,
+                pitch: 0,
+                bearing: 0,
+                duration: 0,
+              })
+              setThreeD(false)
+            }}
+          >
+            Fit reference plan
+          </Button>
+        )}
         <Button
           type="button"
           variant="outline"
@@ -338,7 +637,7 @@ export default function DrawingMap({
         <Button
           type="button"
           variant="outline"
-          disabled={!ready || !known}
+          disabled={!ready}
           aria-pressed={threeD}
           onClick={() => setThreeD(true)}
         >
@@ -382,13 +681,13 @@ export default function DrawingMap({
         className="h-[480px] min-h-80 overflow-hidden rounded-xl border border-stone-300"
       />
       <p className="text-sm">
-        {basemapState} Green: work items. Gold: targets / estimated buildings. Purple: modeled
-        backend shade.
+        Shift-click work items to toggle the batch selection. {basemapState} Green: work items.
+        Gold: targets / estimated buildings. Purple: modeled backend shade.
       </p>
       <p className="text-sm">
         {known
           ? `${known} building(s) with entered heights available in 3D. Display is not surveyed or a shade result.`
-          : '3D unavailable: add a building footprint with a known height and source. 2D editing remains available.'}{' '}
+          : '3D navigation is available. Map buildings appear where provider heights exist; missing coverage stays flat. Context buildings are not project quantities or shade inputs.'}{' '}
         {unknown > 0 &&
           `${unknown} building height(s) unknown; footprints stay 2D and shade comparison is blocked.`}
       </p>

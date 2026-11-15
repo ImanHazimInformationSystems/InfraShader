@@ -1,0 +1,23 @@
+.object-builder { display: grid; gap: 12px; }
+.object-builder h3 { font-size: 21px; color: #512737; margin: 0; }
+.object-builder p { font-size: 12px; line-height: 1.6; }
+.object-category-tabs, .object-builder-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.object-category-tabs button, .object-builder-actions button { padding: 8px 11px; border-radius: 9px; }
+.object-category-tabs [aria-pressed='true'] { background: #701f36; color: white; }
+.object-builder-tray { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; }
+.object-builder-tray button { display: grid; padding: 8px 5px; border: 1px solid #ded5df; border-radius: 12px; background: linear-gradient(#f2f3ec,#fff); transition: transform 150ms; }
+.object-builder-tray button:hover { transform: translateY(-2px); }
+.object-builder-tray [aria-pressed='true'] { border: 2px solid #701f36; background: #f6edf1; }
+.object-builder-tray img { width: 100%; height: 72px; }
+.object-builder-tray strong { font-size: 11px; }
+.object-builder-controls { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; padding: 12px; background: #f3f0f4; border-radius: 12px; }
+.object-builder-controls label { font-size: 11px; display: grid; gap: 5px; }
+.object-builder fieldset { border: 0; margin: 0; }
+.object-builder-controls input { width: 100%; accent-color: #701f36; }
+.object-builder-controls output { color: #785c6c; }
+.object-light-controls { padding: 12px; border-radius: 12px; background: #fcf3dc; }
+.object-builder-list { display: grid; gap: 6px; }
+.object-builder-list button { padding: 10px; text-align: left; font-size: 12px; background: white; border-radius: 10px; }
+.object-cursor-card { width: 70px; height: 65px; opacity: .7; pointer-events: none; }
+.object-move-handle { width: 30px; height: 30px; border: 2px solid white; border-radius: 50%; background: #701f36; color: white; cursor: grab; }
+@media (prefers-reduced-motion: reduce) { .object-builder-tray button { transition: none; } .object-builder-tray button:hover { transform: none; } }
