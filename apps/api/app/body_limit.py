@@ -10,7 +10,11 @@ class BodyLimit:
     async def __call__(self, scope, receive, send):
         if scope["type"] != "http":
             return await self.app(scope, receive, send)
-        limit = 12 * 1024 * 1024 if scope.get("path", "").endswith("/evidence") else 2 * 1024 * 1024
+        limit = (
+            12 * 1024 * 1024
+            if scope.get("path", "").endswith(("/evidence", "/file"))
+            else 2 * 1024 * 1024
+        )
         total = 0
 
         async def bounded_receive():

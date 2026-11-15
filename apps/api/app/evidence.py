@@ -12,6 +12,7 @@ from pydantic import Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app import access
 from app.config import Settings
 from app.errors import APIError, not_found, unavailable
 from app.models import AdministrationEvent, Evidence, Workspace
@@ -145,6 +146,7 @@ def upload(
     source_note,
     storage: PrivateStorage,
 ):
+    access.require_project(session, org_id, project_id, user_id, "edit_evidence")
     project_for_workspace(session, org_id, project_id, user_id, write=True)
     if (
         not description.strip()
@@ -208,6 +210,7 @@ class EvidenceUpdate(StrictModel):
 
 
 def update_metadata(session, org_id, project_id, user_id, evidence_id, data: EvidenceUpdate):
+    access.require_project(session, org_id, project_id, user_id, "edit_evidence")
     project_for_workspace(session, org_id, project_id, user_id, write=True)
     record = session.scalar(
         select(Evidence)
@@ -243,6 +246,7 @@ class EvidenceArchive(StrictModel):
 
 
 def archive_evidence(session, org_id, project_id, user_id, evidence_id, data: EvidenceArchive):
+    access.require_project(session, org_id, project_id, user_id, "edit_evidence")
     project_for_workspace(session, org_id, project_id, user_id, write=True)
     record = session.scalar(
         select(Evidence)
@@ -254,6 +258,21 @@ def archive_evidence(session, org_id, project_id, user_id, evidence_id, data: Ev
     if record.revision != data.expected_revision:
         raise APIError(
             409, "evidence_conflict", "Evidence changed. Reload before removing or restoring it."
+        )
+    workspace = session.get(Workspace, project_id)
+    if (
+        data.archived
+        and workspace
+        and any(
+            str(record.id) in row.get("evidence_ids", [])
+            for row in workspace.data.get("constraints", [])
+        )
+    ):
+        raise APIError(
+            409,
+            "evidence_in_use",
+            "This photo supports a site constraint. "
+            "Unlink it and save the workspace before archiving.",
         )
     record.archived = data.archived
     record.revision += 1

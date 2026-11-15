@@ -65,7 +65,16 @@ def project_shadow(
     return union_all(parts)
 
 
-def analyse_workspace(data: dict, timestamp: datetime, target_id: str) -> dict:
+def analyse_workspace(
+    data: dict, timestamp: datetime, target_id: str, *, contributions: bool = False
+) -> dict:
+    from app.terrain import changed
+
+    if any(changed(scenario.get("terrain")) for scenario in data["scenarios"].values()):
+        raise ValueError(
+            "Edited concept terrain: flat-ground shade analysis is unavailable. "
+            "Terrain-aware shade is not implemented."
+        )
     # Existing workspaces also inherit the shared Baseline at analysis time.
     data = deepcopy(data)
     baseline = data["scenarios"]["baseline"]["items"]
@@ -124,6 +133,7 @@ def analyse_workspace(data: dict, timestamp: datetime, target_id: str) -> dict:
                 "id": item["id"],
                 "name": item["name"],
                 "height_m": item["height_m"],
+                "kind": item["kind"],
                 "height_source": item["height_source"],
                 "provenance": item["provenance"],
                 "source_note": item["source_note"],
@@ -135,7 +145,8 @@ def analyse_workspace(data: dict, timestamp: datetime, target_id: str) -> dict:
         "metric_crs": boundary.metric_crs,
         "limitations": [
             "Flat horizontal ground; opaque buildings and elevated roof surfaces only.",
-            "Trees, terrain, diffuse light and unknown obstructions excluded.",
+            "Trees, terrain, decorative object presets, diffuse light "
+            "and unknown obstructions excluded.",
             "Modelled result; site measurements and field tolerance acceptance are pending.",
         ],
         "scenarios": {},
@@ -149,6 +160,8 @@ def analyse_workspace(data: dict, timestamp: datetime, target_id: str) -> dict:
     inverse = Transformer.from_crs(boundary.metric_crs, "EPSG:4326", always_xy=True)
     for key, scenario in data["scenarios"].items():
         shadows = []
+        source_areas = {}
+        groups = {"existing": [], "buildings": [], "canopies": []}
         excluded = []
         for item in scenario["items"]:
             if item["kind"] not in ("building", "canopy"):
@@ -168,6 +181,16 @@ def analyse_workspace(data: dict, timestamp: datetime, target_id: str) -> dict:
                     convergence=convergence,
                 )
             )
+            group = (
+                "existing"
+                if item["id"] in ids
+                else "canopies"
+                if item["kind"] == "canopy"
+                else "buildings"
+            )
+            groups[group].append(shadows[-1])
+            if contributions:
+                source_areas[item["id"]] = shadows[-1].intersection(target_metric).area
         clipped = union_all(shadows).intersection(target_metric)
         geographic = transform(clipped, inverse.transform, interleaved=False)
         result["scenarios"][key] = {
@@ -178,6 +201,18 @@ def analyse_workspace(data: dict, timestamp: datetime, target_id: str) -> dict:
             "shadow_geometry": mapping(geographic),
             "excluded_trees": excluded,
         }
+        if contributions:
+            result["scenarios"][key]["source_areas_m2"] = source_areas
+            existing = union_all(groups["existing"]).intersection(target_metric)
+            buildings = (
+                union_all(groups["buildings"]).intersection(target_metric).difference(existing)
+            )
+            canopies = clipped.difference(existing.union(buildings))
+            result["scenarios"][key]["contributions_m2"] = {
+                "existing": existing.area,
+                "additional_buildings": buildings.area,
+                "additional_canopies": canopies.area,
+            }
     baseline = result["scenarios"]["baseline"]
     for scenario in result["scenarios"].values():
         scenario["delta_area_m2"] = scenario["area_m2"] - baseline["area_m2"]

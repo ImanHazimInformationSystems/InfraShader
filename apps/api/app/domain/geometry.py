@@ -1,7 +1,7 @@
 """Validated local quantities; geographic coordinates are never treated as metres.
 
-The initial ground-site kernel accepts simple, two-dimensional Polygon exteriors
-and LineStrings. It deliberately rejects holes, multipart geometry, cross-zone
+The ground-site kernel accepts validated two-dimensional Polygons with bounded holes
+and LineStrings. It deliberately rejects multipart geometry, cross-zone
 sites and extents over 5 km. A suitable WGS84 UTM CRS is chosen before any metric
 operation. These calculated quantities do not certify the source measurement.
 The project locator may span up to 0.2 degrees; its extent is not a metric-work
@@ -23,7 +23,7 @@ MAX_VERTICES = 128  # Excludes a Polygon's required closing coordinate.
 MAX_SITE_SPAN_M = 5_000.0
 MAX_METRIC_COORDINATE = 100_000_000.0
 WGS84 = "EPSG:4326"
-QuantityUnit = Literal["m2", "m", "item"]
+QuantityUnit = Literal["m2", "m", "item", "m3", "h"]
 Provenance = Literal[
     "measured", "sourced", "estimated", "manually_entered", "imported", "calculated"
 ]
@@ -86,10 +86,16 @@ def _coordinates(geojson: Mapping[str, Any], *, geographic: bool) -> list[Coordi
     kind = geojson.get("type")
     raw = geojson.get("coordinates")
     if kind == "Polygon":
-        if not _sequence(raw) or len(raw) != 1:
-            raise GeometryValidationError(
-                "Only simple Polygon exteriors without holes are supported."
-            )
+        if not _sequence(raw) or not 1 <= len(raw) <= 9:
+            raise GeometryValidationError("A Polygon needs an exterior and at most eight holes.")
+        if len(raw) > 1:
+            rings = [
+                _coordinates({"type": "Polygon", "coordinates": [ring]}, geographic=geographic)
+                for ring in raw
+            ]
+            if sum(len(ring) - 1 for ring in rings) > MAX_VERTICES:
+                raise GeometryValidationError("Polygon exceeds the aggregate 128-vertex limit.")
+            return [point for ring in rings for point in ring]
         raw = raw[0]
     elif kind != "LineString":
         raise GeometryValidationError("Only Polygon and LineString geometries are supported.")
@@ -129,7 +135,11 @@ def _coordinates(geojson: Mapping[str, Any], *, geographic: bool) -> list[Coordi
 
 def _geometry(geojson: Mapping[str, Any], *, geographic: bool) -> BaseGeometry:
     coordinates = _coordinates(geojson, geographic=geographic)
-    geometry = Polygon(coordinates) if geojson["type"] == "Polygon" else LineString(coordinates)
+    geometry = (
+        Polygon(geojson["coordinates"][0], geojson["coordinates"][1:])
+        if geojson["type"] == "Polygon"
+        else LineString(coordinates)
+    )
     if geometry.is_empty or not geometry.is_valid:
         raise GeometryValidationError(f"Invalid geometry: {is_valid_reason(geometry)}.")
     if not geometry.is_simple:

@@ -6,6 +6,7 @@ from uuid import UUID
 from pydantic import Field
 from sqlalchemy import func, select
 
+from app import access
 from app.calculations import artifact_response, current_workspace, prior_request, save_artifact
 from app.errors import APIError
 from app.models import Artifact, Workspace
@@ -29,6 +30,7 @@ class ReviewInput(StrictModel):
 
 
 def list_reviews(session, org_id, project_id, user_id):
+    access.require_project(session, org_id, project_id, user_id, "review_project")
     project = project_for_workspace(session, org_id, project_id, user_id)
     workspace = session.get(Workspace, project_id)
     records = session.scalars(
@@ -47,6 +49,7 @@ def list_reviews(session, org_id, project_id, user_id):
 
 
 def save_review(session, org_id, project_id, user_id, data: ReviewInput):
+    access.require_project(session, org_id, project_id, user_id, "review_project")
     project = project_for_workspace(session, org_id, project_id, user_id, write=True)
     workspace = session.get(Workspace, project_id)
     previous = prior_request(session, project_id, "review", data.request_key)

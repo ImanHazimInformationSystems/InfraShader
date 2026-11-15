@@ -7,6 +7,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app import projects
+from app.access import ALL_CAPABILITIES
 from app.errors import APIError
 from app.models import Membership, Organisation
 from app.schemas import ProjectCreate, ProjectUpdate
@@ -24,7 +25,7 @@ def test_migrate_persist_reload_tenants_conflict_archive_and_revocation(database
             organisation_id=org_a.id,
             user_id=user_a,
             role="administrator",
-            capabilities=[],
+            capabilities=ALL_CAPABILITIES,
             active=True,
         )
         session.add_all(
@@ -34,7 +35,7 @@ def test_migrate_persist_reload_tenants_conflict_archive_and_revocation(database
                     organisation_id=org_b.id,
                     user_id=user_b,
                     role="administrator",
-                    capabilities=[],
+                    capabilities=ALL_CAPABILITIES,
                     active=True,
                 ),
             ]

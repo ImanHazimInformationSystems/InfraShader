@@ -1,9 +1,11 @@
 """Bounded, stateless preview of provider-derived buildings; never project evidence."""
 
-from datetime import datetime
+from datetime import date, datetime, time, timedelta, timezone
 from math import isfinite
 from typing import Annotated, Literal
 
+import pandas as pd
+from pvlib.solarposition import get_solarposition
 from pydantic import Field
 from pyproj import Proj, Transformer
 from shapely import Polygon, transform, union_all
@@ -13,6 +15,55 @@ from app.domain.shade import project_shadow, solar_position
 from app.workspace import StrictModel
 
 Coordinate = tuple[Annotated[float, Field(ge=-180, le=180)], Annotated[float, Field(ge=-80, le=80)]]
+
+
+class SolarDayInput(StrictModel):
+    center: Coordinate
+    date: date
+    utc_offset: Annotated[float, Field(ge=-12, le=14, allow_inf_nan=False)]
+
+
+def solar_day(data: SolarDayInput):
+    """One bounded local day; exact minute positions use the same model as shadows.
+
+    Events are minute-resolution geometric crossings of -0.833 degrees (standard
+    approximate sunrise/set convention), not terrain-aware observed visibility.
+    """
+    if not 2000 <= data.date.year <= 2100:
+        raise ValueError("Supported analysis years are 2000-2100.")
+    local = timezone(timedelta(hours=data.utc_offset))
+    start = datetime.combine(data.date, time(), tzinfo=local)
+    times = pd.date_range(start, periods=1441, freq="min")
+    positions = get_solarposition(
+        times, data.center[1], data.center[0], altitude=0, method="nrel_numpy"
+    )
+    samples = [
+        {"azimuth_deg": float(a), "elevation_deg": float(e)}
+        for a, e in zip(positions.azimuth, positions.elevation, strict=True)
+    ]
+    if not all(isfinite(v) for sample in samples for v in sample.values()):
+        raise ValueError("Solar position unavailable for this location/date.")
+    elevations = [sample["elevation_deg"] for sample in samples]
+    events = {"sunrise": None, "solar_noon": None, "sunset": None}
+    for i in range(1440):
+        left, right = elevations[i], elevations[i + 1]
+        if left < -0.833 <= right:
+            events["sunrise"] = i + 1
+        if left >= -0.833 > right:
+            events["sunset"] = i
+    # A local day need not contain a transit if an unrelated offset was chosen.
+    noon = max(range(1441), key=elevations.__getitem__)
+    if 0 < noon < 1440:
+        events["solar_noon"] = noon
+    return {
+        "date": data.date.isoformat(),
+        "utc_offset": data.utc_offset,
+        "center": data.center,
+        "samples": samples,
+        "events": events,
+        "event_resolution_minutes": 1,
+        "model": "pvlib_nrel_numpy/geometric_elevation",
+    }
 
 
 class PreviewBuilding(StrictModel):

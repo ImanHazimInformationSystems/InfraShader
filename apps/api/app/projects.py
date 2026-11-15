@@ -3,8 +3,17 @@ from uuid import UUID
 from sqlalchemy import case, exists, func, or_, select, update
 from sqlalchemy.orm import Session
 
+from app import access
 from app.errors import APIError, not_found
-from app.models import Artifact, Membership, Organisation, Project, ProjectRevision, Workspace
+from app.models import (
+    Artifact,
+    Membership,
+    Organisation,
+    Project,
+    ProjectGrant,
+    ProjectRevision,
+    Workspace,
+)
 from app.schemas import (
     OrganisationResponse,
     ProjectCreate,
@@ -14,27 +23,8 @@ from app.schemas import (
     SessionResponse,
 )
 
-ADMIN_CAPABILITIES = [
-    "manage_members",
-    "change_catalogue",
-    "internal_pricing",
-    "issue_developer_brief",
-    "issue_proposal",
-]
-
-
-def require_membership(session: Session, organisation_id: UUID, user_id: UUID) -> Membership:
-    # Re-read on each operation. A still-valid JWT cannot override membership revocation.
-    membership = session.scalar(
-        select(Membership).where(
-            Membership.organisation_id == organisation_id,
-            Membership.user_id == user_id,
-            Membership.active.is_(True),
-        )
-    )
-    if membership is None:
-        raise not_found()
-    return membership
+ADMIN_CAPABILITIES = access.ALL_CAPABILITIES
+require_membership = access.membership
 
 
 def session_info(session: Session, user_id: UUID) -> SessionResponse:
@@ -51,11 +41,10 @@ def session_info(session: Session, user_id: UUID) -> SessionResponse:
                 id=org.id,
                 name=org.name,
                 role=membership.role,
-                capabilities=(
-                    ADMIN_CAPABILITIES
-                    if membership.role == "administrator"
-                    else membership.capabilities
-                ),
+                capabilities=membership.capabilities,
+                workspaces=[w for w in org.workspaces if w in membership.capabilities],
+                enabled_workspaces=org.workspaces,
+                workspace_setup_required=org.workspace_setup_required,
             )
             for org, membership in rows
         ],
@@ -101,22 +90,52 @@ def list_projects(
     query: str = "",
     sort: str = "updated",
     stage: str = "",
+    opportunity: str = "",
+    purpose: str = "",
 ) -> ProjectList:
     require_membership(session, organisation_id, user_id)
-    conditions = [Project.organisation_id == organisation_id, Project.archived == archived]
+    conditions = [
+        Project.organisation_id == organisation_id,
+        Project.archived == archived,
+        access.project_condition(user_id),
+    ]
+    member = access.membership(session, organisation_id, user_id)
+    if "read_project" not in member.capabilities or not access.workspaces(
+        session, organisation_id, member
+    ):
+        return ProjectList(items=[], total=0, limit=limit, offset=offset)
     if stage:
         conditions.append(project_stage() == stage)
+    if opportunity:
+        conditions.append(
+            func.coalesce(Project.details["opportunity"]["stage"].astext, "enquiry") == opportunity
+        )
+    if purpose:
+        conditions.append(Project.purpose == purpose)
     if query.strip():
         conditions.append(
             or_(
                 Project.name.icontains(query.strip(), autoescape=True),
                 Project.stakeholder.icontains(query.strip(), autoescape=True),
+                Project.details["opportunity"]["owner"].astext.icontains(
+                    query.strip(), autoescape=True
+                ),
+                Project.details["opportunity"]["tags"].astext.icontains(
+                    query.strip(), autoescape=True
+                ),
+                Project.details["opportunity"]["source"].astext.icontains(
+                    query.strip(), autoescape=True
+                ),
+                Project.details["opportunity"]["client"]["name"].astext.icontains(
+                    query.strip(), autoescape=True
+                ),
             )
         )
     order = {
         "updated": Project.updated_at.desc(),
         "name": func.lower(Project.name),
         "created": Project.created_at.desc(),
+        "due": Project.details["opportunity"]["due_date"].astext.asc().nullslast(),
     }[sort]
     total = session.scalar(select(func.count()).select_from(Project).where(*conditions)) or 0
     projects = session.execute(
@@ -128,7 +147,17 @@ def list_projects(
     ).all()
     return ProjectList(
         items=[
-            ProjectResponse.model_validate(project).model_copy(update={"stage": stage})
+            ProjectResponse.model_validate(project).model_copy(
+                update={
+                    "stage": stage,
+                    "organisation_capabilities": access.membership(
+                        session, organisation_id, user_id
+                    ).capabilities,
+                    "capabilities": access.project_capabilities(
+                        session, organisation_id, project.id, user_id
+                    ),
+                }
+            )
             for project, stage in projects
         ],
         total=total,
@@ -138,9 +167,15 @@ def list_projects(
 
 
 def create_project(
-    session: Session, organisation_id: UUID, user_id: UUID, data: ProjectCreate
+    session: Session,
+    organisation_id: UUID,
+    user_id: UUID,
+    data: ProjectCreate,
+    *,
+    commit: bool = True,
 ) -> ProjectResponse:
     require_membership(session, organisation_id, user_id)
+    access.require_capability(session, organisation_id, user_id, "create_project")
     project = Project(
         **data.model_dump(mode="json"),
         organisation_id=organisation_id,
@@ -149,7 +184,21 @@ def create_project(
     )
     session.add(project)
     session.flush()
-    response = ProjectResponse.model_validate(project)
+    session.add(
+        ProjectGrant(
+            project_id=project.id, user_id=user_id, capabilities=access.PROJECT_CAPABILITIES
+        )
+    )
+    response = ProjectResponse.model_validate(project).model_copy(
+        update={
+            "organisation_capabilities": access.membership(
+                session, organisation_id, user_id
+            ).capabilities,
+            "capabilities": access.project_capabilities(
+                session, organisation_id, project.id, user_id
+            ),
+        }
+    )
     session.add(
         ProjectRevision(
             project_id=project.id,
@@ -158,20 +207,27 @@ def create_project(
             changed_by=user_id,
         )
     )
-    session.commit()
+    if commit:
+        session.commit()
+    else:
+        session.flush()
     return response
 
 
 def get_project(
     session: Session, organisation_id: UUID, project_id: UUID, user_id: UUID
 ) -> ProjectResponse:
-    require_membership(session, organisation_id, user_id)
-    project = session.scalar(
-        select(Project).where(Project.organisation_id == organisation_id, Project.id == project_id)
+    project = access.require_project(session, organisation_id, project_id, user_id)
+    return ProjectResponse.model_validate(project).model_copy(
+        update={
+            "organisation_capabilities": access.membership(
+                session, organisation_id, user_id
+            ).capabilities,
+            "capabilities": access.project_capabilities(
+                session, organisation_id, project.id, user_id
+            ),
+        }
     )
-    if project is None:
-        raise not_found()
-    return ProjectResponse.model_validate(project)
 
 
 def update_project(
@@ -181,8 +237,11 @@ def update_project(
     user_id: UUID,
     data: ProjectUpdate,
 ) -> ProjectResponse:
-    require_membership(session, organisation_id, user_id)
+    previous = access.require_project(session, organisation_id, project_id, user_id, "edit_project")
     changes = data.model_dump(mode="json", exclude_unset=True, exclude={"expected_revision"})
+    # Older site editors do not know about inventories. A locator change must not erase trees.
+    if data.site is not None and "trees" not in data.site.model_fields_set:
+        changes["site"]["trees"] = previous.site.get("trees", [])
     # Revision is part of the UPDATE predicate: two writers cannot both succeed for revision r.
     project = session.scalar(
         update(Project)
@@ -208,7 +267,16 @@ def update_project(
         )
     # Capture the accepted row while the UPDATE lock is held. A later writer must not change
     # the response to this write after commit releases the lock.
-    response = ProjectResponse.model_validate(project)
+    response = ProjectResponse.model_validate(project).model_copy(
+        update={
+            "organisation_capabilities": access.membership(
+                session, organisation_id, user_id
+            ).capabilities,
+            "capabilities": access.project_capabilities(
+                session, organisation_id, project.id, user_id
+            ),
+        }
+    )
     session.add(
         ProjectRevision(
             project_id=project.id,

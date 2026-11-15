@@ -39,6 +39,7 @@ def calculate_estimate(
     wastage: Decimal,
     charges: list,
     fixed_selling: Decimal | None = None,
+    terrain_pending: bool = False,
 ) -> dict:
     if currency != "MYR":
         raise ValueError("The reviewed initial rounding policy supports MYR only.")
@@ -49,10 +50,42 @@ def calculate_estimate(
         raise ValueError("Wastage must be between 0 and 100%.")
     if method in ("markup", "margin"):
         selling(Decimal(0), method, percent)
+    for item in items:
+        if not item.get("assembly_component") or item["status"] == "existing":
+            continue
+        siblings = [
+            i for i in items if i.get("parent_id") == item["parent_id"] and i["id"] != item["id"]
+        ]
+        for other in siblings:
+            rate = rates.get(other.get("rate_id"), {})
+            if item.get("component_category") in rate.get("includes", []):
+                raise ValueError(
+                    "Recipe component duplicates an inclusion in another selected rate."
+                )
     lines, missing, inclusions = [], [], set()
     subtotal = Decimal(0)
+    if terrain_pending:
+        missing.append(
+            {
+                "item_id": "terrain-scope",
+                "name": "Terrain site work",
+                "reason": "Record and review site-work resources and manual quantities.",
+            }
+        )
     for item in items:
         if item["status"] == "existing":
+            continue
+        if item.get("terrain_work_stale"):
+            missing.append(
+                {
+                    "item_id": item["id"],
+                    "name": item["name"],
+                    "reason": (
+                        "Terrain changed or work is unreviewed. "
+                        "Review manual quantity and resources."
+                    ),
+                }
+            )
             continue
         rate = rates.get(item.get("rate_id"))
         if rate is None:
@@ -67,20 +100,47 @@ def calculate_estimate(
         if rate["basis"] != expected:
             raise ValueError(f"{method} requires a {expected} rate for {item['name']}.")
         inclusions.update(rate["includes"])
+        work = item.get("terrain_work")
+        if work:
+            for other in items:
+                other_work = other.get("terrain_work")
+                other_rate = rates.get(other.get("rate_id"), {})
+                if (
+                    other["id"] != item["id"]
+                    and other_work
+                    and other["status"] != "existing"
+                    and not other.get("terrain_work_stale")
+                    and other_work["resource"] != work["resource"]
+                    and work["resource"] in other_rate.get("includes", [])
+                ):
+                    raise ValueError(
+                        "Site-work resource duplicates an inclusion in another selected rate."
+                    )
+            inclusions.add(work["resource"])
+        if item.get("component_category") in ("labour", "equipment", "transport", "overhead"):
+            inclusions.add(item["component_category"])
         quantity = amount(item["quantity"]["value"]).quantize(QUANTITY, rounding=ROUND_HALF_UP)
         # Wastage applies only to measured area/length, never to explicit counts or fixed charges.
-        factor = (1 + wastage / 100) if unit in ("m2", "m") else Decimal(1)
+        factor = (
+            (1 + wastage / 100)
+            if unit in ("m2", "m") and not item.get("assembly_component")
+            else Decimal(1)
+        )
         total = (quantity * factor * amount(rate["amount"])).quantize(CENT, rounding=ROUND_HALF_UP)
         subtotal += total
         lines.append(
             {
                 "item_id": item["id"],
+                "parent_id": item.get("parent_id", item["id"]),
                 "description": item["name"],
+                "pricing_status": item.get("pricing_status", "firm"),
                 "quantity": str(quantity),
                 "unit": unit,
                 "quantity_source": item["source_note"],
                 "rate": rate,
-                "wastage_percent": str(wastage if unit in ("m2", "m") else 0),
+                "wastage_percent": str(
+                    wastage if unit in ("m2", "m") and not item.get("assembly_component") else 0
+                ),
                 "cost_total": str(total),
             }
         )
@@ -115,5 +175,21 @@ def calculate_estimate(
         "cost_base": str(base),
         "selling_total": str(total),
         "profit": str(total - base) if not missing and lines else None,
+        "explanation": {
+            "formula": "Selling = cost base"
+            if method == "indicative"
+            else "Selling = entered fixed total"
+            if method == "fixed_selling"
+            else "Selling = cost base * (1 + markup / 100)"
+            if method == "markup"
+            else "Selling = cost base / (1 - margin / 100)",
+            "rounding": (
+                "Quantities and rates 4 decimals; each line and selling total 2 decimals, HALF_UP."
+            ),
+            "charges": (
+                "Only listed explicit charges are included; no implicit tax, "
+                "discount or escalation."
+            ),
+        },
         "profit_basis": "Selling less the listed direct costs and explicit charges only.",
     }

@@ -10,8 +10,9 @@ from sqlalchemy.exc import DBAPIError
 from sqlalchemy.orm import Session
 
 from app import calculations, projects, workspace
+from app.access import ALL_CAPABILITIES, LEGACY_MEMBER_CAPABILITIES
 from app.errors import APIError
-from app.models import Evidence, Membership, Organisation
+from app.models import Evidence, Membership, Organisation, ProjectGrant
 from app.schemas import ProjectCreate
 from tests.test_workspace import fixture_workspace
 
@@ -29,11 +30,22 @@ def initialise(database, purpose):
         session.add_all(
             [
                 Membership(
-                    organisation_id=org_id, user_id=admin, role="administrator", capabilities=[]
+                    organisation_id=org_id,
+                    user_id=admin,
+                    role="administrator",
+                    capabilities=ALL_CAPABILITIES,
                 ),
-                Membership(organisation_id=org_id, user_id=member, role="member", capabilities=[]),
                 Membership(
-                    organisation_id=other_id, user_id=foreign, role="administrator", capabilities=[]
+                    organisation_id=org_id,
+                    user_id=member,
+                    role="member",
+                    capabilities=LEGACY_MEMBER_CAPABILITIES,
+                ),
+                Membership(
+                    organisation_id=other_id,
+                    user_id=foreign,
+                    role="administrator",
+                    capabilities=ALL_CAPABILITIES,
                 ),
             ]
         )
@@ -50,9 +62,21 @@ def initialise(database, purpose):
                 intended_users="Visitors",
                 desired_outcome="Compare supported scope",
                 use_periods="Weekday noon",
+                details={
+                    "opportunity": {
+                        "source": "INTERNAL REFERRAL ONLY",
+                        "client": {"name": "Private contact", "notes": "PRIVATE CONTACT NOTE"},
+                    }
+                },
                 site={"bounds": [101.68, 3.13, 101.69, 3.14]},
             ),
         )
+        session.add(
+            ProjectGrant(
+                project_id=project.id, user_id=member, capabilities=LEGACY_MEMBER_CAPABILITIES
+            )
+        )
+        session.commit()
     return org_id, project.id, admin, member, foreign
 
 
@@ -160,6 +184,11 @@ def test_real_saved_geometry_analysis_estimate_issue_and_audience(database, purp
         session.commit()
         photo_id = photo.id
         issue = calculations.IssueInput(
+            valid_until=date(2099, 12, 31),
+            programme="After site verification",
+            maintenance="Excluded",
+            change_summary="Fixture revision",
+            pricing_override_reason="Fixture validity reviewed; not a market quote",
             customer_narrative="A shaded waiting space with sourced scope.",
             evidence_ids=[photo_id],
             request_key=uuid4(),
@@ -216,6 +245,9 @@ def test_real_saved_geometry_analysis_estimate_issue_and_audience(database, purp
 
         assert forbidden.isdisjoint(keys(issued["payload"]))
         assert forbidden.isdisjoint(keys(preview))
+        assert "opportunity" not in issued["payload"]["brief_details"]
+        assert "opportunity" not in preview["brief_details"]
+        assert "PRIVATE CONTACT NOTE" not in str(issued["payload"])
         assert "draft" not in issued["payload"]
         assert preview["version"] == issued["payload"]["version"]
         assert issued["payload"]["shade"]["status"] == "omitted"

@@ -42,6 +42,21 @@ async def test_local_settings_cors_preflight_accepts_put(client):
     assert "PUT" in response.headers["access-control-allow-methods"]
 
 
+async def test_cors_preflight_accepts_delete_for_cross_origin_deployments(client):
+    # Project deletion, brief-file and attachment removal use DELETE; a deployed web app on
+    # another origin sends a preflight that must allow it.
+    response = await client.options(
+        "/api/v1/projects/00000000-0000-0000-0000-000000000000",
+        headers={
+            "Origin": "http://127.0.0.1:5173",
+            "Access-Control-Request-Method": "DELETE",
+            "Access-Control-Request-Headers": "Authorization,Content-Type",
+        },
+    )
+    assert response.status_code == 200
+    assert "DELETE" in response.headers["access-control-allow-methods"]
+
+
 async def test_readiness_distinguishes_skeleton_from_configured_service(client):
     response = await client.get("/api/v1/readiness")
     assert response.status_code == 503

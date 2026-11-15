@@ -6,23 +6,28 @@ Never import from app/ or use against a non-test database.
 """
 
 import json
+import os
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from uuid import uuid4
+from typing import Annotated
+from uuid import UUID, uuid4
 
 import jwt
 from alembic import command
 from alembic.config import Config
 from cryptography.hazmat.primitives.asymmetric import ec
-from fastapi import Request
+from fastapi import Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine, event, text
 from sqlalchemy.orm import Session
 
-from app.auth import TokenVerifier, get_verifier
+from app import onboarding
+from app.access import ALL_CAPABILITIES
+from app.auth import TokenVerifier, current_user, get_verifier
 from app.config import Settings, get_settings
 from app.db import database_session
+from app.errors import APIError
 from app.main import app
 from app.models import Membership, Organisation
 
@@ -33,10 +38,17 @@ schema = "browser_test_" + uuid4().hex
 engine = create_engine(url)
 admin_engine = create_engine(url)
 user_id = uuid4()
+# A second, separate test identity and tenant for cross-organisation workflows (S03/L25/O05).
+contractor_id = uuid4()
+IDENTITIES = {"fixture@example.invalid": user_id, "contractor@example.invalid": contractor_id}
 private_key = ec.generate_private_key(ec.SECP256R1())
 public_key = json.loads(jwt.algorithms.ECAlgorithm.to_jwk(private_key.public_key()))
 public_key.update(kid="browser-fixture", alg="ES256", use="sig")
-settings = Settings(database_url=url, supabase_url="http://127.0.0.1:8000", _env_file=None)
+settings = Settings(
+    database_url=url,
+    supabase_url=os.getenv("INFRA_TEST_API_URL", "http://127.0.0.1:8000"),
+    _env_file=None,
+)
 verifier = TokenVerifier(settings)
 
 
@@ -67,7 +79,19 @@ async def lifespan(_):
                     organisation_id=org.id,
                     user_id=user_id,
                     role="administrator",
-                    capabilities=[],
+                    capabilities=ALL_CAPABILITIES,
+                    active=True,
+                )
+            )
+            contractor_org = Organisation(name="Contractor fixture (test only)")
+            session.add(contractor_org)
+            session.flush()
+            session.add(
+                Membership(
+                    organisation_id=contractor_org.id,
+                    user_id=contractor_id,
+                    role="administrator",
+                    capabilities=ALL_CAPABILITIES,
                     active=True,
                 )
             )
@@ -89,8 +113,8 @@ app.router.lifespan_context = lifespan
 # Test provider accepts Supabase client headers; production API keeps its narrower CORS policy.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:5173"],
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_origins=["http://127.0.0.1:5173", "http://127.0.0.1:5174"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 app.dependency_overrides[database_session] = session_dependency
@@ -98,12 +122,24 @@ app.dependency_overrides[get_settings] = lambda: settings
 app.dependency_overrides[get_verifier] = lambda: verifier
 
 
-def user():
+def fixture_verified_email(user: Annotated[UUID, Depends(current_user)]):
+    # TEST ONLY: the signed test identity's fixed, confirmed email. Not Supabase Auth.
+    for email, identity in IDENTITIES.items():
+        if identity == user:
+            return email
+    raise APIError(403, "verified_email_required", "Unknown test identity.")
+
+
+app.dependency_overrides[onboarding.verified_email] = fixture_verified_email
+
+
+def user(email="fixture@example.invalid"):
     return {
-        "id": str(user_id),
+        "id": str(IDENTITIES[email]),
         "aud": "authenticated",
         "role": "authenticated",
-        "email": "fixture@example.invalid",
+        "email": email,
+        "email_confirmed_at": datetime.now(UTC).isoformat(),
         "app_metadata": {"provider": "email"},
         "user_metadata": {},
         "created_at": datetime.now(UTC).isoformat(),
@@ -118,14 +154,14 @@ def jwks():
 @app.post("/auth/v1/token")
 async def fixture_token(request: Request):
     body = await request.json()
-    if body.get("email") != "fixture@example.invalid" or body.get("password") != "fixture-only":
+    if body.get("email") not in IDENTITIES or body.get("password") != "fixture-only":
         from fastapi.responses import JSONResponse
 
         return JSONResponse({"msg": "Invalid test fixture credentials"}, status_code=400)
     now = datetime.now(UTC)
     token = jwt.encode(
         {
-            "sub": str(user_id),
+            "sub": str(IDENTITIES[body["email"]]),
             "iss": settings.issuer,
             "aud": "authenticated",
             "iat": now,
@@ -141,12 +177,21 @@ async def fixture_token(request: Request):
         "token_type": "bearer",
         "expires_in": 3600,
         "refresh_token": "fixture-not-a-real-refresh-token",
-        "user": user(),
+        "user": user(body["email"]),
     }
 
 
 @app.get("/auth/v1/user")
-def fixture_user():
+def fixture_user(request: Request):
+    # The bearer token was signed by this test server; read its subject to answer for that user.
+    bearer = request.headers.get("authorization", "").removeprefix("Bearer ").strip()
+    try:
+        subject = UUID(jwt.decode(bearer, options={"verify_signature": False})["sub"])
+    except (jwt.PyJWTError, KeyError, ValueError):
+        return user()
+    for email, identity in IDENTITIES.items():
+        if identity == subject:
+            return user(email)
     return user()
 
 

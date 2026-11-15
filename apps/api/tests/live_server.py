@@ -15,6 +15,7 @@ from PIL import Image
 from sqlalchemy import create_engine, event, select, text
 from sqlalchemy.orm import Session
 
+from app.access import ALL_CAPABILITIES
 from app.auth import TokenVerifier, get_verifier
 from app.config import Settings, get_settings
 from app.db import database_session
@@ -81,7 +82,10 @@ async def lifespan(_):
         command.upgrade(config, "head")
     Image.new("RGB", (20, 20), "green").save(ROOT / ".local/live-evidence-fixture.png")
     try:
-        for name in ("owner", "foreign"):
+        # users[0] owner, users[1] foreign (no membership), users[2] contractor (own organisation),
+        # users[3] a second owner-organisation administrator for the submission test (users[0]
+        # changes its password in the recovery test).
+        for name in ("owner", "foreign", "contractor", "submission-owner"):
             email = f"local-test-{name}-{uuid4().hex}@example.invalid"
             password = secrets.token_urlsafe(30)
             response = httpx.post(
@@ -101,7 +105,26 @@ async def lifespan(_):
                     organisation_id=org.id,
                     user_id=UUID(users[0]["id"]),
                     role="administrator",
-                    capabilities=[],
+                    capabilities=ALL_CAPABILITIES,
+                )
+            )
+            session.add(
+                Membership(
+                    organisation_id=org.id,
+                    user_id=UUID(users[3]["id"]),
+                    role="administrator",
+                    capabilities=ALL_CAPABILITIES,
+                )
+            )
+            contractor = Organisation(name="Real local contractor fixture")
+            session.add(contractor)
+            session.flush()
+            session.add(
+                Membership(
+                    organisation_id=contractor.id,
+                    user_id=UUID(users[2]["id"]),
+                    role="administrator",
+                    capabilities=ALL_CAPABILITIES,
                 )
             )
             session.commit()

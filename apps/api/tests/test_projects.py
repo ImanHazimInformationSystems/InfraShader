@@ -5,8 +5,9 @@ from uuid import uuid4
 import pytest
 from sqlalchemy.dialects import postgresql
 
-from app import projects
+from app import access, projects
 from app.errors import APIError
+from app.models import Organisation
 from app.schemas import ProjectCreate, ProjectUpdate
 
 
@@ -21,6 +22,13 @@ class IsolatedSession:
     def scalar(self, statement, **kwargs):
         self.statements.append(statement)
         return next(self.results)
+
+    def get(self, model, key):
+        return (
+            SimpleNamespace(workspaces=["studio", "review"])
+            if model is Organisation
+            else SimpleNamespace(capabilities=access.ALL_CAPABILITIES)
+        )
 
     def add(self, record):
         self.statements.append(record)
@@ -77,14 +85,21 @@ def test_foreign_project_query_stays_bound_to_authorised_org():
 
 def test_update_uses_atomic_expected_revision_and_conflict_has_no_commit():
     org, user, project = uuid4(), uuid4(), uuid4()
-    db = IsolatedSession([SimpleNamespace(role="member"), None, project])
+    db = IsolatedSession(
+        [
+            SimpleNamespace(role="member", capabilities=access.ALL_CAPABILITIES),
+            project,
+            None,
+            project,
+        ]
+    )
     with pytest.raises(APIError) as error:
         projects.update_project(
             db, org, project, user, ProjectUpdate(expected_revision=3, name="New")
         )
     assert error.value.status_code == 409
     assert error.value.code == "revision_conflict"
-    compiled = db.statements[1].compile(dialect=postgresql.dialect())
+    compiled = db.statements[2].compile(dialect=postgresql.dialect())
     assert "projects.revision =" in str(compiled)
     assert "projects.organisation_id =" in str(compiled)
     assert 3 in compiled.params.values()
@@ -110,7 +125,15 @@ def test_successful_update_increments_revision_after_persistence():
         revision=4,
         updated_at=datetime.now(UTC),
     )
-    db = IsolatedSession([SimpleNamespace(role="member"), record])
+    db = IsolatedSession(
+        [
+            SimpleNamespace(role="member", capabilities=access.ALL_CAPABILITIES),
+            record,
+            record,
+            SimpleNamespace(capabilities=access.ALL_CAPABILITIES),
+            SimpleNamespace(capabilities=access.ALL_CAPABILITIES),
+        ]
+    )
     response = projects.update_project(
         db, org, project, user, ProjectUpdate(expected_revision=3, name="Updated")
     )
@@ -147,7 +170,15 @@ def test_write_response_is_accepted_revision_even_if_next_writer_commits_immedia
         def refresh(self, record):
             raise AssertionError("A post-commit refresh can observe another writer's revision")
 
-    db = ImmediateNextWriter([SimpleNamespace(role="member"), record])
+    db = ImmediateNextWriter(
+        [
+            SimpleNamespace(role="member", capabilities=access.ALL_CAPABILITIES),
+            record,
+            record,
+            SimpleNamespace(capabilities=access.ALL_CAPABILITIES),
+            SimpleNamespace(capabilities=access.ALL_CAPABILITIES),
+        ]
+    )
     response = projects.update_project(
         db, org, project, user, ProjectUpdate(expected_revision=3, name="My accepted edit")
     )

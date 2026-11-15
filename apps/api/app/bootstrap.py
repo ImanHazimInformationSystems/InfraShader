@@ -6,6 +6,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.access import ALL_CAPABILITIES
 from app.config import get_settings
 from app.db import engine_for
 from app.models import Membership, Organisation
@@ -47,7 +48,7 @@ def main() -> None:
                 organisation_id=organisation.id,
                 user_id=args.user_id,
                 role="administrator",
-                capabilities=[],
+                capabilities=ALL_CAPABILITIES,
                 active=True,
             )
         )

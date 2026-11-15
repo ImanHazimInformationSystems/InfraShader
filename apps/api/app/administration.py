@@ -32,13 +32,16 @@ class OrganisationInput(Contract):
     expected_revision: int = Field(ge=1)
     name: str = Field(min_length=1, max_length=160)
     settings: OrganisationSettings
+    workspaces: list[Literal["studio", "review"]] | None = Field(
+        default=None, min_length=1, max_length=2
+    )
 
 
 class MemberInput(Contract):
     expected_revision: int = Field(ge=1)
     role: Literal["administrator", "member"]
     active: bool
-    capabilities: list[Capability] = Field(default_factory=list, max_length=5)
+    capabilities: list[Capability] = Field(default_factory=list, max_length=20)
 
 
 class ProfileInput(Contract):
@@ -50,7 +53,7 @@ def admin(session, org_id, user_id, lock=False):
     if lock:
         session.scalar(select(Organisation).where(Organisation.id == org_id).with_for_update())
     membership = require_membership(session, org_id, user_id)
-    if membership.role != "administrator":
+    if "manage_members" not in membership.capabilities:
         raise APIError(
             403, "administrator_required", "An organisation administrator must make this change."
         )
@@ -64,6 +67,8 @@ def get_settings(session, org_id, user_id):
         "id": str(org.id),
         "name": org.name,
         "revision": org.revision,
+        "workspaces": org.workspaces,
+        "workspace_setup_required": org.workspace_setup_required,
         "settings": OrganisationSettings(**org.settings).model_dump(mode="json"),
     }
 
@@ -75,9 +80,12 @@ def save_settings(session, org_id, user_id, data):
         raise APIError(
             409, "settings_conflict", "Settings changed. Reload and compare your changes."
         )
-    before = {"name": org.name, "settings": org.settings}
+    before = {"name": org.name, "settings": org.settings, "workspaces": org.workspaces}
     org.name = data.name
     org.settings = data.settings.model_dump(mode="json")
+    if data.workspaces is not None:
+        org.workspaces = [w for w in ("studio", "review") if w in data.workspaces]
+        org.workspace_setup_required = False
     org.revision += 1
     session.add(
         AdministrationEvent(
@@ -86,7 +94,7 @@ def save_settings(session, org_id, user_id, data):
             payload={
                 "action": "settings",
                 "before": before,
-                "after": {"name": org.name, "settings": org.settings},
+                "after": {"name": org.name, "settings": org.settings, "workspaces": org.workspaces},
             },
         )
     )
@@ -144,6 +152,12 @@ def update_member(session, org_id, user_id, member_id, data):
         )
         if count <= 1:
             raise APIError(409, "last_administrator", "Keep at least one active administrator.")
+    if data.role == "administrator" and "manage_members" not in data.capabilities:
+        data.capabilities.append("manage_members")
+    if data.role == "member" and "manage_members" in data.capabilities:
+        raise APIError(
+            422, "role_mismatch", "Membership administration requires the administrator role."
+        )
     before = member_data(row)
     row.role = data.role
     row.active = data.active
@@ -195,6 +209,20 @@ def events(session, org_id, user_id):
         .order_by(AdministrationEvent.created_at.desc())
         .limit(100)
     ).all()
+
+    def visible(row):
+        if row.payload.get("action") != "pricing_issue_override":
+            return True
+        from app import access
+
+        try:
+            access.require_project(
+                session, org_id, UUID(row.payload["project_id"]), user_id, "internal_pricing"
+            )
+        except (APIError, ValueError, KeyError):
+            return False
+        return True
+
     return {
         "items": [
             {
@@ -204,6 +232,7 @@ def events(session, org_id, user_id):
                 "payload": row.payload,
             }
             for row in rows
+            if visible(row)
         ]
     }
 
