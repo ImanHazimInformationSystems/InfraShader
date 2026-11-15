@@ -1,4 +1,4 @@
-param([ValidateSet('sync','dev','test','lint','migrate','bootstrap')][string]$Task = 'dev', [Parameter(ValueFromRemainingArguments=$true)][string[]]$TaskArgs)
+param([ValidateSet('sync','dev','test','lint','migrate','bootstrap','backup')][string]$Task = 'dev', [Parameter(ValueFromRemainingArguments=$true)][string[]]$TaskArgs)
 $ErrorActionPreference = 'Stop'
 $uvCommand = Get-Command uv -ErrorAction SilentlyContinue
 $uvExecutable = if ($uvCommand) { $uvCommand.Source } else { Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Links\uv.exe' }
@@ -23,6 +23,7 @@ try {
         lint { & $uvExecutable run --frozen ruff check .; if ($LASTEXITCODE -eq 0) { & $uvExecutable run --frozen ruff format --check . } }
         migrate { & $uvExecutable run --frozen alembic upgrade head }
         bootstrap { & $uvExecutable run --frozen python -m app.bootstrap @TaskArgs }
+        backup { $envArgs = if (Test-Path -LiteralPath '.env') { @('--env-file', '.env') } else { @() }; & $uvExecutable run --frozen python ../../scripts/backup.py @envArgs @TaskArgs }
     }
     if ($LASTEXITCODE -ne 0) { throw "API task $Task failed with exit code $LASTEXITCODE" }
 } finally { Pop-Location; $env:DATABASE_URL = $previousDatabase; $env:TEST_DATABASE_URL = $previousTestDatabase }
