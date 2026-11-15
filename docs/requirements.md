@@ -1,4 +1,6 @@
-# Feature acceptance matrix
+# Historical SRS acceptance matrix
+
+> This matrix preserves the earlier SRS-mapped acceptance record; its October date and checkpoint claims are historical. For current feature implementation/verification/deployment/acceptance dimensions use [FEATURE_STATUS.md](FEATURE_STATUS.md) and canonical CSVs in `docs/tracking/`. For the current repository snapshot use [AI_HANDOFF.md](AI_HANDOFF.md). New feature work must retain the original SRS IDs and record changes in the canonical registers rather than treating this historical narrative as a second live status list.
 
 Updated 13 October 2026; audited against the actual repository and all F/D gaps. One row covers the whole feature: passing a subset does not make it verified working. Current work: [completion-plan.md](completion-plan.md). Migrations 0001-0010 are applied locally. The F01-F08 software audit is detailed in [f01-f08-acceptance.md](f01-f08-acceptance.md); external release gates remain separate. Brief and workspace history starts at the revision present when the history migration was installed; earlier versions cannot be reconstructed.
 
@@ -44,3 +46,37 @@ SRS G1-G8 remain open: scope/policy, full tenant/Auth/Storage checks, field shad
 ### Explorer extension, 14 October 2026
 
 F03 now has a fullscreen browser-window map and collapsible site search/coordinate controls. F06-adjacent exploration reads provider footprints/heights automatically, without requiring manual project modelling. Date/time/UTC-offset controls drive a bounded local shadow preview with sun azimuth/elevation. Provider preview is separate from verified saved analysis and does not satisfy G3 field acceptance. Complete city coverage, terrain, trees and roof/facade occlusion remain outside this implementation. See ADR-013.
+
+### Explorer environment extension, 18 October 2026
+
+- E06: implemented explicit-offset playback/Now/events, daily pvlib positions,
+  geographic sun indicator/disc/path, native sky/light and readable day/night map.
+  Stale shadow overlays clear while input changes; existing low-sun limits remain.
+- E07: implemented six manual weather presets, procedural GPU clouds/rain, numeric
+  and slider wind/intensity, quality, pause/off and reduced-motion handling. Clearly
+  simulated; no changes to numerical shade, quantities, prices or saved decisions.
+- E08: live weather remains optional and not implemented. No external weather API.
+- Site transfer preserves extent and carries time as editable new-brief context,
+  not a silent change to existing project analysis. No new database schema/packages.
+- Physical low-end devices, prolonged GPU/context-loss soak and full accessibility
+  remain open; F06/F07 field acceptance and other core gaps are unchanged.
+
+See [environment details](explorer-environment.md) and validation.md for actual checks.
+
+
+### Organisation access foundation - 19 October 2026
+
+| Roadmap / acceptance | Implemented scope | Evidence / remaining gate |
+|---|---|---|
+| S02 / account access | Existing Supabase JWT/login/recovery retained; current verified-email lookup for onboarding; no-membership create/join UI | API verified-identity negatives and real local Auth browser paths. Public signup remains disabled; account provisioning is local/operator-assisted. |
+| S02 / team and roles | Combinable explicit capability templates, membership revisions/audit, transactional invitation create/list/accept/revoke/expiry, last-admin guard | test_access_foundation.py; real recipient invite browser. Manual link delivery; no mail service. |
+| S03 / project access | Membership and explicit project grant; no implicit admin confidential-data bypass; same-tenant delegated grants; revocation | Cross-tenant/wrong-project/financial/reviewer denials and local file workflow. Cross-organisation disclosure exchange remains unimplemented. |
+| S01 / 00.11/00.12 / workspace shells | Explicit Studio/Review/Both configuration; role-aware navigation, validated saved preferences, compatible project routes and revalidation | access-browser and project navigation tests. Review exposes existing assigned-project/review tools; inbox/scoring/procurement/formal approvals remain unimplemented. |
+| Legacy-data safety | Migration 0011 materialises previous effective access, preserves records, flags workspace confirmation | Disposable-schema upgrade/backfill test; local application upgrade applied without reset. |
+| X01 / source traceability | Existing dependencies reused; policy, migration and local walkthrough documented | dependency-source-register.md and organisation-access.md; lock files remain authoritative. |
+
+This increment does not mark the whole MVP, review workflow or G1-G8 accepted. F13 and F16-F20 remain separately gated. Final test counts and unresolved verification are in validation.md.
+# Current tracking reference
+
+As of 26 October 2026, [FEATURE_STATUS.md](FEATURE_STATUS.md) and `docs/tracking/*.csv` hold the reconciled tracking dimensions. The matrix below remains historical requirement/evidence context. Resolve discrepancies through [reconciliation](tracking/reconciliation.md); do not maintain an independent current status here.
+

@@ -1,0 +1,8 @@
+{
+  "instances": 150,
+  "presets": 12,
+  "draw_calls": 49,
+  "triangles": 10380,
+  "save_reload_render_ms": 2880,
+  "environment": "Local automated Chromium WebGL; not physical-device acceptance"
+}

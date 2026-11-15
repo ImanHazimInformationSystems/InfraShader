@@ -1,0 +1,1643 @@
+﻿Resource ID,Name,URL,Source bundle,Context,Installation status,URL verification
+X01,React / FastAPI / PostgreSQL,https://react.dev/,EXISTING UI/API/PERSISTENCE [REUSE; R01-R03/R07],"X01 - EXISTING UI/API/PERSISTENCE [REUSE; R01-R03/R07]
+https://react.dev/ | https://www.typescriptlang.org/docs/
+https://fastapi.tiangolo.com/ | https://docs.pydantic.dev/
+https://www.postgresql.org/docs/ | https://docs.sqlalchemy.org/en/20/
+https://alembic.sqlalchemy.org/en/latest/ | https://supabase.com/docs/
+Use: two workspace shells, typed forms, private records, permissions and migrations.
+Licence basis: React/TypeScript/FastAPI/Pydantic/SQLAlchemy/Alembic MIT;
+PostgreSQL PostgreSQL licence; Supabase component/hosted terms checked separately.
+Reuse manifests; do not add a new frontend/backend framework for this refinement.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X01,React / FastAPI / PostgreSQL,https://www.typescriptlang.org/docs/,EXISTING UI/API/PERSISTENCE [REUSE; R01-R03/R07],"X01 - EXISTING UI/API/PERSISTENCE [REUSE; R01-R03/R07]
+https://react.dev/ | https://www.typescriptlang.org/docs/
+https://fastapi.tiangolo.com/ | https://docs.pydantic.dev/
+https://www.postgresql.org/docs/ | https://docs.sqlalchemy.org/en/20/
+https://alembic.sqlalchemy.org/en/latest/ | https://supabase.com/docs/
+Use: two workspace shells, typed forms, private records, permissions and migrations.
+Licence basis: React/TypeScript/FastAPI/Pydantic/SQLAlchemy/Alembic MIT;
+PostgreSQL PostgreSQL licence; Supabase component/hosted terms checked separately.
+Reuse manifests; do not add a new frontend/backend framework for this refinement.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X01,React / FastAPI / PostgreSQL,https://fastapi.tiangolo.com/,EXISTING UI/API/PERSISTENCE [REUSE; R01-R03/R07],"X01 - EXISTING UI/API/PERSISTENCE [REUSE; R01-R03/R07]
+https://react.dev/ | https://www.typescriptlang.org/docs/
+https://fastapi.tiangolo.com/ | https://docs.pydantic.dev/
+https://www.postgresql.org/docs/ | https://docs.sqlalchemy.org/en/20/
+https://alembic.sqlalchemy.org/en/latest/ | https://supabase.com/docs/
+Use: two workspace shells, typed forms, private records, permissions and migrations.
+Licence basis: React/TypeScript/FastAPI/Pydantic/SQLAlchemy/Alembic MIT;
+PostgreSQL PostgreSQL licence; Supabase component/hosted terms checked separately.
+Reuse manifests; do not add a new frontend/backend framework for this refinement.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X01,React / FastAPI / PostgreSQL,https://docs.pydantic.dev/,EXISTING UI/API/PERSISTENCE [REUSE; R01-R03/R07],"X01 - EXISTING UI/API/PERSISTENCE [REUSE; R01-R03/R07]
+https://react.dev/ | https://www.typescriptlang.org/docs/
+https://fastapi.tiangolo.com/ | https://docs.pydantic.dev/
+https://www.postgresql.org/docs/ | https://docs.sqlalchemy.org/en/20/
+https://alembic.sqlalchemy.org/en/latest/ | https://supabase.com/docs/
+Use: two workspace shells, typed forms, private records, permissions and migrations.
+Licence basis: React/TypeScript/FastAPI/Pydantic/SQLAlchemy/Alembic MIT;
+PostgreSQL PostgreSQL licence; Supabase component/hosted terms checked separately.
+Reuse manifests; do not add a new frontend/backend framework for this refinement.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X01,React / FastAPI / PostgreSQL,https://www.postgresql.org/docs/,EXISTING UI/API/PERSISTENCE [REUSE; R01-R03/R07],"X01 - EXISTING UI/API/PERSISTENCE [REUSE; R01-R03/R07]
+https://react.dev/ | https://www.typescriptlang.org/docs/
+https://fastapi.tiangolo.com/ | https://docs.pydantic.dev/
+https://www.postgresql.org/docs/ | https://docs.sqlalchemy.org/en/20/
+https://alembic.sqlalchemy.org/en/latest/ | https://supabase.com/docs/
+Use: two workspace shells, typed forms, private records, permissions and migrations.
+Licence basis: React/TypeScript/FastAPI/Pydantic/SQLAlchemy/Alembic MIT;
+PostgreSQL PostgreSQL licence; Supabase component/hosted terms checked separately.
+Reuse manifests; do not add a new frontend/backend framework for this refinement.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X01,React / FastAPI / PostgreSQL,https://docs.sqlalchemy.org/en/20/,EXISTING UI/API/PERSISTENCE [REUSE; R01-R03/R07],"X01 - EXISTING UI/API/PERSISTENCE [REUSE; R01-R03/R07]
+https://react.dev/ | https://www.typescriptlang.org/docs/
+https://fastapi.tiangolo.com/ | https://docs.pydantic.dev/
+https://www.postgresql.org/docs/ | https://docs.sqlalchemy.org/en/20/
+https://alembic.sqlalchemy.org/en/latest/ | https://supabase.com/docs/
+Use: two workspace shells, typed forms, private records, permissions and migrations.
+Licence basis: React/TypeScript/FastAPI/Pydantic/SQLAlchemy/Alembic MIT;
+PostgreSQL PostgreSQL licence; Supabase component/hosted terms checked separately.
+Reuse manifests; do not add a new frontend/backend framework for this refinement.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X01,React / FastAPI / PostgreSQL,https://alembic.sqlalchemy.org/en/latest/,EXISTING UI/API/PERSISTENCE [REUSE; R01-R03/R07],"X01 - EXISTING UI/API/PERSISTENCE [REUSE; R01-R03/R07]
+https://react.dev/ | https://www.typescriptlang.org/docs/
+https://fastapi.tiangolo.com/ | https://docs.pydantic.dev/
+https://www.postgresql.org/docs/ | https://docs.sqlalchemy.org/en/20/
+https://alembic.sqlalchemy.org/en/latest/ | https://supabase.com/docs/
+Use: two workspace shells, typed forms, private records, permissions and migrations.
+Licence basis: React/TypeScript/FastAPI/Pydantic/SQLAlchemy/Alembic MIT;
+PostgreSQL PostgreSQL licence; Supabase component/hosted terms checked separately.
+Reuse manifests; do not add a new frontend/backend framework for this refinement.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X01,React / FastAPI / PostgreSQL,https://supabase.com/docs/,EXISTING UI/API/PERSISTENCE [REUSE; R01-R03/R07],"X01 - EXISTING UI/API/PERSISTENCE [REUSE; R01-R03/R07]
+https://react.dev/ | https://www.typescriptlang.org/docs/
+https://fastapi.tiangolo.com/ | https://docs.pydantic.dev/
+https://www.postgresql.org/docs/ | https://docs.sqlalchemy.org/en/20/
+https://alembic.sqlalchemy.org/en/latest/ | https://supabase.com/docs/
+Use: two workspace shells, typed forms, private records, permissions and migrations.
+Licence basis: React/TypeScript/FastAPI/Pydantic/SQLAlchemy/Alembic MIT;
+PostgreSQL PostgreSQL licence; Supabase component/hosted terms checked separately.
+Reuse manifests; do not add a new frontend/backend framework for this refinement.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X02,MapLibre / Terra Draw,https://github.com/maplibre/maplibre-gl-js,MAP AND PRECISE DRAWING [REUSE; R04-R05],"X02 - MAP AND PRECISE DRAWING [REUSE; R04-R05]
+https://github.com/maplibre/maplibre-gl-js (BSD-3-Clause; npm maplibre-gl)
+https://github.com/JamesLMilner/terra-draw (MIT; npm terra-draw)
+Use correct terra-draw-maplibre-gl-adapter version already selected in project.
+Use: geometry editing, numeric selection, layers and supported snapping modes.
+Verify adapter compatibility before upgrades; upstream examples may target a
+different MapLibre major version. No advanced CAD feature is assumed built-in.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X02,MapLibre / Terra Draw,https://github.com/JamesLMilner/terra-draw,MAP AND PRECISE DRAWING [REUSE; R04-R05],"X02 - MAP AND PRECISE DRAWING [REUSE; R04-R05]
+https://github.com/maplibre/maplibre-gl-js (BSD-3-Clause; npm maplibre-gl)
+https://github.com/JamesLMilner/terra-draw (MIT; npm terra-draw)
+Use correct terra-draw-maplibre-gl-adapter version already selected in project.
+Use: geometry editing, numeric selection, layers and supported snapping modes.
+Verify adapter compatibility before upgrades; upstream examples may target a
+different MapLibre major version. No advanced CAD feature is assumed built-in.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X03,PostGIS / Shapely / PyProj / pvlib,https://postgis.net/docs/,NUMERICAL GEOMETRY AND SOLAR [REUSE; R03/R06],"X03 - NUMERICAL GEOMETRY AND SOLAR [REUSE; R03/R06]
+https://postgis.net/docs/ (GPL-2.0-or-later; deployed database extension)
+https://shapely.readthedocs.io/en/stable/ (BSD-3-Clause; PyPI shapely)
+https://pyproj4.github.io/pyproj/stable/ (MIT; PyPI pyproj)
+https://pvlib-python.readthedocs.io/en/stable/ (BSD-3-Clause; PyPI pvlib)
+Use: authoritative area/length, supported plant/assembly quantity derivations and
+existing shade. Declare CRS, method, source/revision and numerical limitations.
+A plant quantity rule and geometry-to-cost binding remain custom application logic.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X03,PostGIS / Shapely / PyProj / pvlib,https://shapely.readthedocs.io/en/stable/,NUMERICAL GEOMETRY AND SOLAR [REUSE; R03/R06],"X03 - NUMERICAL GEOMETRY AND SOLAR [REUSE; R03/R06]
+https://postgis.net/docs/ (GPL-2.0-or-later; deployed database extension)
+https://shapely.readthedocs.io/en/stable/ (BSD-3-Clause; PyPI shapely)
+https://pyproj4.github.io/pyproj/stable/ (MIT; PyPI pyproj)
+https://pvlib-python.readthedocs.io/en/stable/ (BSD-3-Clause; PyPI pvlib)
+Use: authoritative area/length, supported plant/assembly quantity derivations and
+existing shade. Declare CRS, method, source/revision and numerical limitations.
+A plant quantity rule and geometry-to-cost binding remain custom application logic.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X03,PostGIS / Shapely / PyProj / pvlib,https://pyproj4.github.io/pyproj/stable/,NUMERICAL GEOMETRY AND SOLAR [REUSE; R03/R06],"X03 - NUMERICAL GEOMETRY AND SOLAR [REUSE; R03/R06]
+https://postgis.net/docs/ (GPL-2.0-or-later; deployed database extension)
+https://shapely.readthedocs.io/en/stable/ (BSD-3-Clause; PyPI shapely)
+https://pyproj4.github.io/pyproj/stable/ (MIT; PyPI pyproj)
+https://pvlib-python.readthedocs.io/en/stable/ (BSD-3-Clause; PyPI pvlib)
+Use: authoritative area/length, supported plant/assembly quantity derivations and
+existing shade. Declare CRS, method, source/revision and numerical limitations.
+A plant quantity rule and geometry-to-cost binding remain custom application logic.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X03,PostGIS / Shapely / PyProj / pvlib,https://pvlib-python.readthedocs.io/en/stable/,NUMERICAL GEOMETRY AND SOLAR [REUSE; R03/R06],"X03 - NUMERICAL GEOMETRY AND SOLAR [REUSE; R03/R06]
+https://postgis.net/docs/ (GPL-2.0-or-later; deployed database extension)
+https://shapely.readthedocs.io/en/stable/ (BSD-3-Clause; PyPI shapely)
+https://pyproj4.github.io/pyproj/stable/ (MIT; PyPI pyproj)
+https://pvlib-python.readthedocs.io/en/stable/ (BSD-3-Clause; PyPI pvlib)
+Use: authoritative area/length, supported plant/assembly quantity derivations and
+existing shade. Declare CRS, method, source/revision and numerical limitations.
+A plant quantity rule and geometry-to-cost binding remain custom application logic.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X04,Custom rules / Decimal / Pydantic,https://docs.python.org/3/library/decimal.html,"MONEY, REVISIONS, VALIDATION AND SCORING [CUSTOM ON EXISTING STACK]","X04 - MONEY, REVISIONS, VALIDATION AND SCORING [CUSTOM ON EXISTING STACK]
+https://docs.python.org/3/library/decimal.html
+https://www.postgresql.org/docs/current/datatype-numeric.html
+https://docs.pydantic.dev/
+Use: K01-K06, immutable snapshots, dimensional checks, price completeness,
+versioned score/rubric and state transitions. No LLM or external score API needed.
+Inspect current pricing/workspace/review domain code before introducing new modules.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X04,Custom rules / Decimal / Pydantic,https://www.postgresql.org/docs/current/datatype-numeric.html,"MONEY, REVISIONS, VALIDATION AND SCORING [CUSTOM ON EXISTING STACK]","X04 - MONEY, REVISIONS, VALIDATION AND SCORING [CUSTOM ON EXISTING STACK]
+https://docs.python.org/3/library/decimal.html
+https://www.postgresql.org/docs/current/datatype-numeric.html
+https://docs.pydantic.dev/
+Use: K01-K06, immutable snapshots, dimensional checks, price completeness,
+versioned score/rubric and state transitions. No LLM or external score API needed.
+Inspect current pricing/workspace/review domain code before introducing new modules.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X04,Custom rules / Decimal / Pydantic,https://docs.pydantic.dev/,"MONEY, REVISIONS, VALIDATION AND SCORING [CUSTOM ON EXISTING STACK]","X04 - MONEY, REVISIONS, VALIDATION AND SCORING [CUSTOM ON EXISTING STACK]
+https://docs.python.org/3/library/decimal.html
+https://www.postgresql.org/docs/current/datatype-numeric.html
+https://docs.pydantic.dev/
+Use: K01-K06, immutable snapshots, dimensional checks, price completeness,
+versioned score/rubric and state transitions. No LLM or external score API needed.
+Inspect current pricing/workspace/review domain code before introducing new modules.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X05,React PDF / Supabase / openpyxl,https://react-pdf.org/,RETAINED OUTPUTS AND SCHEDULE EXPORT [REUSE / SMALL ADDITION],"X05 - RETAINED OUTPUTS AND SCHEDULE EXPORT [REUSE / SMALL ADDITION]
+https://react-pdf.org/ (MIT renderer; npm @react-pdf/renderer)
+https://supabase.com/docs/guides/storage (existing private storage)
+https://openpyxl.readthedocs.io/en/stable/ (MIT; PyPI openpyxl if XLSX needed)
+https://docs.python.org/3/library/csv.html (standard library)
+Use: scaled/labelled plan sheets, plant/BOQ/change appendices, retained PDF bytes,
+authorised retrieval and CSV/XLSX export. Exact PDF/layout integration is custom.
+Plan calibration and export scaling are different tasks; validate both.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X05,React PDF / Supabase / openpyxl,https://supabase.com/docs/guides/storage,RETAINED OUTPUTS AND SCHEDULE EXPORT [REUSE / SMALL ADDITION],"X05 - RETAINED OUTPUTS AND SCHEDULE EXPORT [REUSE / SMALL ADDITION]
+https://react-pdf.org/ (MIT renderer; npm @react-pdf/renderer)
+https://supabase.com/docs/guides/storage (existing private storage)
+https://openpyxl.readthedocs.io/en/stable/ (MIT; PyPI openpyxl if XLSX needed)
+https://docs.python.org/3/library/csv.html (standard library)
+Use: scaled/labelled plan sheets, plant/BOQ/change appendices, retained PDF bytes,
+authorised retrieval and CSV/XLSX export. Exact PDF/layout integration is custom.
+Plan calibration and export scaling are different tasks; validate both.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X05,React PDF / Supabase / openpyxl,https://openpyxl.readthedocs.io/en/stable/,RETAINED OUTPUTS AND SCHEDULE EXPORT [REUSE / SMALL ADDITION],"X05 - RETAINED OUTPUTS AND SCHEDULE EXPORT [REUSE / SMALL ADDITION]
+https://react-pdf.org/ (MIT renderer; npm @react-pdf/renderer)
+https://supabase.com/docs/guides/storage (existing private storage)
+https://openpyxl.readthedocs.io/en/stable/ (MIT; PyPI openpyxl if XLSX needed)
+https://docs.python.org/3/library/csv.html (standard library)
+Use: scaled/labelled plan sheets, plant/BOQ/change appendices, retained PDF bytes,
+authorised retrieval and CSV/XLSX export. Exact PDF/layout integration is custom.
+Plan calibration and export scaling are different tasks; validate both.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X05,React PDF / Supabase / openpyxl,https://docs.python.org/3/library/csv.html,RETAINED OUTPUTS AND SCHEDULE EXPORT [REUSE / SMALL ADDITION],"X05 - RETAINED OUTPUTS AND SCHEDULE EXPORT [REUSE / SMALL ADDITION]
+https://react-pdf.org/ (MIT renderer; npm @react-pdf/renderer)
+https://supabase.com/docs/guides/storage (existing private storage)
+https://openpyxl.readthedocs.io/en/stable/ (MIT; PyPI openpyxl if XLSX needed)
+https://docs.python.org/3/library/csv.html (standard library)
+Use: scaled/labelled plan sheets, plant/BOQ/change appendices, retained PDF bytes,
+authorised retrieval and CSV/XLSX export. Exact PDF/layout integration is custom.
+Plan calibration and export scaling are different tasks; validate both.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X06,PDF.js / MapLibre image source,https://github.com/mozilla/pdf.js,REFERENCE PLAN AND DOCUMENT VIEWER [ADD ONLY IF ABSENT; N03],"X06 - REFERENCE PLAN AND DOCUMENT VIEWER [ADD ONLY IF ABSENT; N03]
+https://github.com/mozilla/pdf.js (Apache-2.0; npm pdfjs-dist)
+https://mozilla.github.io/pdf.js/
+https://maplibre.org/maplibre-gl-js/docs/API/classes/ImageSource/
+Use: render an admitted PDF page to a bounded raster, display image reference,
+calibrate known points/dimensions, opacity and trace. Store original and transform.
+A single baseline length sets scale but may not correct perspective/distortion;
+use sufficient georeferencing controls for claimed alignment and report uncertainty.
+PDF worker/assets version must match the bundled PDF.js package; isolate parsing.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X06,PDF.js / MapLibre image source,https://mozilla.github.io/pdf.js/,REFERENCE PLAN AND DOCUMENT VIEWER [ADD ONLY IF ABSENT; N03],"X06 - REFERENCE PLAN AND DOCUMENT VIEWER [ADD ONLY IF ABSENT; N03]
+https://github.com/mozilla/pdf.js (Apache-2.0; npm pdfjs-dist)
+https://mozilla.github.io/pdf.js/
+https://maplibre.org/maplibre-gl-js/docs/API/classes/ImageSource/
+Use: render an admitted PDF page to a bounded raster, display image reference,
+calibrate known points/dimensions, opacity and trace. Store original and transform.
+A single baseline length sets scale but may not correct perspective/distortion;
+use sufficient georeferencing controls for claimed alignment and report uncertainty.
+PDF worker/assets version must match the bundled PDF.js package; isolate parsing.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X06,PDF.js / MapLibre image source,https://maplibre.org/maplibre-gl-js/docs/API/classes/ImageSource/,REFERENCE PLAN AND DOCUMENT VIEWER [ADD ONLY IF ABSENT; N03],"X06 - REFERENCE PLAN AND DOCUMENT VIEWER [ADD ONLY IF ABSENT; N03]
+https://github.com/mozilla/pdf.js (Apache-2.0; npm pdfjs-dist)
+https://mozilla.github.io/pdf.js/
+https://maplibre.org/maplibre-gl-js/docs/API/classes/ImageSource/
+Use: render an admitted PDF page to a bounded raster, display image reference,
+calibrate known points/dimensions, opacity and trace. Store original and transform.
+A single baseline length sets scale but may not correct perspective/distortion;
+use sufficient georeferencing controls for claimed alignment and report uncertainty.
+PDF worker/assets version must match the bundled PDF.js package; isolate parsing.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X07,TanStack / ECharts,https://github.com/TanStack/table,LARGE TABLES AND DASHBOARD CHARTS [CANDIDATE; N01-N02],"X07 - LARGE TABLES AND DASHBOARD CHARTS [CANDIDATE; N01-N02]
+https://github.com/TanStack/table (MIT; npm @tanstack/react-table)
+https://github.com/TanStack/virtual (MIT; npm @tanstack/react-virtual)
+https://github.com/apache/echarts (Apache-2.0; npm echarts)
+Use: plant/BOQ/comparison grids and small source-backed progress/budget charts.
+Add only if needed; backend computes official values. No paid grid edition required.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X07,TanStack / ECharts,https://github.com/TanStack/virtual,LARGE TABLES AND DASHBOARD CHARTS [CANDIDATE; N01-N02],"X07 - LARGE TABLES AND DASHBOARD CHARTS [CANDIDATE; N01-N02]
+https://github.com/TanStack/table (MIT; npm @tanstack/react-table)
+https://github.com/TanStack/virtual (MIT; npm @tanstack/react-virtual)
+https://github.com/apache/echarts (Apache-2.0; npm echarts)
+Use: plant/BOQ/comparison grids and small source-backed progress/budget charts.
+Add only if needed; backend computes official values. No paid grid edition required.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X07,TanStack / ECharts,https://github.com/apache/echarts,LARGE TABLES AND DASHBOARD CHARTS [CANDIDATE; N01-N02],"X07 - LARGE TABLES AND DASHBOARD CHARTS [CANDIDATE; N01-N02]
+https://github.com/TanStack/table (MIT; npm @tanstack/react-table)
+https://github.com/TanStack/virtual (MIT; npm @tanstack/react-virtual)
+https://github.com/apache/echarts (Apache-2.0; npm echarts)
+Use: plant/BOQ/comparison grids and small source-backed progress/budget charts.
+Add only if needed; backend computes official values. No paid grid edition required.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X08,Curated landscape data,,CUSTOM LANDSCAPE DATA AND BUSINESS RULES [CURATED; N08/N13],"X08 - CUSTOM LANDSCAPE DATA AND BUSINESS RULES [CURATED; N08/N13]
+Use permissioned plant/nursery/material/supplier records and owner-approved rubrics.
+Required fields: source/date, procurement size, units, quantity method, inclusions,
+validity and assumptions. No universal free Malaysian price/plant/policy feed promised.
+Code library does not supply current rates, horticultural advice or legal criteria.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X09,Docling / pdfplumber,https://github.com/docling-project/docling,DOCUMENT EXTRACTION [NEXT / OPTIONAL; N03/N06],"X09 - DOCUMENT EXTRACTION [NEXT / OPTIONAL; N03/N06]
+https://github.com/docling-project/docling (MIT code; PyPI docling)
+https://docling-project.github.io/docling/
+https://github.com/jsvine/pdfplumber (MIT; optional alternative)
+Use native structured fields/manual entry first. Choose a measured extraction
+route only when pilots show material reading/re-entry burden. Do not install both
+parsers by default; audit models/OCR assets and their independent licences.
+Run bounded jobs with source-page/row anchors and review of financial fields.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X09,Docling / pdfplumber,https://docling-project.github.io/docling/,DOCUMENT EXTRACTION [NEXT / OPTIONAL; N03/N06],"X09 - DOCUMENT EXTRACTION [NEXT / OPTIONAL; N03/N06]
+https://github.com/docling-project/docling (MIT code; PyPI docling)
+https://docling-project.github.io/docling/
+https://github.com/jsvine/pdfplumber (MIT; optional alternative)
+Use native structured fields/manual entry first. Choose a measured extraction
+route only when pilots show material reading/re-entry burden. Do not install both
+parsers by default; audit models/OCR assets and their independent licences.
+Run bounded jobs with source-page/row anchors and review of financial fields.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X09,Docling / pdfplumber,https://github.com/jsvine/pdfplumber,DOCUMENT EXTRACTION [NEXT / OPTIONAL; N03/N06],"X09 - DOCUMENT EXTRACTION [NEXT / OPTIONAL; N03/N06]
+https://github.com/docling-project/docling (MIT code; PyPI docling)
+https://docling-project.github.io/docling/
+https://github.com/jsvine/pdfplumber (MIT; optional alternative)
+Use native structured fields/manual entry first. Choose a measured extraction
+route only when pilots show material reading/re-entry burden. Do not install both
+parsers by default; audit models/OCR assets and their independent licences.
+Run bounded jobs with source-page/row anchors and review of financial fields.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X10,Ollama / pgvector / model candidates,https://github.com/ollama/ollama,SOURCE-GROUNDED AI [NEXT / OPTIONAL; N04-N05/N09-N10],"X10 - SOURCE-GROUNDED AI [NEXT / OPTIONAL; N04-N05/N09-N10]
+https://github.com/ollama/ollama (MIT runtime)
+https://docs.ollama.com/capabilities/structured-outputs
+https://huggingface.co/Qwen/Qwen3-8B (Apache-2.0 candidate model; benchmark first)
+https://github.com/pgvector/pgvector (PostgreSQL licence; optional extension)
+https://github.com/huggingface/sentence-transformers (Apache-2.0 code)
+https://huggingface.co/BAAI/bge-m3 (MIT candidate embedding model)
+Use optional extraction assistance, evidence-gap suggestions and reviewed drafts.
+Source-filter before retrieval; schema/citation/number checks; no autonomous scoring,
+price changes or decisions. Small datasets may use keyword retrieval without vectors.
+Pin model digest/quantisation/prompt/schema as well as package versions when adopted.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X10,Ollama / pgvector / model candidates,https://docs.ollama.com/capabilities/structured-outputs,SOURCE-GROUNDED AI [NEXT / OPTIONAL; N04-N05/N09-N10],"X10 - SOURCE-GROUNDED AI [NEXT / OPTIONAL; N04-N05/N09-N10]
+https://github.com/ollama/ollama (MIT runtime)
+https://docs.ollama.com/capabilities/structured-outputs
+https://huggingface.co/Qwen/Qwen3-8B (Apache-2.0 candidate model; benchmark first)
+https://github.com/pgvector/pgvector (PostgreSQL licence; optional extension)
+https://github.com/huggingface/sentence-transformers (Apache-2.0 code)
+https://huggingface.co/BAAI/bge-m3 (MIT candidate embedding model)
+Use optional extraction assistance, evidence-gap suggestions and reviewed drafts.
+Source-filter before retrieval; schema/citation/number checks; no autonomous scoring,
+price changes or decisions. Small datasets may use keyword retrieval without vectors.
+Pin model digest/quantisation/prompt/schema as well as package versions when adopted.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X10,Ollama / pgvector / model candidates,https://huggingface.co/Qwen/Qwen3-8B,SOURCE-GROUNDED AI [NEXT / OPTIONAL; N04-N05/N09-N10],"X10 - SOURCE-GROUNDED AI [NEXT / OPTIONAL; N04-N05/N09-N10]
+https://github.com/ollama/ollama (MIT runtime)
+https://docs.ollama.com/capabilities/structured-outputs
+https://huggingface.co/Qwen/Qwen3-8B (Apache-2.0 candidate model; benchmark first)
+https://github.com/pgvector/pgvector (PostgreSQL licence; optional extension)
+https://github.com/huggingface/sentence-transformers (Apache-2.0 code)
+https://huggingface.co/BAAI/bge-m3 (MIT candidate embedding model)
+Use optional extraction assistance, evidence-gap suggestions and reviewed drafts.
+Source-filter before retrieval; schema/citation/number checks; no autonomous scoring,
+price changes or decisions. Small datasets may use keyword retrieval without vectors.
+Pin model digest/quantisation/prompt/schema as well as package versions when adopted.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X10,Ollama / pgvector / model candidates,https://github.com/pgvector/pgvector,SOURCE-GROUNDED AI [NEXT / OPTIONAL; N04-N05/N09-N10],"X10 - SOURCE-GROUNDED AI [NEXT / OPTIONAL; N04-N05/N09-N10]
+https://github.com/ollama/ollama (MIT runtime)
+https://docs.ollama.com/capabilities/structured-outputs
+https://huggingface.co/Qwen/Qwen3-8B (Apache-2.0 candidate model; benchmark first)
+https://github.com/pgvector/pgvector (PostgreSQL licence; optional extension)
+https://github.com/huggingface/sentence-transformers (Apache-2.0 code)
+https://huggingface.co/BAAI/bge-m3 (MIT candidate embedding model)
+Use optional extraction assistance, evidence-gap suggestions and reviewed drafts.
+Source-filter before retrieval; schema/citation/number checks; no autonomous scoring,
+price changes or decisions. Small datasets may use keyword retrieval without vectors.
+Pin model digest/quantisation/prompt/schema as well as package versions when adopted.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X10,Ollama / pgvector / model candidates,https://github.com/huggingface/sentence-transformers,SOURCE-GROUNDED AI [NEXT / OPTIONAL; N04-N05/N09-N10],"X10 - SOURCE-GROUNDED AI [NEXT / OPTIONAL; N04-N05/N09-N10]
+https://github.com/ollama/ollama (MIT runtime)
+https://docs.ollama.com/capabilities/structured-outputs
+https://huggingface.co/Qwen/Qwen3-8B (Apache-2.0 candidate model; benchmark first)
+https://github.com/pgvector/pgvector (PostgreSQL licence; optional extension)
+https://github.com/huggingface/sentence-transformers (Apache-2.0 code)
+https://huggingface.co/BAAI/bge-m3 (MIT candidate embedding model)
+Use optional extraction assistance, evidence-gap suggestions and reviewed drafts.
+Source-filter before retrieval; schema/citation/number checks; no autonomous scoring,
+price changes or decisions. Small datasets may use keyword retrieval without vectors.
+Pin model digest/quantisation/prompt/schema as well as package versions when adopted.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X10,Ollama / pgvector / model candidates,https://huggingface.co/BAAI/bge-m3,SOURCE-GROUNDED AI [NEXT / OPTIONAL; N04-N05/N09-N10],"X10 - SOURCE-GROUNDED AI [NEXT / OPTIONAL; N04-N05/N09-N10]
+https://github.com/ollama/ollama (MIT runtime)
+https://docs.ollama.com/capabilities/structured-outputs
+https://huggingface.co/Qwen/Qwen3-8B (Apache-2.0 candidate model; benchmark first)
+https://github.com/pgvector/pgvector (PostgreSQL licence; optional extension)
+https://github.com/huggingface/sentence-transformers (Apache-2.0 code)
+https://huggingface.co/BAAI/bge-m3 (MIT candidate embedding model)
+Use optional extraction assistance, evidence-gap suggestions and reviewed drafts.
+Source-filter before retrieval; schema/citation/number checks; no autonomous scoring,
+price changes or decisions. Small datasets may use keyword retrieval without vectors.
+Pin model digest/quantisation/prompt/schema as well as package versions when adopted.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X11,Celery / Valkey candidate,https://github.com/celery/celery,OPTIONAL DURABLE JOBS [ADD WHEN REQUIRED; N06],"X11 - OPTIONAL DURABLE JOBS [ADD WHEN REQUIRED; N06]
+https://github.com/celery/celery (BSD-3-Clause; PyPI celery)
+https://github.com/valkey-io/valkey (BSD-3-Clause; optional broker infrastructure)
+Use background parsing/export/AI jobs with persisted status, retries and revocation.
+Verify transport/broker compatibility and actual deployment cost. Do not add worker
+services just to run a small synchronous form validation or scoring calculation.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X11,Celery / Valkey candidate,https://github.com/valkey-io/valkey,OPTIONAL DURABLE JOBS [ADD WHEN REQUIRED; N06],"X11 - OPTIONAL DURABLE JOBS [ADD WHEN REQUIRED; N06]
+https://github.com/celery/celery (BSD-3-Clause; PyPI celery)
+https://github.com/valkey-io/valkey (BSD-3-Clause; optional broker infrastructure)
+Use background parsing/export/AI jobs with persisted status, retries and revocation.
+Verify transport/broker compatibility and actual deployment cost. Do not add worker
+services just to run a small synchronous form validation or scoring calculation.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X12,pytest / Playwright / Vitest,https://docs.pytest.org/,TEST AND PERFORMANCE EVIDENCE [REUSE; R16/N19],"X12 - TEST AND PERFORMANCE EVIDENCE [REUSE; R16/N19]
+https://docs.pytest.org/ | https://playwright.dev/docs/intro
+https://vitest.dev/guide/ | https://github.com/locustio/locust
+Use: real workflow regression, cross-tenant access, hand-checked quantities/score
+examples, retained file recovery, reference alignment and representative load tests.
+Reproduce a customer revision and external-file comparison, not only API happy paths.
+
+VERSION PIN PROCEDURE FOR CODEX
+1. Read current manifests plus package-lock.json and apps/api/uv.lock; record actual
+   installed versions and current commit in docs/dependency-source-register.md.
+2. Prefer installed compatible packages; consult docs/source at matching release tag.
+3. For a justified addition, choose a supported version compatible with the runtime/
+   adapter, record exact version/licence/upstream tag and update existing lockfiles.
+4. For model/assets/data, record exact digest/version/source/rights and hardware needs.
+5. Record feature -> repository module -> dependency -> source doc -> acceptance test.
+6. Report 'not verified' when a version/path has not been inspected. Never label a
+   moving main branch or latest docs URL as a frozen reproducible dependency pin.
+
+Suggested locations are architectural responsibilities, NOT verified existing files:
+apps/api/app/domain/briefs/ - scope acknowledgements and unresolved assumptions.
+apps/api/app/domain/quantities/ - method/units, plant/material schedule derivation.
+apps/api/app/domain/change_control/ - impact ledger and proposal revisions.
+apps/api/app/domain/comparison/ - reviewed scope mappings and readiness rules.
+apps/web/src/features/studio/ - plant/material/source/readiness panels.
+apps/web/src/features/organisation/ - intake, comparison, rubric and signoff.
+Reuse current modules and conventions where they already implement these duties.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X12,pytest / Playwright / Vitest,https://playwright.dev/docs/intro,TEST AND PERFORMANCE EVIDENCE [REUSE; R16/N19],"X12 - TEST AND PERFORMANCE EVIDENCE [REUSE; R16/N19]
+https://docs.pytest.org/ | https://playwright.dev/docs/intro
+https://vitest.dev/guide/ | https://github.com/locustio/locust
+Use: real workflow regression, cross-tenant access, hand-checked quantities/score
+examples, retained file recovery, reference alignment and representative load tests.
+Reproduce a customer revision and external-file comparison, not only API happy paths.
+
+VERSION PIN PROCEDURE FOR CODEX
+1. Read current manifests plus package-lock.json and apps/api/uv.lock; record actual
+   installed versions and current commit in docs/dependency-source-register.md.
+2. Prefer installed compatible packages; consult docs/source at matching release tag.
+3. For a justified addition, choose a supported version compatible with the runtime/
+   adapter, record exact version/licence/upstream tag and update existing lockfiles.
+4. For model/assets/data, record exact digest/version/source/rights and hardware needs.
+5. Record feature -> repository module -> dependency -> source doc -> acceptance test.
+6. Report 'not verified' when a version/path has not been inspected. Never label a
+   moving main branch or latest docs URL as a frozen reproducible dependency pin.
+
+Suggested locations are architectural responsibilities, NOT verified existing files:
+apps/api/app/domain/briefs/ - scope acknowledgements and unresolved assumptions.
+apps/api/app/domain/quantities/ - method/units, plant/material schedule derivation.
+apps/api/app/domain/change_control/ - impact ledger and proposal revisions.
+apps/api/app/domain/comparison/ - reviewed scope mappings and readiness rules.
+apps/web/src/features/studio/ - plant/material/source/readiness panels.
+apps/web/src/features/organisation/ - intake, comparison, rubric and signoff.
+Reuse current modules and conventions where they already implement these duties.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X12,pytest / Playwright / Vitest,https://vitest.dev/guide/,TEST AND PERFORMANCE EVIDENCE [REUSE; R16/N19],"X12 - TEST AND PERFORMANCE EVIDENCE [REUSE; R16/N19]
+https://docs.pytest.org/ | https://playwright.dev/docs/intro
+https://vitest.dev/guide/ | https://github.com/locustio/locust
+Use: real workflow regression, cross-tenant access, hand-checked quantities/score
+examples, retained file recovery, reference alignment and representative load tests.
+Reproduce a customer revision and external-file comparison, not only API happy paths.
+
+VERSION PIN PROCEDURE FOR CODEX
+1. Read current manifests plus package-lock.json and apps/api/uv.lock; record actual
+   installed versions and current commit in docs/dependency-source-register.md.
+2. Prefer installed compatible packages; consult docs/source at matching release tag.
+3. For a justified addition, choose a supported version compatible with the runtime/
+   adapter, record exact version/licence/upstream tag and update existing lockfiles.
+4. For model/assets/data, record exact digest/version/source/rights and hardware needs.
+5. Record feature -> repository module -> dependency -> source doc -> acceptance test.
+6. Report 'not verified' when a version/path has not been inspected. Never label a
+   moving main branch or latest docs URL as a frozen reproducible dependency pin.
+
+Suggested locations are architectural responsibilities, NOT verified existing files:
+apps/api/app/domain/briefs/ - scope acknowledgements and unresolved assumptions.
+apps/api/app/domain/quantities/ - method/units, plant/material schedule derivation.
+apps/api/app/domain/change_control/ - impact ledger and proposal revisions.
+apps/api/app/domain/comparison/ - reviewed scope mappings and readiness rules.
+apps/web/src/features/studio/ - plant/material/source/readiness panels.
+apps/web/src/features/organisation/ - intake, comparison, rubric and signoff.
+Reuse current modules and conventions where they already implement these duties.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+X12,pytest / Playwright / Vitest,https://github.com/locustio/locust,TEST AND PERFORMANCE EVIDENCE [REUSE; R16/N19],"X12 - TEST AND PERFORMANCE EVIDENCE [REUSE; R16/N19]
+https://docs.pytest.org/ | https://playwright.dev/docs/intro
+https://vitest.dev/guide/ | https://github.com/locustio/locust
+Use: real workflow regression, cross-tenant access, hand-checked quantities/score
+examples, retained file recovery, reference alignment and representative load tests.
+Reproduce a customer revision and external-file comparison, not only API happy paths.
+
+VERSION PIN PROCEDURE FOR CODEX
+1. Read current manifests plus package-lock.json and apps/api/uv.lock; record actual
+   installed versions and current commit in docs/dependency-source-register.md.
+2. Prefer installed compatible packages; consult docs/source at matching release tag.
+3. For a justified addition, choose a supported version compatible with the runtime/
+   adapter, record exact version/licence/upstream tag and update existing lockfiles.
+4. For model/assets/data, record exact digest/version/source/rights and hardware needs.
+5. Record feature -> repository module -> dependency -> source doc -> acceptance test.
+6. Report 'not verified' when a version/path has not been inspected. Never label a
+   moving main branch or latest docs URL as a frozen reproducible dependency pin.
+
+Suggested locations are architectural responsibilities, NOT verified existing files:
+apps/api/app/domain/briefs/ - scope acknowledgements and unresolved assumptions.
+apps/api/app/domain/quantities/ - method/units, plant/material schedule derivation.
+apps/api/app/domain/change_control/ - impact ledger and proposal revisions.
+apps/api/app/domain/comparison/ - reviewed scope mappings and readiness rules.
+apps/web/src/features/studio/ - plant/material/source/readiness panels.
+apps/web/src/features/organisation/ - intake, comparison, rubric and signoff.
+Reuse current modules and conventions where they already implement these duties.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R01,"React, TypeScript, Vite, Tailwind",https://react.dev/,EXISTING WEB / UI,"R01 - EXISTING WEB / UI
+React: https://react.dev/
+TypeScript: https://www.typescriptlang.org/docs/
+Vite: https://vite.dev/guide/
+React Router: https://reactrouter.com/
+Tailwind: https://tailwindcss.com/docs
+Radix: https://www.radix-ui.com/primitives/docs/overview/introduction
+shadcn/ui reference: https://ui.shadcn.com/docs
+Lucide: https://lucide.dev/
+Zod: https://zod.dev/
+The current app uses an editable shadcn-style Radix/CVA button and semantic CSS;
+it is not a claim that the entire shadcn component library is implemented.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R01,"React, TypeScript, Vite, Tailwind",https://www.typescriptlang.org/docs/,EXISTING WEB / UI,"R01 - EXISTING WEB / UI
+React: https://react.dev/
+TypeScript: https://www.typescriptlang.org/docs/
+Vite: https://vite.dev/guide/
+React Router: https://reactrouter.com/
+Tailwind: https://tailwindcss.com/docs
+Radix: https://www.radix-ui.com/primitives/docs/overview/introduction
+shadcn/ui reference: https://ui.shadcn.com/docs
+Lucide: https://lucide.dev/
+Zod: https://zod.dev/
+The current app uses an editable shadcn-style Radix/CVA button and semantic CSS;
+it is not a claim that the entire shadcn component library is implemented.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R01,"React, TypeScript, Vite, Tailwind",https://vite.dev/guide/,EXISTING WEB / UI,"R01 - EXISTING WEB / UI
+React: https://react.dev/
+TypeScript: https://www.typescriptlang.org/docs/
+Vite: https://vite.dev/guide/
+React Router: https://reactrouter.com/
+Tailwind: https://tailwindcss.com/docs
+Radix: https://www.radix-ui.com/primitives/docs/overview/introduction
+shadcn/ui reference: https://ui.shadcn.com/docs
+Lucide: https://lucide.dev/
+Zod: https://zod.dev/
+The current app uses an editable shadcn-style Radix/CVA button and semantic CSS;
+it is not a claim that the entire shadcn component library is implemented.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R01,"React, TypeScript, Vite, Tailwind",https://reactrouter.com/,EXISTING WEB / UI,"R01 - EXISTING WEB / UI
+React: https://react.dev/
+TypeScript: https://www.typescriptlang.org/docs/
+Vite: https://vite.dev/guide/
+React Router: https://reactrouter.com/
+Tailwind: https://tailwindcss.com/docs
+Radix: https://www.radix-ui.com/primitives/docs/overview/introduction
+shadcn/ui reference: https://ui.shadcn.com/docs
+Lucide: https://lucide.dev/
+Zod: https://zod.dev/
+The current app uses an editable shadcn-style Radix/CVA button and semantic CSS;
+it is not a claim that the entire shadcn component library is implemented.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R01,"React, TypeScript, Vite, Tailwind",https://tailwindcss.com/docs,EXISTING WEB / UI,"R01 - EXISTING WEB / UI
+React: https://react.dev/
+TypeScript: https://www.typescriptlang.org/docs/
+Vite: https://vite.dev/guide/
+React Router: https://reactrouter.com/
+Tailwind: https://tailwindcss.com/docs
+Radix: https://www.radix-ui.com/primitives/docs/overview/introduction
+shadcn/ui reference: https://ui.shadcn.com/docs
+Lucide: https://lucide.dev/
+Zod: https://zod.dev/
+The current app uses an editable shadcn-style Radix/CVA button and semantic CSS;
+it is not a claim that the entire shadcn component library is implemented.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R01,"React, TypeScript, Vite, Tailwind",https://www.radix-ui.com/primitives/docs/overview/introduction,EXISTING WEB / UI,"R01 - EXISTING WEB / UI
+React: https://react.dev/
+TypeScript: https://www.typescriptlang.org/docs/
+Vite: https://vite.dev/guide/
+React Router: https://reactrouter.com/
+Tailwind: https://tailwindcss.com/docs
+Radix: https://www.radix-ui.com/primitives/docs/overview/introduction
+shadcn/ui reference: https://ui.shadcn.com/docs
+Lucide: https://lucide.dev/
+Zod: https://zod.dev/
+The current app uses an editable shadcn-style Radix/CVA button and semantic CSS;
+it is not a claim that the entire shadcn component library is implemented.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R01,"React, TypeScript, Vite, Tailwind",https://ui.shadcn.com/docs,EXISTING WEB / UI,"R01 - EXISTING WEB / UI
+React: https://react.dev/
+TypeScript: https://www.typescriptlang.org/docs/
+Vite: https://vite.dev/guide/
+React Router: https://reactrouter.com/
+Tailwind: https://tailwindcss.com/docs
+Radix: https://www.radix-ui.com/primitives/docs/overview/introduction
+shadcn/ui reference: https://ui.shadcn.com/docs
+Lucide: https://lucide.dev/
+Zod: https://zod.dev/
+The current app uses an editable shadcn-style Radix/CVA button and semantic CSS;
+it is not a claim that the entire shadcn component library is implemented.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R01,"React, TypeScript, Vite, Tailwind",https://lucide.dev/,EXISTING WEB / UI,"R01 - EXISTING WEB / UI
+React: https://react.dev/
+TypeScript: https://www.typescriptlang.org/docs/
+Vite: https://vite.dev/guide/
+React Router: https://reactrouter.com/
+Tailwind: https://tailwindcss.com/docs
+Radix: https://www.radix-ui.com/primitives/docs/overview/introduction
+shadcn/ui reference: https://ui.shadcn.com/docs
+Lucide: https://lucide.dev/
+Zod: https://zod.dev/
+The current app uses an editable shadcn-style Radix/CVA button and semantic CSS;
+it is not a claim that the entire shadcn component library is implemented.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R01,"React, TypeScript, Vite, Tailwind",https://zod.dev/,EXISTING WEB / UI,"R01 - EXISTING WEB / UI
+React: https://react.dev/
+TypeScript: https://www.typescriptlang.org/docs/
+Vite: https://vite.dev/guide/
+React Router: https://reactrouter.com/
+Tailwind: https://tailwindcss.com/docs
+Radix: https://www.radix-ui.com/primitives/docs/overview/introduction
+shadcn/ui reference: https://ui.shadcn.com/docs
+Lucide: https://lucide.dev/
+Zod: https://zod.dev/
+The current app uses an editable shadcn-style Radix/CVA button and semantic CSS;
+it is not a claim that the entire shadcn component library is implemented.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R02,"Python, FastAPI, Pydantic",https://docs.python.org/3.12/,EXISTING API / VALIDATION,"R02 - EXISTING API / VALIDATION
+Python: https://docs.python.org/3.12/
+FastAPI: https://fastapi.tiangolo.com/
+Pydantic: https://docs.pydantic.dev/latest/
+Uvicorn: https://www.uvicorn.org/
+uv: https://docs.astral.sh/uv/",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R02,"Python, FastAPI, Pydantic",https://fastapi.tiangolo.com/,EXISTING API / VALIDATION,"R02 - EXISTING API / VALIDATION
+Python: https://docs.python.org/3.12/
+FastAPI: https://fastapi.tiangolo.com/
+Pydantic: https://docs.pydantic.dev/latest/
+Uvicorn: https://www.uvicorn.org/
+uv: https://docs.astral.sh/uv/",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R02,"Python, FastAPI, Pydantic",https://docs.pydantic.dev/latest/,EXISTING API / VALIDATION,"R02 - EXISTING API / VALIDATION
+Python: https://docs.python.org/3.12/
+FastAPI: https://fastapi.tiangolo.com/
+Pydantic: https://docs.pydantic.dev/latest/
+Uvicorn: https://www.uvicorn.org/
+uv: https://docs.astral.sh/uv/",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R02,"Python, FastAPI, Pydantic",https://www.uvicorn.org/,EXISTING API / VALIDATION,"R02 - EXISTING API / VALIDATION
+Python: https://docs.python.org/3.12/
+FastAPI: https://fastapi.tiangolo.com/
+Pydantic: https://docs.pydantic.dev/latest/
+Uvicorn: https://www.uvicorn.org/
+uv: https://docs.astral.sh/uv/",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R02,"Python, FastAPI, Pydantic",https://docs.astral.sh/uv/,EXISTING API / VALIDATION,"R02 - EXISTING API / VALIDATION
+Python: https://docs.python.org/3.12/
+FastAPI: https://fastapi.tiangolo.com/
+Pydantic: https://docs.pydantic.dev/latest/
+Uvicorn: https://www.uvicorn.org/
+uv: https://docs.astral.sh/uv/",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R03,"PostgreSQL, PostGIS, SQLAlchemy",https://www.postgresql.org/docs/,EXISTING PERSISTENCE,"R03 - EXISTING PERSISTENCE
+PostgreSQL: https://www.postgresql.org/docs/
+PostGIS: https://postgis.net/documentation/
+SQLAlchemy: https://docs.sqlalchemy.org/en/20/
+Psycopg: https://www.psycopg.org/psycopg3/docs/
+Alembic: https://alembic.sqlalchemy.org/en/latest/",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R03,"PostgreSQL, PostGIS, SQLAlchemy",https://postgis.net/documentation/,EXISTING PERSISTENCE,"R03 - EXISTING PERSISTENCE
+PostgreSQL: https://www.postgresql.org/docs/
+PostGIS: https://postgis.net/documentation/
+SQLAlchemy: https://docs.sqlalchemy.org/en/20/
+Psycopg: https://www.psycopg.org/psycopg3/docs/
+Alembic: https://alembic.sqlalchemy.org/en/latest/",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R03,"PostgreSQL, PostGIS, SQLAlchemy",https://docs.sqlalchemy.org/en/20/,EXISTING PERSISTENCE,"R03 - EXISTING PERSISTENCE
+PostgreSQL: https://www.postgresql.org/docs/
+PostGIS: https://postgis.net/documentation/
+SQLAlchemy: https://docs.sqlalchemy.org/en/20/
+Psycopg: https://www.psycopg.org/psycopg3/docs/
+Alembic: https://alembic.sqlalchemy.org/en/latest/",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R03,"PostgreSQL, PostGIS, SQLAlchemy",https://www.psycopg.org/psycopg3/docs/,EXISTING PERSISTENCE,"R03 - EXISTING PERSISTENCE
+PostgreSQL: https://www.postgresql.org/docs/
+PostGIS: https://postgis.net/documentation/
+SQLAlchemy: https://docs.sqlalchemy.org/en/20/
+Psycopg: https://www.psycopg.org/psycopg3/docs/
+Alembic: https://alembic.sqlalchemy.org/en/latest/",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R03,"PostgreSQL, PostGIS, SQLAlchemy",https://alembic.sqlalchemy.org/en/latest/,EXISTING PERSISTENCE,"R03 - EXISTING PERSISTENCE
+PostgreSQL: https://www.postgresql.org/docs/
+PostGIS: https://postgis.net/documentation/
+SQLAlchemy: https://docs.sqlalchemy.org/en/20/
+Psycopg: https://www.psycopg.org/psycopg3/docs/
+Alembic: https://alembic.sqlalchemy.org/en/latest/",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R04,"MapLibre, OpenFreeMap, Photon",https://maplibre.org/maplibre-gl-js/docs/,EXISTING MAP / DATA PROVIDERS,"R04 - EXISTING MAP / DATA PROVIDERS
+MapLibre: https://maplibre.org/maplibre-gl-js/docs/
+OpenFreeMap: https://openfreemap.org/quick_start/
+OpenFreeMap source: https://github.com/hyperknot/openfreemap
+Photon search: https://github.com/komoot/photon
+OpenStreetMap attribution/data rights: https://www.openstreetmap.org/copyright
+Tiles provide context and estimated/render heights; they are not survey evidence.
+The public Photon service has usage/availability limits. Provider approval remains. 12 November authorized replacement: Mapbox GL JS 3.34.2/Standard/Satellite now replaces the MapLibre/OpenFreeMap runtime; Photon remains separate. Prior URLs remain historical references. Token valid, Standard checked, live satellite raster requests HTTP 429; docs/mapbox-migration.md.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R04,"MapLibre, OpenFreeMap, Photon",https://openfreemap.org/quick_start/,EXISTING MAP / DATA PROVIDERS,"R04 - EXISTING MAP / DATA PROVIDERS
+MapLibre: https://maplibre.org/maplibre-gl-js/docs/
+OpenFreeMap: https://openfreemap.org/quick_start/
+OpenFreeMap source: https://github.com/hyperknot/openfreemap
+Photon search: https://github.com/komoot/photon
+OpenStreetMap attribution/data rights: https://www.openstreetmap.org/copyright
+Tiles provide context and estimated/render heights; they are not survey evidence.
+The public Photon service has usage/availability limits. Provider approval remains. 12 November authorized replacement: Mapbox GL JS 3.34.2/Standard/Satellite now replaces the MapLibre/OpenFreeMap runtime; Photon remains separate. Prior URLs remain historical references. Token valid, Standard checked, live satellite raster requests HTTP 429; docs/mapbox-migration.md.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R04,"MapLibre, OpenFreeMap, Photon",https://github.com/hyperknot/openfreemap,EXISTING MAP / DATA PROVIDERS,"R04 - EXISTING MAP / DATA PROVIDERS
+MapLibre: https://maplibre.org/maplibre-gl-js/docs/
+OpenFreeMap: https://openfreemap.org/quick_start/
+OpenFreeMap source: https://github.com/hyperknot/openfreemap
+Photon search: https://github.com/komoot/photon
+OpenStreetMap attribution/data rights: https://www.openstreetmap.org/copyright
+Tiles provide context and estimated/render heights; they are not survey evidence.
+The public Photon service has usage/availability limits. Provider approval remains. 12 November authorized replacement: Mapbox GL JS 3.34.2/Standard/Satellite now replaces the MapLibre/OpenFreeMap runtime; Photon remains separate. Prior URLs remain historical references. Token valid, Standard checked, live satellite raster requests HTTP 429; docs/mapbox-migration.md.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R04,"MapLibre, OpenFreeMap, Photon",https://github.com/komoot/photon,EXISTING MAP / DATA PROVIDERS,"R04 - EXISTING MAP / DATA PROVIDERS
+MapLibre: https://maplibre.org/maplibre-gl-js/docs/
+OpenFreeMap: https://openfreemap.org/quick_start/
+OpenFreeMap source: https://github.com/hyperknot/openfreemap
+Photon search: https://github.com/komoot/photon
+OpenStreetMap attribution/data rights: https://www.openstreetmap.org/copyright
+Tiles provide context and estimated/render heights; they are not survey evidence.
+The public Photon service has usage/availability limits. Provider approval remains. 12 November authorized replacement: Mapbox GL JS 3.34.2/Standard/Satellite now replaces the MapLibre/OpenFreeMap runtime; Photon remains separate. Prior URLs remain historical references. Token valid, Standard checked, live satellite raster requests HTTP 429; docs/mapbox-migration.md.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R04,"MapLibre, OpenFreeMap, Photon",https://www.openstreetmap.org/copyright,EXISTING MAP / DATA PROVIDERS,"R04 - EXISTING MAP / DATA PROVIDERS
+MapLibre: https://maplibre.org/maplibre-gl-js/docs/
+OpenFreeMap: https://openfreemap.org/quick_start/
+OpenFreeMap source: https://github.com/hyperknot/openfreemap
+Photon search: https://github.com/komoot/photon
+OpenStreetMap attribution/data rights: https://www.openstreetmap.org/copyright
+Tiles provide context and estimated/render heights; they are not survey evidence.
+The public Photon service has usage/availability limits. Provider approval remains. 12 November authorized replacement: Mapbox GL JS 3.34.2/Standard/Satellite now replaces the MapLibre/OpenFreeMap runtime; Photon remains separate. Prior URLs remain historical references. Token valid, Standard checked, live satellite raster requests HTTP 429; docs/mapbox-migration.md.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R05,"Terra Draw, MapLibre",https://github.com/JamesLMilner/terra-draw,EXISTING MAP EDITING,"R05 - EXISTING MAP EDITING
+Terra Draw: https://github.com/JamesLMilner/terra-draw
+MapLibre API: https://maplibre.org/maplibre-gl-js/docs/API/",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R05,"Terra Draw, MapLibre",https://maplibre.org/maplibre-gl-js/docs/API/,EXISTING MAP EDITING,"R05 - EXISTING MAP EDITING
+Terra Draw: https://github.com/JamesLMilner/terra-draw
+MapLibre API: https://maplibre.org/maplibre-gl-js/docs/API/",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R06,"pvlib, Shapely, PyProj",https://pvlib-python.readthedocs.io/en/stable/,EXISTING SOLAR / GEOMETRY; OPTIONAL INGESTION ALTERNATIVES,"R06 - EXISTING SOLAR / GEOMETRY; OPTIONAL INGESTION ALTERNATIVES
+pvlib: https://pvlib-python.readthedocs.io/en/stable/
+Shapely: https://shapely.readthedocs.io/en/stable/
+PyProj: https://pyproj4.github.io/pyproj/stable/
+Custom ground/roof projection: apps/api/app/domain/shade.py
+Custom explorer adapter: apps/api/app/explore.py
+Optional in original specification; not required for the documented core engine:
+GeoPandas: https://geopandas.org/en/stable/
+OSMnx: https://osmnx.readthedocs.io/en/stable/
+pybdshadow: https://github.com/ni1o1/pybdshadow
+These optional tools do not resolve missing data or field-validation gates.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R06,"pvlib, Shapely, PyProj",https://shapely.readthedocs.io/en/stable/,EXISTING SOLAR / GEOMETRY; OPTIONAL INGESTION ALTERNATIVES,"R06 - EXISTING SOLAR / GEOMETRY; OPTIONAL INGESTION ALTERNATIVES
+pvlib: https://pvlib-python.readthedocs.io/en/stable/
+Shapely: https://shapely.readthedocs.io/en/stable/
+PyProj: https://pyproj4.github.io/pyproj/stable/
+Custom ground/roof projection: apps/api/app/domain/shade.py
+Custom explorer adapter: apps/api/app/explore.py
+Optional in original specification; not required for the documented core engine:
+GeoPandas: https://geopandas.org/en/stable/
+OSMnx: https://osmnx.readthedocs.io/en/stable/
+pybdshadow: https://github.com/ni1o1/pybdshadow
+These optional tools do not resolve missing data or field-validation gates.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R06,"pvlib, Shapely, PyProj",https://pyproj4.github.io/pyproj/stable/,EXISTING SOLAR / GEOMETRY; OPTIONAL INGESTION ALTERNATIVES,"R06 - EXISTING SOLAR / GEOMETRY; OPTIONAL INGESTION ALTERNATIVES
+pvlib: https://pvlib-python.readthedocs.io/en/stable/
+Shapely: https://shapely.readthedocs.io/en/stable/
+PyProj: https://pyproj4.github.io/pyproj/stable/
+Custom ground/roof projection: apps/api/app/domain/shade.py
+Custom explorer adapter: apps/api/app/explore.py
+Optional in original specification; not required for the documented core engine:
+GeoPandas: https://geopandas.org/en/stable/
+OSMnx: https://osmnx.readthedocs.io/en/stable/
+pybdshadow: https://github.com/ni1o1/pybdshadow
+These optional tools do not resolve missing data or field-validation gates.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R06,"pvlib, Shapely, PyProj",https://geopandas.org/en/stable/,EXISTING SOLAR / GEOMETRY; OPTIONAL INGESTION ALTERNATIVES,"R06 - EXISTING SOLAR / GEOMETRY; OPTIONAL INGESTION ALTERNATIVES
+pvlib: https://pvlib-python.readthedocs.io/en/stable/
+Shapely: https://shapely.readthedocs.io/en/stable/
+PyProj: https://pyproj4.github.io/pyproj/stable/
+Custom ground/roof projection: apps/api/app/domain/shade.py
+Custom explorer adapter: apps/api/app/explore.py
+Optional in original specification; not required for the documented core engine:
+GeoPandas: https://geopandas.org/en/stable/
+OSMnx: https://osmnx.readthedocs.io/en/stable/
+pybdshadow: https://github.com/ni1o1/pybdshadow
+These optional tools do not resolve missing data or field-validation gates.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R06,"pvlib, Shapely, PyProj",https://osmnx.readthedocs.io/en/stable/,EXISTING SOLAR / GEOMETRY; OPTIONAL INGESTION ALTERNATIVES,"R06 - EXISTING SOLAR / GEOMETRY; OPTIONAL INGESTION ALTERNATIVES
+pvlib: https://pvlib-python.readthedocs.io/en/stable/
+Shapely: https://shapely.readthedocs.io/en/stable/
+PyProj: https://pyproj4.github.io/pyproj/stable/
+Custom ground/roof projection: apps/api/app/domain/shade.py
+Custom explorer adapter: apps/api/app/explore.py
+Optional in original specification; not required for the documented core engine:
+GeoPandas: https://geopandas.org/en/stable/
+OSMnx: https://osmnx.readthedocs.io/en/stable/
+pybdshadow: https://github.com/ni1o1/pybdshadow
+These optional tools do not resolve missing data or field-validation gates.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R06,"pvlib, Shapely, PyProj",https://github.com/ni1o1/pybdshadow,EXISTING SOLAR / GEOMETRY; OPTIONAL INGESTION ALTERNATIVES,"R06 - EXISTING SOLAR / GEOMETRY; OPTIONAL INGESTION ALTERNATIVES
+pvlib: https://pvlib-python.readthedocs.io/en/stable/
+Shapely: https://shapely.readthedocs.io/en/stable/
+PyProj: https://pyproj4.github.io/pyproj/stable/
+Custom ground/roof projection: apps/api/app/domain/shade.py
+Custom explorer adapter: apps/api/app/explore.py
+Optional in original specification; not required for the documented core engine:
+GeoPandas: https://geopandas.org/en/stable/
+OSMnx: https://osmnx.readthedocs.io/en/stable/
+pybdshadow: https://github.com/ni1o1/pybdshadow
+These optional tools do not resolve missing data or field-validation gates.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R07,Supabase Auth and Storage,https://supabase.com/docs/guides/auth,EXISTING IDENTITY / PRIVATE FILES,"R07 - EXISTING IDENTITY / PRIVATE FILES
+Supabase Auth: https://supabase.com/docs/guides/auth
+Storage: https://supabase.com/docs/guides/storage
+Local development: https://supabase.com/docs/guides/local-development
+Local Auth/Storage are separate from the application's PostGIS database.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R07,Supabase Auth and Storage,https://supabase.com/docs/guides/storage,EXISTING IDENTITY / PRIVATE FILES,"R07 - EXISTING IDENTITY / PRIVATE FILES
+Supabase Auth: https://supabase.com/docs/guides/auth
+Storage: https://supabase.com/docs/guides/storage
+Local development: https://supabase.com/docs/guides/local-development
+Local Auth/Storage are separate from the application's PostGIS database.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R07,Supabase Auth and Storage,https://supabase.com/docs/guides/local-development,EXISTING IDENTITY / PRIVATE FILES,"R07 - EXISTING IDENTITY / PRIVATE FILES
+Supabase Auth: https://supabase.com/docs/guides/auth
+Storage: https://supabase.com/docs/guides/storage
+Local development: https://supabase.com/docs/guides/local-development
+Local Auth/Storage are separate from the application's PostGIS database.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R08,"Pillow, FastAPI uploads",https://pillow.readthedocs.io/en/stable/,EXISTING IMAGE / UPLOAD HANDLING,"R08 - EXISTING IMAGE / UPLOAD HANDLING
+Pillow: https://pillow.readthedocs.io/en/stable/
+FastAPI uploads: https://fastapi.tiangolo.com/tutorial/request-files/",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R08,"Pillow, FastAPI uploads",https://fastapi.tiangolo.com/tutorial/request-files/,EXISTING IMAGE / UPLOAD HANDLING,"R08 - EXISTING IMAGE / UPLOAD HANDLING
+Pillow: https://pillow.readthedocs.io/en/stable/
+FastAPI uploads: https://fastapi.tiangolo.com/tutorial/request-files/",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R09,"Decimal, PostgreSQL NUMERIC",https://docs.python.org/3.12/library/decimal.html,EXISTING MONEY RULES,"R09 - EXISTING MONEY RULES
+Decimal: https://docs.python.org/3.12/library/decimal.html
+PostgreSQL numeric: https://www.postgresql.org/docs/current/datatype-numeric.html
+Business logic: apps/api/app/domain/pricing.py and docs/decisions.md ADR-008.
+Currency/rates/sources and commercial rules require human review.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R09,"Decimal, PostgreSQL NUMERIC",https://www.postgresql.org/docs/current/datatype-numeric.html,EXISTING MONEY RULES,"R09 - EXISTING MONEY RULES
+Decimal: https://docs.python.org/3.12/library/decimal.html
+PostgreSQL numeric: https://www.postgresql.org/docs/current/datatype-numeric.html
+Business logic: apps/api/app/domain/pricing.py and docs/decisions.md ADR-008.
+Currency/rates/sources and commercial rules require human review.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R10,"React PDF, Noto fonts",https://react-pdf.org/,EXISTING PDF / FONTS,"R10 - EXISTING PDF / FONTS
+React PDF renderer: https://react-pdf.org/
+Noto fonts: https://github.com/notofonts/noto-fonts
+pypdf validation: https://pypdf.readthedocs.io/en/stable/
+Bundled font licence: apps/web/public/fonts/OFL.txt.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R10,"React PDF, Noto fonts",https://github.com/notofonts/noto-fonts,EXISTING PDF / FONTS,"R10 - EXISTING PDF / FONTS
+React PDF renderer: https://react-pdf.org/
+Noto fonts: https://github.com/notofonts/noto-fonts
+pypdf validation: https://pypdf.readthedocs.io/en/stable/
+Bundled font licence: apps/web/public/fonts/OFL.txt.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R10,"React PDF, Noto fonts",https://pypdf.readthedocs.io/en/stable/,EXISTING PDF / FONTS,"R10 - EXISTING PDF / FONTS
+React PDF renderer: https://react-pdf.org/
+Noto fonts: https://github.com/notofonts/noto-fonts
+pypdf validation: https://pypdf.readthedocs.io/en/stable/
+Bundled font licence: apps/web/public/fonts/OFL.txt.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R11,Three.js,https://threejs.org/docs/,3D RESOURCE; VERIFY CURRENT LOCAL ENVIRONMENT DEPENDENCIES,"R11 - 3D RESOURCE; VERIFY CURRENT LOCAL ENVIRONMENT DEPENDENCIES
+Three.js: https://threejs.org/docs/
+MapLibre custom layer:
+https://maplibre.org/maplibre-gl-js/docs/API/interfaces/CustomLayerInterface/
+GLTFLoader, TransformControls, geometry and raycasting support proposed display/
+placement workflows; authoritative shade needs separate validated calculations. Current geographic custom layers use the Mapbox matrix API; historical MapLibre reference retained. Three.js remains pinned and source-authored preset licensing is unchanged.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R11,Three.js,https://maplibre.org/maplibre-gl-js/docs/API/interfaces/CustomLayerInterface/,3D RESOURCE; VERIFY CURRENT LOCAL ENVIRONMENT DEPENDENCIES,"R11 - 3D RESOURCE; VERIFY CURRENT LOCAL ENVIRONMENT DEPENDENCIES
+Three.js: https://threejs.org/docs/
+MapLibre custom layer:
+https://maplibre.org/maplibre-gl-js/docs/API/interfaces/CustomLayerInterface/
+GLTFLoader, TransformControls, geometry and raycasting support proposed display/
+placement workflows; authoritative shade needs separate validated calculations. Current geographic custom layers use the Mapbox matrix API; historical MapLibre reference retained. Three.js remains pinned and source-authored preset licensing is unchanged.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R12,"IfcOpenShell, ezdxf",https://docs.ifcopenshell.org/,CANDIDATE BUILDING IMPORT (GATED),"R12 - CANDIDATE BUILDING IMPORT (GATED)
+IfcOpenShell: https://docs.ifcopenshell.org/
+IfcConvert: https://docs.ifcopenshell.org/ifcconvert.html
+IFC standard: https://standards.buildingsmart.org/IFC/RELEASE/IFC4_3/HTML/content/introduction.htm
+ezdxf: https://ezdxf.readthedocs.io/en/stable/
+Optional alternative web-ifc: https://github.com/ThatOpen/engine_web-ifc
+Select one viable import route after representative samples and licence review.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R12,"IfcOpenShell, ezdxf",https://docs.ifcopenshell.org/ifcconvert.html,CANDIDATE BUILDING IMPORT (GATED),"R12 - CANDIDATE BUILDING IMPORT (GATED)
+IfcOpenShell: https://docs.ifcopenshell.org/
+IfcConvert: https://docs.ifcopenshell.org/ifcconvert.html
+IFC standard: https://standards.buildingsmart.org/IFC/RELEASE/IFC4_3/HTML/content/introduction.htm
+ezdxf: https://ezdxf.readthedocs.io/en/stable/
+Optional alternative web-ifc: https://github.com/ThatOpen/engine_web-ifc
+Select one viable import route after representative samples and licence review.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R12,"IfcOpenShell, ezdxf",https://standards.buildingsmart.org/IFC/RELEASE/IFC4_3/HTML/content/introduction.htm,CANDIDATE BUILDING IMPORT (GATED),"R12 - CANDIDATE BUILDING IMPORT (GATED)
+IfcOpenShell: https://docs.ifcopenshell.org/
+IfcConvert: https://docs.ifcopenshell.org/ifcconvert.html
+IFC standard: https://standards.buildingsmart.org/IFC/RELEASE/IFC4_3/HTML/content/introduction.htm
+ezdxf: https://ezdxf.readthedocs.io/en/stable/
+Optional alternative web-ifc: https://github.com/ThatOpen/engine_web-ifc
+Select one viable import route after representative samples and licence review.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R12,"IfcOpenShell, ezdxf",https://ezdxf.readthedocs.io/en/stable/,CANDIDATE BUILDING IMPORT (GATED),"R12 - CANDIDATE BUILDING IMPORT (GATED)
+IfcOpenShell: https://docs.ifcopenshell.org/
+IfcConvert: https://docs.ifcopenshell.org/ifcconvert.html
+IFC standard: https://standards.buildingsmart.org/IFC/RELEASE/IFC4_3/HTML/content/introduction.htm
+ezdxf: https://ezdxf.readthedocs.io/en/stable/
+Optional alternative web-ifc: https://github.com/ThatOpen/engine_web-ifc
+Select one viable import route after representative samples and licence review.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R12,"IfcOpenShell, ezdxf",https://github.com/ThatOpen/engine_web-ifc,CANDIDATE BUILDING IMPORT (GATED),"R12 - CANDIDATE BUILDING IMPORT (GATED)
+IfcOpenShell: https://docs.ifcopenshell.org/
+IfcConvert: https://docs.ifcopenshell.org/ifcconvert.html
+IFC standard: https://standards.buildingsmart.org/IFC/RELEASE/IFC4_3/HTML/content/introduction.htm
+ezdxf: https://ezdxf.readthedocs.io/en/stable/
+Optional alternative web-ifc: https://github.com/ThatOpen/engine_web-ifc
+Select one viable import route after representative samples and licence review.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R13,"GDAL, PDF.js",https://gdal.org/en/stable/,CANDIDATE TERRAIN / REFERENCE-PLAN PROCESSING,"R13 - CANDIDATE TERRAIN / REFERENCE-PLAN PROCESSING
+GDAL: https://gdal.org/en/stable/
+PDF.js: https://mozilla.github.io/pdf.js/
+Source elevation/plan rights, resolution, calibration and datum remain required.
+Neither tool alone supplies a terrain-shadow or drainage solver.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R13,"GDAL, PDF.js",https://mozilla.github.io/pdf.js/,CANDIDATE TERRAIN / REFERENCE-PLAN PROCESSING,"R13 - CANDIDATE TERRAIN / REFERENCE-PLAN PROCESSING
+GDAL: https://gdal.org/en/stable/
+PDF.js: https://mozilla.github.io/pdf.js/
+Source elevation/plan rights, resolution, calibration and datum remain required.
+Neither tool alone supplies a terrain-shadow or drainage solver.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R14,"Blender, glTF Validator",https://www.blender.org/,CANDIDATE ASSET AUTHORING / OPEN EXCHANGE FORMAT,"R14 - CANDIDATE ASSET AUTHORING / OPEN EXCHANGE FORMAT
+Blender: https://www.blender.org/
+glTF 2.0 specification:
+https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html
+glTF Validator: https://github.com/KhronosGroup/glTF-Validator
+Asset rights and confirmed dimensions remain necessary even for valid files.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R14,"Blender, glTF Validator",https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html,CANDIDATE ASSET AUTHORING / OPEN EXCHANGE FORMAT,"R14 - CANDIDATE ASSET AUTHORING / OPEN EXCHANGE FORMAT
+Blender: https://www.blender.org/
+glTF 2.0 specification:
+https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html
+glTF Validator: https://github.com/KhronosGroup/glTF-Validator
+Asset rights and confirmed dimensions remain necessary even for valid files.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R14,"Blender, glTF Validator",https://github.com/KhronosGroup/glTF-Validator,CANDIDATE ASSET AUTHORING / OPEN EXCHANGE FORMAT,"R14 - CANDIDATE ASSET AUTHORING / OPEN EXCHANGE FORMAT
+Blender: https://www.blender.org/
+glTF 2.0 specification:
+https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html
+glTF Validator: https://github.com/KhronosGroup/glTF-Validator
+Asset rights and confirmed dimensions remain necessary even for valid files.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R15,Ollama (optional),https://docs.ollama.com/,"OPTIONAL LOCAL MODEL, NOT A CORE REQUIREMENT","R15 - OPTIONAL LOCAL MODEL, NOT A CORE REQUIREMENT
+Ollama: https://docs.ollama.com/
+Templates can use the existing Python stack without a model. Open-weight models
+have their own licences/hardware needs; no hosted model provider is selected.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R16,"Playwright, pytest, Vitest",https://eslint.org/docs/latest/,EXISTING CHECKS AND OPTIONAL ACCESSIBILITY ADDITION,"R16 - EXISTING CHECKS AND OPTIONAL ACCESSIBILITY ADDITION
+ESLint: https://eslint.org/docs/latest/
+Vitest: https://vitest.dev/guide/
+Playwright: https://playwright.dev/docs/intro
+Ruff: https://docs.astral.sh/ruff/
+pytest: https://docs.pytest.org/en/stable/
+Optional axe-core: https://github.com/dequelabs/axe-core
+Manual keyboard/screen-reader/physical touch checks complement automated checks.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R16,"Playwright, pytest, Vitest",https://vitest.dev/guide/,EXISTING CHECKS AND OPTIONAL ACCESSIBILITY ADDITION,"R16 - EXISTING CHECKS AND OPTIONAL ACCESSIBILITY ADDITION
+ESLint: https://eslint.org/docs/latest/
+Vitest: https://vitest.dev/guide/
+Playwright: https://playwright.dev/docs/intro
+Ruff: https://docs.astral.sh/ruff/
+pytest: https://docs.pytest.org/en/stable/
+Optional axe-core: https://github.com/dequelabs/axe-core
+Manual keyboard/screen-reader/physical touch checks complement automated checks.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R16,"Playwright, pytest, Vitest",https://playwright.dev/docs/intro,EXISTING CHECKS AND OPTIONAL ACCESSIBILITY ADDITION,"R16 - EXISTING CHECKS AND OPTIONAL ACCESSIBILITY ADDITION
+ESLint: https://eslint.org/docs/latest/
+Vitest: https://vitest.dev/guide/
+Playwright: https://playwright.dev/docs/intro
+Ruff: https://docs.astral.sh/ruff/
+pytest: https://docs.pytest.org/en/stable/
+Optional axe-core: https://github.com/dequelabs/axe-core
+Manual keyboard/screen-reader/physical touch checks complement automated checks.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R16,"Playwright, pytest, Vitest",https://docs.astral.sh/ruff/,EXISTING CHECKS AND OPTIONAL ACCESSIBILITY ADDITION,"R16 - EXISTING CHECKS AND OPTIONAL ACCESSIBILITY ADDITION
+ESLint: https://eslint.org/docs/latest/
+Vitest: https://vitest.dev/guide/
+Playwright: https://playwright.dev/docs/intro
+Ruff: https://docs.astral.sh/ruff/
+pytest: https://docs.pytest.org/en/stable/
+Optional axe-core: https://github.com/dequelabs/axe-core
+Manual keyboard/screen-reader/physical touch checks complement automated checks.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R16,"Playwright, pytest, Vitest",https://docs.pytest.org/en/stable/,EXISTING CHECKS AND OPTIONAL ACCESSIBILITY ADDITION,"R16 - EXISTING CHECKS AND OPTIONAL ACCESSIBILITY ADDITION
+ESLint: https://eslint.org/docs/latest/
+Vitest: https://vitest.dev/guide/
+Playwright: https://playwright.dev/docs/intro
+Ruff: https://docs.astral.sh/ruff/
+pytest: https://docs.pytest.org/en/stable/
+Optional axe-core: https://github.com/dequelabs/axe-core
+Manual keyboard/screen-reader/physical touch checks complement automated checks.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R16,"Playwright, pytest, Vitest",https://github.com/dequelabs/axe-core,EXISTING CHECKS AND OPTIONAL ACCESSIBILITY ADDITION,"R16 - EXISTING CHECKS AND OPTIONAL ACCESSIBILITY ADDITION
+ESLint: https://eslint.org/docs/latest/
+Vitest: https://vitest.dev/guide/
+Playwright: https://playwright.dev/docs/intro
+Ruff: https://docs.astral.sh/ruff/
+pytest: https://docs.pytest.org/en/stable/
+Optional axe-core: https://github.com/dequelabs/axe-core
+Manual keyboard/screen-reader/physical touch checks complement automated checks.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R17,"Docker, PostgreSQL recovery",https://docs.docker.com/desktop/,LOCAL RUNTIME / RECOVERY / OPTIONAL TELEMETRY,"R17 - LOCAL RUNTIME / RECOVERY / OPTIONAL TELEMETRY
+Docker: https://docs.docker.com/desktop/
+WSL: https://learn.microsoft.com/windows/wsl/
+PostgreSQL backup: https://www.postgresql.org/docs/current/backup.html
+Optional OpenTelemetry: https://opentelemetry.io/docs/
+Current health/logging is not a complete monitoring/backup/alert deployment.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R17,"Docker, PostgreSQL recovery",https://learn.microsoft.com/windows/wsl/,LOCAL RUNTIME / RECOVERY / OPTIONAL TELEMETRY,"R17 - LOCAL RUNTIME / RECOVERY / OPTIONAL TELEMETRY
+Docker: https://docs.docker.com/desktop/
+WSL: https://learn.microsoft.com/windows/wsl/
+PostgreSQL backup: https://www.postgresql.org/docs/current/backup.html
+Optional OpenTelemetry: https://opentelemetry.io/docs/
+Current health/logging is not a complete monitoring/backup/alert deployment.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R17,"Docker, PostgreSQL recovery",https://www.postgresql.org/docs/current/backup.html,LOCAL RUNTIME / RECOVERY / OPTIONAL TELEMETRY,"R17 - LOCAL RUNTIME / RECOVERY / OPTIONAL TELEMETRY
+Docker: https://docs.docker.com/desktop/
+WSL: https://learn.microsoft.com/windows/wsl/
+PostgreSQL backup: https://www.postgresql.org/docs/current/backup.html
+Optional OpenTelemetry: https://opentelemetry.io/docs/
+Current health/logging is not a complete monitoring/backup/alert deployment.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R17,"Docker, PostgreSQL recovery",https://opentelemetry.io/docs/,LOCAL RUNTIME / RECOVERY / OPTIONAL TELEMETRY,"R17 - LOCAL RUNTIME / RECOVERY / OPTIONAL TELEMETRY
+Docker: https://docs.docker.com/desktop/
+WSL: https://learn.microsoft.com/windows/wsl/
+PostgreSQL backup: https://www.postgresql.org/docs/current/backup.html
+Optional OpenTelemetry: https://opentelemetry.io/docs/
+Current health/logging is not a complete monitoring/backup/alert deployment.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R18,"timezonefinder, zoneinfo",https://timezonefinder.readthedocs.io/en/latest/,OPTIONAL AUTOMATIC TIMEZONE,"R18 - OPTIONAL AUTOMATIC TIMEZONE
+timezonefinder: https://timezonefinder.readthedocs.io/en/latest/
+Python zoneinfo: https://docs.python.org/3.12/library/zoneinfo.html
+Coordinate lookup plus date-aware rules needs validation and a manual override.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+R18,"timezonefinder, zoneinfo",https://docs.python.org/3.12/library/zoneinfo.html,OPTIONAL AUTOMATIC TIMEZONE,"R18 - OPTIONAL AUTOMATIC TIMEZONE
+timezonefinder: https://timezonefinder.readthedocs.io/en/latest/
+Python zoneinfo: https://docs.python.org/3.12/library/zoneinfo.html
+Coordinate lookup plus date-aware rules needs validation and a manual override.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N01,TanStack Table / Virtual,https://github.com/TanStack/table,PROFESSIONAL GRIDS AND VIRTUALISATION [PROPOSED; npm],"N01 - PROFESSIONAL GRIDS AND VIRTUALISATION [PROPOSED; npm]
+TanStack Table (MIT): https://github.com/TanStack/table
+Docs: https://tanstack.com/table/latest
+TanStack Virtual (MIT): https://github.com/TanStack/virtual
+Docs: https://tanstack.com/virtual/latest
+Use: BOQ/rate/supplier/proposal grids with controlled sort/filter, column state,
+selection and server pagination; virtualise long rendered lists. Application
+code supplies permissions, editing, totals and persistence. Neither is a turnkey
+commercial spreadsheet or enterprise bid-leveling product.
+Feature links: L13-L15, L30, O05-O14, O18, S07.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N01,TanStack Table / Virtual,https://tanstack.com/table/latest,PROFESSIONAL GRIDS AND VIRTUALISATION [PROPOSED; npm],"N01 - PROFESSIONAL GRIDS AND VIRTUALISATION [PROPOSED; npm]
+TanStack Table (MIT): https://github.com/TanStack/table
+Docs: https://tanstack.com/table/latest
+TanStack Virtual (MIT): https://github.com/TanStack/virtual
+Docs: https://tanstack.com/virtual/latest
+Use: BOQ/rate/supplier/proposal grids with controlled sort/filter, column state,
+selection and server pagination; virtualise long rendered lists. Application
+code supplies permissions, editing, totals and persistence. Neither is a turnkey
+commercial spreadsheet or enterprise bid-leveling product.
+Feature links: L13-L15, L30, O05-O14, O18, S07.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N01,TanStack Table / Virtual,https://github.com/TanStack/virtual,PROFESSIONAL GRIDS AND VIRTUALISATION [PROPOSED; npm],"N01 - PROFESSIONAL GRIDS AND VIRTUALISATION [PROPOSED; npm]
+TanStack Table (MIT): https://github.com/TanStack/table
+Docs: https://tanstack.com/table/latest
+TanStack Virtual (MIT): https://github.com/TanStack/virtual
+Docs: https://tanstack.com/virtual/latest
+Use: BOQ/rate/supplier/proposal grids with controlled sort/filter, column state,
+selection and server pagination; virtualise long rendered lists. Application
+code supplies permissions, editing, totals and persistence. Neither is a turnkey
+commercial spreadsheet or enterprise bid-leveling product.
+Feature links: L13-L15, L30, O05-O14, O18, S07.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N01,TanStack Table / Virtual,https://tanstack.com/virtual/latest,PROFESSIONAL GRIDS AND VIRTUALISATION [PROPOSED; npm],"N01 - PROFESSIONAL GRIDS AND VIRTUALISATION [PROPOSED; npm]
+TanStack Table (MIT): https://github.com/TanStack/table
+Docs: https://tanstack.com/table/latest
+TanStack Virtual (MIT): https://github.com/TanStack/virtual
+Docs: https://tanstack.com/virtual/latest
+Use: BOQ/rate/supplier/proposal grids with controlled sort/filter, column state,
+selection and server pagination; virtualise long rendered lists. Application
+code supplies permissions, editing, totals and persistence. Neither is a turnkey
+commercial spreadsheet or enterprise bid-leveling product.
+Feature links: L13-L15, L30, O05-O14, O18, S07.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N02,Apache ECharts,https://github.com/apache/echarts,CHARTS AND MAP-TO-METRIC DASHBOARDS [PROPOSED; npm],"N02 - CHARTS AND MAP-TO-METRIC DASHBOARDS [PROPOSED; npm]
+Apache ECharts (Apache-2.0): https://github.com/apache/echarts
+Docs/examples: https://echarts.apache.org/en/index.html
+Use: cost breakdowns, score contributions, sensitivity charts, timeline summaries,
+portfolio indicators and linked map/table filtering. Prefer an accessible table
+alongside charts; import only needed chart modules and dispose chart instances.
+Charts render verified API metrics. ECharts does not calculate procurement scores
+or provide an AI analysis engine.
+Feature links: L11/L21/L22/L30, O01/O12/O13/O18/O20/O21/O30, A05/A07/A10.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N02,Apache ECharts,https://echarts.apache.org/en/index.html,CHARTS AND MAP-TO-METRIC DASHBOARDS [PROPOSED; npm],"N02 - CHARTS AND MAP-TO-METRIC DASHBOARDS [PROPOSED; npm]
+Apache ECharts (Apache-2.0): https://github.com/apache/echarts
+Docs/examples: https://echarts.apache.org/en/index.html
+Use: cost breakdowns, score contributions, sensitivity charts, timeline summaries,
+portfolio indicators and linked map/table filtering. Prefer an accessible table
+alongside charts; import only needed chart modules and dispose chart instances.
+Charts render verified API metrics. ECharts does not calculate procurement scores
+or provide an AI analysis engine.
+Feature links: L11/L21/L22/L30, O01/O12/O13/O18/O20/O21/O30, A05/A07/A10.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N03,"PDF.js, Docling / OCR",https://github.com/mozilla/pdf.js,"DOCUMENT READER, PARSING AND OCR [PROPOSED; npm + uv/system packages]","N03 - DOCUMENT READER, PARSING AND OCR [PROPOSED; npm + uv/system packages]
+PDF.js (Apache-2.0): https://github.com/mozilla/pdf.js
+Docs: https://mozilla.github.io/pdf.js/
+Docling (MIT code): https://github.com/docling-project/docling
+Docs: https://docling-project.github.io/docling/
+Optional lightweight PDF text/table route: pdfplumber (MIT)
+https://github.com/jsvine/pdfplumber
+Optional OCR engine: Tesseract (Apache-2.0)
+https://github.com/tesseract-ocr/tesseract
+Use PDF.js for page display/anchors, then select ONE measured extraction path.
+Start native typed fields first; add Docling for representative complex/scanned
+proposals where justified. A lighter parser may suffice for simple digital PDFs.
+Record source page/row/bounds and retain original files; OCR requires review.
+Docling's downloaded models/OCR language packs/dependencies have separate licences
+and resource needs. Confirm chosen model artefacts and Malay/English support.
+Run admission/size/page limits and parsing in isolated background workers.
+Feature links: L05/L24-L27, O04-O07/O14/O19, A01-A04/A06/A08.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N03,"PDF.js, Docling / OCR",https://mozilla.github.io/pdf.js/,"DOCUMENT READER, PARSING AND OCR [PROPOSED; npm + uv/system packages]","N03 - DOCUMENT READER, PARSING AND OCR [PROPOSED; npm + uv/system packages]
+PDF.js (Apache-2.0): https://github.com/mozilla/pdf.js
+Docs: https://mozilla.github.io/pdf.js/
+Docling (MIT code): https://github.com/docling-project/docling
+Docs: https://docling-project.github.io/docling/
+Optional lightweight PDF text/table route: pdfplumber (MIT)
+https://github.com/jsvine/pdfplumber
+Optional OCR engine: Tesseract (Apache-2.0)
+https://github.com/tesseract-ocr/tesseract
+Use PDF.js for page display/anchors, then select ONE measured extraction path.
+Start native typed fields first; add Docling for representative complex/scanned
+proposals where justified. A lighter parser may suffice for simple digital PDFs.
+Record source page/row/bounds and retain original files; OCR requires review.
+Docling's downloaded models/OCR language packs/dependencies have separate licences
+and resource needs. Confirm chosen model artefacts and Malay/English support.
+Run admission/size/page limits and parsing in isolated background workers.
+Feature links: L05/L24-L27, O04-O07/O14/O19, A01-A04/A06/A08.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N03,"PDF.js, Docling / OCR",https://github.com/docling-project/docling,"DOCUMENT READER, PARSING AND OCR [PROPOSED; npm + uv/system packages]","N03 - DOCUMENT READER, PARSING AND OCR [PROPOSED; npm + uv/system packages]
+PDF.js (Apache-2.0): https://github.com/mozilla/pdf.js
+Docs: https://mozilla.github.io/pdf.js/
+Docling (MIT code): https://github.com/docling-project/docling
+Docs: https://docling-project.github.io/docling/
+Optional lightweight PDF text/table route: pdfplumber (MIT)
+https://github.com/jsvine/pdfplumber
+Optional OCR engine: Tesseract (Apache-2.0)
+https://github.com/tesseract-ocr/tesseract
+Use PDF.js for page display/anchors, then select ONE measured extraction path.
+Start native typed fields first; add Docling for representative complex/scanned
+proposals where justified. A lighter parser may suffice for simple digital PDFs.
+Record source page/row/bounds and retain original files; OCR requires review.
+Docling's downloaded models/OCR language packs/dependencies have separate licences
+and resource needs. Confirm chosen model artefacts and Malay/English support.
+Run admission/size/page limits and parsing in isolated background workers.
+Feature links: L05/L24-L27, O04-O07/O14/O19, A01-A04/A06/A08.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N03,"PDF.js, Docling / OCR",https://docling-project.github.io/docling/,"DOCUMENT READER, PARSING AND OCR [PROPOSED; npm + uv/system packages]","N03 - DOCUMENT READER, PARSING AND OCR [PROPOSED; npm + uv/system packages]
+PDF.js (Apache-2.0): https://github.com/mozilla/pdf.js
+Docs: https://mozilla.github.io/pdf.js/
+Docling (MIT code): https://github.com/docling-project/docling
+Docs: https://docling-project.github.io/docling/
+Optional lightweight PDF text/table route: pdfplumber (MIT)
+https://github.com/jsvine/pdfplumber
+Optional OCR engine: Tesseract (Apache-2.0)
+https://github.com/tesseract-ocr/tesseract
+Use PDF.js for page display/anchors, then select ONE measured extraction path.
+Start native typed fields first; add Docling for representative complex/scanned
+proposals where justified. A lighter parser may suffice for simple digital PDFs.
+Record source page/row/bounds and retain original files; OCR requires review.
+Docling's downloaded models/OCR language packs/dependencies have separate licences
+and resource needs. Confirm chosen model artefacts and Malay/English support.
+Run admission/size/page limits and parsing in isolated background workers.
+Feature links: L05/L24-L27, O04-O07/O14/O19, A01-A04/A06/A08.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N03,"PDF.js, Docling / OCR",https://github.com/jsvine/pdfplumber,"DOCUMENT READER, PARSING AND OCR [PROPOSED; npm + uv/system packages]","N03 - DOCUMENT READER, PARSING AND OCR [PROPOSED; npm + uv/system packages]
+PDF.js (Apache-2.0): https://github.com/mozilla/pdf.js
+Docs: https://mozilla.github.io/pdf.js/
+Docling (MIT code): https://github.com/docling-project/docling
+Docs: https://docling-project.github.io/docling/
+Optional lightweight PDF text/table route: pdfplumber (MIT)
+https://github.com/jsvine/pdfplumber
+Optional OCR engine: Tesseract (Apache-2.0)
+https://github.com/tesseract-ocr/tesseract
+Use PDF.js for page display/anchors, then select ONE measured extraction path.
+Start native typed fields first; add Docling for representative complex/scanned
+proposals where justified. A lighter parser may suffice for simple digital PDFs.
+Record source page/row/bounds and retain original files; OCR requires review.
+Docling's downloaded models/OCR language packs/dependencies have separate licences
+and resource needs. Confirm chosen model artefacts and Malay/English support.
+Run admission/size/page limits and parsing in isolated background workers.
+Feature links: L05/L24-L27, O04-O07/O14/O19, A01-A04/A06/A08.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N03,"PDF.js, Docling / OCR",https://github.com/tesseract-ocr/tesseract,"DOCUMENT READER, PARSING AND OCR [PROPOSED; npm + uv/system packages]","N03 - DOCUMENT READER, PARSING AND OCR [PROPOSED; npm + uv/system packages]
+PDF.js (Apache-2.0): https://github.com/mozilla/pdf.js
+Docs: https://mozilla.github.io/pdf.js/
+Docling (MIT code): https://github.com/docling-project/docling
+Docs: https://docling-project.github.io/docling/
+Optional lightweight PDF text/table route: pdfplumber (MIT)
+https://github.com/jsvine/pdfplumber
+Optional OCR engine: Tesseract (Apache-2.0)
+https://github.com/tesseract-ocr/tesseract
+Use PDF.js for page display/anchors, then select ONE measured extraction path.
+Start native typed fields first; add Docling for representative complex/scanned
+proposals where justified. A lighter parser may suffice for simple digital PDFs.
+Record source page/row/bounds and retain original files; OCR requires review.
+Docling's downloaded models/OCR language packs/dependencies have separate licences
+and resource needs. Confirm chosen model artefacts and Malay/English support.
+Run admission/size/page limits and parsing in isolated background workers.
+Feature links: L05/L24-L27, O04-O07/O14/O19, A01-A04/A06/A08.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N04,"Ollama, Qwen candidate",https://github.com/ollama/ollama,LOCAL LANGUAGE-MODEL RUNTIME AND CANDIDATE MODEL [OPTIONAL; upstream],"N04 - LOCAL LANGUAGE-MODEL RUNTIME AND CANDIDATE MODEL [OPTIONAL; upstream]
+Ollama runtime (MIT): https://github.com/ollama/ollama
+Structured-output docs: https://docs.ollama.com/capabilities/structured-outputs
+Example candidate model: Qwen/Qwen3-8B (Apache-2.0 model card)
+https://huggingface.co/Qwen/Qwen3-8B
+Use: constrained JSON drafts, summaries and evidence-linked explanations through
+a backend-only adapter. This specific model is a candidate to benchmark, not a
+claim that it is the newest/best or that Malay domain quality is established.
+Record exact model/quantisation/hash/licence; choose a smaller admissible model
+or CPU/manual fallback when hardware is insufficient. No client-side inference
+endpoint secrets or remote confidential uploads by default. Ollama's runtime
+licence does not confer rights to every model in its catalogue.
+Feature links: L27, O19, A01-A12 where generation is useful.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N04,"Ollama, Qwen candidate",https://docs.ollama.com/capabilities/structured-outputs,LOCAL LANGUAGE-MODEL RUNTIME AND CANDIDATE MODEL [OPTIONAL; upstream],"N04 - LOCAL LANGUAGE-MODEL RUNTIME AND CANDIDATE MODEL [OPTIONAL; upstream]
+Ollama runtime (MIT): https://github.com/ollama/ollama
+Structured-output docs: https://docs.ollama.com/capabilities/structured-outputs
+Example candidate model: Qwen/Qwen3-8B (Apache-2.0 model card)
+https://huggingface.co/Qwen/Qwen3-8B
+Use: constrained JSON drafts, summaries and evidence-linked explanations through
+a backend-only adapter. This specific model is a candidate to benchmark, not a
+claim that it is the newest/best or that Malay domain quality is established.
+Record exact model/quantisation/hash/licence; choose a smaller admissible model
+or CPU/manual fallback when hardware is insufficient. No client-side inference
+endpoint secrets or remote confidential uploads by default. Ollama's runtime
+licence does not confer rights to every model in its catalogue.
+Feature links: L27, O19, A01-A12 where generation is useful.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N04,"Ollama, Qwen candidate",https://huggingface.co/Qwen/Qwen3-8B,LOCAL LANGUAGE-MODEL RUNTIME AND CANDIDATE MODEL [OPTIONAL; upstream],"N04 - LOCAL LANGUAGE-MODEL RUNTIME AND CANDIDATE MODEL [OPTIONAL; upstream]
+Ollama runtime (MIT): https://github.com/ollama/ollama
+Structured-output docs: https://docs.ollama.com/capabilities/structured-outputs
+Example candidate model: Qwen/Qwen3-8B (Apache-2.0 model card)
+https://huggingface.co/Qwen/Qwen3-8B
+Use: constrained JSON drafts, summaries and evidence-linked explanations through
+a backend-only adapter. This specific model is a candidate to benchmark, not a
+claim that it is the newest/best or that Malay domain quality is established.
+Record exact model/quantisation/hash/licence; choose a smaller admissible model
+or CPU/manual fallback when hardware is insufficient. No client-side inference
+endpoint secrets or remote confidential uploads by default. Ollama's runtime
+licence does not confer rights to every model in its catalogue.
+Feature links: L27, O19, A01-A12 where generation is useful.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N05,"pgvector, Sentence Transformers",https://github.com/pgvector/pgvector,PRIVATE RETRIEVAL / EMBEDDINGS [OPTIONAL; PostgreSQL extension + uv/model],"N05 - PRIVATE RETRIEVAL / EMBEDDINGS [OPTIONAL; PostgreSQL extension + uv/model]
+pgvector (PostgreSQL licence): https://github.com/pgvector/pgvector
+Sentence Transformers (Apache-2.0 code):
+https://github.com/huggingface/sentence-transformers
+Example multilingual embedding candidate BAAI/bge-m3 (MIT model card):
+https://huggingface.co/BAAI/bge-m3
+Use: authorised document chunk embeddings and semantic matching/search alongside
+PostgreSQL full-text search. Start keyword/structured retrieval for small pilots;
+add pgvector only if needed and supported by the actual application database.
+Apply tenant/project/submission-version permissions before search and final result
+assembly; test filtered approximate-search recall, not only unfiltered speed.
+Chunks/citations/caches must be removed or retained according to file/decision
+policy; embeddings are confidential derived data. Benchmark bilingual retrieval
+and correct evidence citation; do not equate similarity to verified correctness.
+Feature links: A02-A04/A06/A08/A11 and O14/O19.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N05,"pgvector, Sentence Transformers",https://github.com/huggingface/sentence-transformers,PRIVATE RETRIEVAL / EMBEDDINGS [OPTIONAL; PostgreSQL extension + uv/model],"N05 - PRIVATE RETRIEVAL / EMBEDDINGS [OPTIONAL; PostgreSQL extension + uv/model]
+pgvector (PostgreSQL licence): https://github.com/pgvector/pgvector
+Sentence Transformers (Apache-2.0 code):
+https://github.com/huggingface/sentence-transformers
+Example multilingual embedding candidate BAAI/bge-m3 (MIT model card):
+https://huggingface.co/BAAI/bge-m3
+Use: authorised document chunk embeddings and semantic matching/search alongside
+PostgreSQL full-text search. Start keyword/structured retrieval for small pilots;
+add pgvector only if needed and supported by the actual application database.
+Apply tenant/project/submission-version permissions before search and final result
+assembly; test filtered approximate-search recall, not only unfiltered speed.
+Chunks/citations/caches must be removed or retained according to file/decision
+policy; embeddings are confidential derived data. Benchmark bilingual retrieval
+and correct evidence citation; do not equate similarity to verified correctness.
+Feature links: A02-A04/A06/A08/A11 and O14/O19.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N05,"pgvector, Sentence Transformers",https://huggingface.co/BAAI/bge-m3,PRIVATE RETRIEVAL / EMBEDDINGS [OPTIONAL; PostgreSQL extension + uv/model],"N05 - PRIVATE RETRIEVAL / EMBEDDINGS [OPTIONAL; PostgreSQL extension + uv/model]
+pgvector (PostgreSQL licence): https://github.com/pgvector/pgvector
+Sentence Transformers (Apache-2.0 code):
+https://github.com/huggingface/sentence-transformers
+Example multilingual embedding candidate BAAI/bge-m3 (MIT model card):
+https://huggingface.co/BAAI/bge-m3
+Use: authorised document chunk embeddings and semantic matching/search alongside
+PostgreSQL full-text search. Start keyword/structured retrieval for small pilots;
+add pgvector only if needed and supported by the actual application database.
+Apply tenant/project/submission-version permissions before search and final result
+assembly; test filtered approximate-search recall, not only unfiltered speed.
+Chunks/citations/caches must be removed or retained according to file/decision
+policy; embeddings are confidential derived data. Benchmark bilingual retrieval
+and correct evidence citation; do not equate similarity to verified correctness.
+Feature links: A02-A04/A06/A08/A11 and O14/O19.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N06,"Celery, Valkey candidate",https://github.com/celery/celery,DURABLE BACKGROUND WORK [PROPOSED WHEN NEEDED; uv + service],"N06 - DURABLE BACKGROUND WORK [PROPOSED WHEN NEEDED; uv + service]
+Celery (BSD-3-Clause): https://github.com/celery/celery
+Docs: https://docs.celeryq.dev/
+Valkey (BSD-3-Clause): https://github.com/valkey-io/valkey
+Docs: https://valkey.io/docs/
+Use: bounded OCR, AI, batch analysis and retained export jobs with progress,
+retry, cancellation and idempotency. PostgreSQL retains authoritative job records.
+Choose supported broker/result-backend integration only after verifying exact
+Celery/transport/Valkey versions; Redis-protocol compatibility is not sufficient
+proof. Use another supported open-source broker if this check fails.
+FastAPI in-process background tasks are not a durable job guarantee after restart.
+Feature links: S11, O05-O06, O15-O19, A-series, batch L11.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N06,"Celery, Valkey candidate",https://docs.celeryq.dev/,DURABLE BACKGROUND WORK [PROPOSED WHEN NEEDED; uv + service],"N06 - DURABLE BACKGROUND WORK [PROPOSED WHEN NEEDED; uv + service]
+Celery (BSD-3-Clause): https://github.com/celery/celery
+Docs: https://docs.celeryq.dev/
+Valkey (BSD-3-Clause): https://github.com/valkey-io/valkey
+Docs: https://valkey.io/docs/
+Use: bounded OCR, AI, batch analysis and retained export jobs with progress,
+retry, cancellation and idempotency. PostgreSQL retains authoritative job records.
+Choose supported broker/result-backend integration only after verifying exact
+Celery/transport/Valkey versions; Redis-protocol compatibility is not sufficient
+proof. Use another supported open-source broker if this check fails.
+FastAPI in-process background tasks are not a durable job guarantee after restart.
+Feature links: S11, O05-O06, O15-O19, A-series, batch L11.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N06,"Celery, Valkey candidate",https://github.com/valkey-io/valkey,DURABLE BACKGROUND WORK [PROPOSED WHEN NEEDED; uv + service],"N06 - DURABLE BACKGROUND WORK [PROPOSED WHEN NEEDED; uv + service]
+Celery (BSD-3-Clause): https://github.com/celery/celery
+Docs: https://docs.celeryq.dev/
+Valkey (BSD-3-Clause): https://github.com/valkey-io/valkey
+Docs: https://valkey.io/docs/
+Use: bounded OCR, AI, batch analysis and retained export jobs with progress,
+retry, cancellation and idempotency. PostgreSQL retains authoritative job records.
+Choose supported broker/result-backend integration only after verifying exact
+Celery/transport/Valkey versions; Redis-protocol compatibility is not sufficient
+proof. Use another supported open-source broker if this check fails.
+FastAPI in-process background tasks are not a durable job guarantee after restart.
+Feature links: S11, O05-O06, O15-O19, A-series, batch L11.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N06,"Celery, Valkey candidate",https://valkey.io/docs/,DURABLE BACKGROUND WORK [PROPOSED WHEN NEEDED; uv + service],"N06 - DURABLE BACKGROUND WORK [PROPOSED WHEN NEEDED; uv + service]
+Celery (BSD-3-Clause): https://github.com/celery/celery
+Docs: https://docs.celeryq.dev/
+Valkey (BSD-3-Clause): https://github.com/valkey-io/valkey
+Docs: https://valkey.io/docs/
+Use: bounded OCR, AI, batch analysis and retained export jobs with progress,
+retry, cancellation and idempotency. PostgreSQL retains authoritative job records.
+Choose supported broker/result-backend integration only after verifying exact
+Celery/transport/Valkey versions; Redis-protocol compatibility is not sufficient
+proof. Use another supported open-source broker if this check fails.
+FastAPI in-process background tasks are not a durable job guarantee after restart.
+Feature links: S11, O05-O06, O15-O19, A-series, batch L11.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N07,"openpyxl, CSV, python-docx",https://docs.python.org/3/library/csv.html,STRUCTURED FILE EXCHANGE AND REPORTS [PROPOSED; Python standard library/uv],"N07 - STRUCTURED FILE EXCHANGE AND REPORTS [PROPOSED; Python standard library/uv]
+CSV: https://docs.python.org/3/library/csv.html
+openpyxl (MIT): https://openpyxl.readthedocs.io/en/stable/
+python-docx (MIT; optional editable Word outputs):
+https://github.com/python-openxml/python-docx
+Keep existing React PDF renderer (R10) for PDF rather than introduce a second
+renderer without need. Use typed JSON/GeoJSON schemas for native exchanges.
+Use: BOQ/criteria/comparison XLSX, CSV schedules, decision appendices and optional
+Word reports. Restrict file types, no macro execution, formula-injection controls
+and explicit workbook limits. Human-approved mapping is needed for arbitrary
+supplier spreadsheets; a spreadsheet library does not normalise their semantics.
+Feature links: L13/L14/L24-L26, O06-O07/O13/O17/O28, S09.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N07,"openpyxl, CSV, python-docx",https://openpyxl.readthedocs.io/en/stable/,STRUCTURED FILE EXCHANGE AND REPORTS [PROPOSED; Python standard library/uv],"N07 - STRUCTURED FILE EXCHANGE AND REPORTS [PROPOSED; Python standard library/uv]
+CSV: https://docs.python.org/3/library/csv.html
+openpyxl (MIT): https://openpyxl.readthedocs.io/en/stable/
+python-docx (MIT; optional editable Word outputs):
+https://github.com/python-openxml/python-docx
+Keep existing React PDF renderer (R10) for PDF rather than introduce a second
+renderer without need. Use typed JSON/GeoJSON schemas for native exchanges.
+Use: BOQ/criteria/comparison XLSX, CSV schedules, decision appendices and optional
+Word reports. Restrict file types, no macro execution, formula-injection controls
+and explicit workbook limits. Human-approved mapping is needed for arbitrary
+supplier spreadsheets; a spreadsheet library does not normalise their semantics.
+Feature links: L13/L14/L24-L26, O06-O07/O13/O17/O28, S09.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N07,"openpyxl, CSV, python-docx",https://github.com/python-openxml/python-docx,STRUCTURED FILE EXCHANGE AND REPORTS [PROPOSED; Python standard library/uv],"N07 - STRUCTURED FILE EXCHANGE AND REPORTS [PROPOSED; Python standard library/uv]
+CSV: https://docs.python.org/3/library/csv.html
+openpyxl (MIT): https://openpyxl.readthedocs.io/en/stable/
+python-docx (MIT; optional editable Word outputs):
+https://github.com/python-openxml/python-docx
+Keep existing React PDF renderer (R10) for PDF rather than introduce a second
+renderer without need. Use typed JSON/GeoJSON schemas for native exchanges.
+Use: BOQ/criteria/comparison XLSX, CSV schedules, decision appendices and optional
+Word reports. Restrict file types, no macro execution, formula-injection controls
+and explicit workbook limits. Human-approved mapping is needed for arbitrary
+supplier spreadsheets; a spreadsheet library does not normalise their semantics.
+Feature links: L13/L14/L24-L26, O06-O07/O13/O17/O28, S09.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N08,Custom scoring and money rules,https://docs.python.org/3/library/decimal.html,"EXPLAINABLE SCORING, MONEY AND RULE ENGINE [CUSTOM; EXISTING PYTHON]","N08 - EXPLAINABLE SCORING, MONEY AND RULE ENGINE [CUSTOM; EXISTING PYTHON]
+Python Decimal: https://docs.python.org/3/library/decimal.html
+PostgreSQL NUMERIC: https://www.postgresql.org/docs/current/datatype-numeric.html
+Pydantic: https://docs.pydantic.dev/
+Implement versioned formula/rubric functions, eligibility/missing-data policy,
+normalisation, lifecycle assumptions, moderation and approval state transitions
+in InfraShader. No AI model or library supplies the organisation's policy.
+Use SQL transactions/revision checks. Unit tests use independently worked cases.
+Feature links: O07/O09-O18/O20/O26, L15-L16/L20-L22 and A05/A07/A10.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N08,Custom scoring and money rules,https://www.postgresql.org/docs/current/datatype-numeric.html,"EXPLAINABLE SCORING, MONEY AND RULE ENGINE [CUSTOM; EXISTING PYTHON]","N08 - EXPLAINABLE SCORING, MONEY AND RULE ENGINE [CUSTOM; EXISTING PYTHON]
+Python Decimal: https://docs.python.org/3/library/decimal.html
+PostgreSQL NUMERIC: https://www.postgresql.org/docs/current/datatype-numeric.html
+Pydantic: https://docs.pydantic.dev/
+Implement versioned formula/rubric functions, eligibility/missing-data policy,
+normalisation, lifecycle assumptions, moderation and approval state transitions
+in InfraShader. No AI model or library supplies the organisation's policy.
+Use SQL transactions/revision checks. Unit tests use independently worked cases.
+Feature links: O07/O09-O18/O20/O26, L15-L16/L20-L22 and A05/A07/A10.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N08,Custom scoring and money rules,https://docs.pydantic.dev/,"EXPLAINABLE SCORING, MONEY AND RULE ENGINE [CUSTOM; EXISTING PYTHON]","N08 - EXPLAINABLE SCORING, MONEY AND RULE ENGINE [CUSTOM; EXISTING PYTHON]
+Python Decimal: https://docs.python.org/3/library/decimal.html
+PostgreSQL NUMERIC: https://www.postgresql.org/docs/current/datatype-numeric.html
+Pydantic: https://docs.pydantic.dev/
+Implement versioned formula/rubric functions, eligibility/missing-data policy,
+normalisation, lifecycle assumptions, moderation and approval state transitions
+in InfraShader. No AI model or library supplies the organisation's policy.
+Use SQL transactions/revision checks. Unit tests use independently worked cases.
+Feature links: O07/O09-O18/O20/O26, L15-L16/L20-L22 and A05/A07/A10.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N09,"Pydantic, JSON Schema",https://docs.pydantic.dev/,TYPED AI CONTRACTS AND SOURCE VALIDATION [CUSTOM + EXISTING PYTHON],"N09 - TYPED AI CONTRACTS AND SOURCE VALIDATION [CUSTOM + EXISTING PYTHON]
+Pydantic: https://docs.pydantic.dev/
+JSON Schema: https://json-schema.org/
+Ollama structured output reference: N04.
+Use: strict finding schemas with source IDs, field type/unit, original/reviewed
+values, missing/unsupported flags and revision. Validate numbers against canonical
+facts, enforce allowed references and reject unknown source IDs. A valid JSON
+object can still contain an incorrect claim; human/grounding checks remain needed.
+Feature links: all A-series and O06/O19.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N09,"Pydantic, JSON Schema",https://json-schema.org/,TYPED AI CONTRACTS AND SOURCE VALIDATION [CUSTOM + EXISTING PYTHON],"N09 - TYPED AI CONTRACTS AND SOURCE VALIDATION [CUSTOM + EXISTING PYTHON]
+Pydantic: https://docs.pydantic.dev/
+JSON Schema: https://json-schema.org/
+Ollama structured output reference: N04.
+Use: strict finding schemas with source IDs, field type/unit, original/reviewed
+values, missing/unsupported flags and revision. Validate numbers against canonical
+facts, enforce allowed references and reject unknown source IDs. A valid JSON
+object can still contain an incorrect claim; human/grounding checks remain needed.
+Feature links: all A-series and O06/O19.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N10,"pytest, Playwright AI evaluation",https://docs.pytest.org/,AI ACCEPTANCE AND REGRESSION HARNESS [CUSTOM + EXISTING TEST TOOLS],"N10 - AI ACCEPTANCE AND REGRESSION HARNESS [CUSTOM + EXISTING TEST TOOLS]
+pytest: https://docs.pytest.org/
+Playwright: https://playwright.dev/docs/intro
+Use a permissioned set of English/Malay sample proposals and human-labelled
+expected extractions, citations, gaps and abstentions. Track numeric accuracy,
+field errors, citation precision, missing-evidence recall, inappropriate disclosure
+and latency. Separate parser, retriever and generator errors. Store only
+permissioned/redacted test documents and lock model/prompt versions in reports.
+No paid evaluator or external model-as-judge is necessary for the first pilot.
+Feature links: A11, AC-04/AC-05 and O19 release gate.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N10,"pytest, Playwright AI evaluation",https://playwright.dev/docs/intro,AI ACCEPTANCE AND REGRESSION HARNESS [CUSTOM + EXISTING TEST TOOLS],"N10 - AI ACCEPTANCE AND REGRESSION HARNESS [CUSTOM + EXISTING TEST TOOLS]
+pytest: https://docs.pytest.org/
+Playwright: https://playwright.dev/docs/intro
+Use a permissioned set of English/Malay sample proposals and human-labelled
+expected extractions, citations, gaps and abstentions. Track numeric accuracy,
+field errors, citation precision, missing-evidence recall, inappropriate disclosure
+and latency. Separate parser, retriever and generator errors. Store only
+permissioned/redacted test documents and lock model/prompt versions in reports.
+No paid evaluator or external model-as-judge is necessary for the first pilot.
+Feature links: A11, AC-04/AC-05 and O19 release gate.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N11,OR-Tools,https://github.com/google/or-tools,OPTIONAL BUDGET/SCENARIO OPTIMISATION [CONDITIONAL; uv],"N11 - OPTIONAL BUDGET/SCENARIO OPTIMISATION [CONDITIONAL; uv]
+Google OR-Tools (Apache-2.0): https://github.com/google/or-tools
+Docs: https://developers.google.com/optimization
+Use: explicit constrained project selection, resource scheduling or bounded design
+candidate optimisation after objectives/input data are defined. Report feasible/
+infeasible status and assumptions. Does not determine fair procurement policy,
+landscape aesthetics or actual site constructability.
+Feature links: O20, A09/A12; not required for initial weighted-score comparison.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N11,OR-Tools,https://developers.google.com/optimization,OPTIONAL BUDGET/SCENARIO OPTIMISATION [CONDITIONAL; uv],"N11 - OPTIONAL BUDGET/SCENARIO OPTIMISATION [CONDITIONAL; uv]
+Google OR-Tools (Apache-2.0): https://github.com/google/or-tools
+Docs: https://developers.google.com/optimization
+Use: explicit constrained project selection, resource scheduling or bounded design
+candidate optimisation after objectives/input data are defined. Report feasible/
+infeasible status and assumptions. Does not determine fair procurement policy,
+landscape aesthetics or actual site constructability.
+Feature links: O20, A09/A12; not required for initial weighted-score comparison.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N12,scikit-learn,https://github.com/scikit-learn/scikit-learn,OPTIONAL STATISTICAL ANALYSIS [CONDITIONAL; uv],"N12 - OPTIONAL STATISTICAL ANALYSIS [CONDITIONAL; uv]
+scikit-learn (BSD-3-Clause): https://github.com/scikit-learn/scikit-learn
+Outlier guidance: https://scikit-learn.org/stable/modules/outlier_detection.html
+Use: validated historical outlier/prediction experiments after a sufficient
+relevant dataset exists. Prefer simple transparent median/IQR checks for early
+comparisons. Record sample size and rate/unit/site/date comparability.
+Feature links: A05/A12; not required for proposal summaries or weighted scores.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N12,scikit-learn,https://scikit-learn.org/stable/modules/outlier_detection.html,OPTIONAL STATISTICAL ANALYSIS [CONDITIONAL; uv],"N12 - OPTIONAL STATISTICAL ANALYSIS [CONDITIONAL; uv]
+scikit-learn (BSD-3-Clause): https://github.com/scikit-learn/scikit-learn
+Outlier guidance: https://scikit-learn.org/stable/modules/outlier_detection.html
+Use: validated historical outlier/prediction experiments after a sufficient
+relevant dataset exists. Prefer simple transparent median/IQR checks for early
+comparisons. Record sample size and rate/unit/site/date comparability.
+Feature links: A05/A12; not required for proposal summaries or weighted scores.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N13,Curated plant/rate/policy data,,"PLANT, MATERIAL, RATE AND LOCAL POLICY DATA [CURATED INPUT; NOT A LIBRARY]","N13 - PLANT, MATERIAL, RATE AND LOCAL POLICY DATA [CURATED INPUT; NOT A LIBRARY]
+Needs: permissioned nursery/supplier catalogues, quotations, local horticultural
+review, measured site data, owner criteria and authorised policy templates.
+Acquisition: user-provided files/records or specifically licensed datasets;
+retain source, author, date, region, units, uncertainty and permitted reuse.
+Use: plant/material attributes, maintainable rates and organisation rules.
+No universal free database is promised to supply current Malaysian prices,
+plant suitability, statutory rules or verified contractor registration.
+Feature links: L03/L09-L10/L14-L15/L18/L21-L22, O02/O04/O09/O21/O26.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N14,"Blender, Three.js, glTF",https://www.blender.org/,3D ASSET AUTHORING AND IMPORT [CONDITIONAL; R11/R14],"N14 - 3D ASSET AUTHORING AND IMPORT [CONDITIONAL; R11/R14]
+Blender: https://www.blender.org/
+glTF: https://www.khronos.org/gltf/
+Validator: https://github.com/KhronosGroup/glTF-Validator
+Three.js loaders/transforms: https://threejs.org/docs/
+Use: dimensioned low-poly GLB preparation, import checks and reusable previews.
+Use own/procedural assets or individually approved licences; asset rights do
+not follow automatically from Blender/Three.js being free. Repeated assets
+need instancing/LOD, unit/pivot/axis checks and footprint approval.
+Feature links: L06-L09/L19/L23, F18-F20.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N14,"Blender, Three.js, glTF",https://www.khronos.org/gltf/,3D ASSET AUTHORING AND IMPORT [CONDITIONAL; R11/R14],"N14 - 3D ASSET AUTHORING AND IMPORT [CONDITIONAL; R11/R14]
+Blender: https://www.blender.org/
+glTF: https://www.khronos.org/gltf/
+Validator: https://github.com/KhronosGroup/glTF-Validator
+Three.js loaders/transforms: https://threejs.org/docs/
+Use: dimensioned low-poly GLB preparation, import checks and reusable previews.
+Use own/procedural assets or individually approved licences; asset rights do
+not follow automatically from Blender/Three.js being free. Repeated assets
+need instancing/LOD, unit/pivot/axis checks and footprint approval.
+Feature links: L06-L09/L19/L23, F18-F20.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N14,"Blender, Three.js, glTF",https://github.com/KhronosGroup/glTF-Validator,3D ASSET AUTHORING AND IMPORT [CONDITIONAL; R11/R14],"N14 - 3D ASSET AUTHORING AND IMPORT [CONDITIONAL; R11/R14]
+Blender: https://www.blender.org/
+glTF: https://www.khronos.org/gltf/
+Validator: https://github.com/KhronosGroup/glTF-Validator
+Three.js loaders/transforms: https://threejs.org/docs/
+Use: dimensioned low-poly GLB preparation, import checks and reusable previews.
+Use own/procedural assets or individually approved licences; asset rights do
+not follow automatically from Blender/Three.js being free. Repeated assets
+need instancing/LOD, unit/pivot/axis checks and footprint approval.
+Feature links: L06-L09/L19/L23, F18-F20.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N14,"Blender, Three.js, glTF",https://threejs.org/docs/,3D ASSET AUTHORING AND IMPORT [CONDITIONAL; R11/R14],"N14 - 3D ASSET AUTHORING AND IMPORT [CONDITIONAL; R11/R14]
+Blender: https://www.blender.org/
+glTF: https://www.khronos.org/gltf/
+Validator: https://github.com/KhronosGroup/glTF-Validator
+Three.js loaders/transforms: https://threejs.org/docs/
+Use: dimensioned low-poly GLB preparation, import checks and reusable previews.
+Use own/procedural assets or individually approved licences; asset rights do
+not follow automatically from Blender/Three.js being free. Repeated assets
+need instancing/LOD, unit/pivot/axis checks and footprint approval.
+Feature links: L06-L09/L19/L23, F18-F20.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N15,"IfcOpenShell, ezdxf, GDAL",https://docs.ifcopenshell.org/,"BUILDING, TERRAIN AND CAD PROCESSING [CONDITIONAL; REUSE R12/R13]","N15 - BUILDING, TERRAIN AND CAD PROCESSING [CONDITIONAL; REUSE R12/R13]
+IfcOpenShell: https://docs.ifcopenshell.org/
+ezdxf: https://ezdxf.readthedocs.io/
+GDAL: https://gdal.org/en/stable/
+Use only selected adapters after sample-based feasibility, alignment, resource
+limits and licence review. IFC/DXF/GLB are different formats/workflows; native
+DWG remains unsupported. A format reader is not a validated engineering solver.
+Feature links: L05/L06/L19; F13/F17/F18.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N15,"IfcOpenShell, ezdxf, GDAL",https://ezdxf.readthedocs.io/,"BUILDING, TERRAIN AND CAD PROCESSING [CONDITIONAL; REUSE R12/R13]","N15 - BUILDING, TERRAIN AND CAD PROCESSING [CONDITIONAL; REUSE R12/R13]
+IfcOpenShell: https://docs.ifcopenshell.org/
+ezdxf: https://ezdxf.readthedocs.io/
+GDAL: https://gdal.org/en/stable/
+Use only selected adapters after sample-based feasibility, alignment, resource
+limits and licence review. IFC/DXF/GLB are different formats/workflows; native
+DWG remains unsupported. A format reader is not a validated engineering solver.
+Feature links: L05/L06/L19; F13/F17/F18.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N15,"IfcOpenShell, ezdxf, GDAL",https://gdal.org/en/stable/,"BUILDING, TERRAIN AND CAD PROCESSING [CONDITIONAL; REUSE R12/R13]","N15 - BUILDING, TERRAIN AND CAD PROCESSING [CONDITIONAL; REUSE R12/R13]
+IfcOpenShell: https://docs.ifcopenshell.org/
+ezdxf: https://ezdxf.readthedocs.io/
+GDAL: https://gdal.org/en/stable/
+Use only selected adapters after sample-based feasibility, alignment, resource
+limits and licence review. IFC/DXF/GLB are different formats/workflows; native
+DWG remains unsupported. A format reader is not a validated engineering solver.
+Feature links: L05/L06/L19; F13/F17/F18.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N16,"MapLibre, pvlib environment",https://maplibre.org/maplibre-gl-js/docs/examples/sky-fog-terrain/,EXISTING ENVIRONMENT EXPERIENCE AND OPTIONAL WEATHER DATA,"N16 - EXISTING ENVIRONMENT EXPERIENCE AND OPTIONAL WEATHER DATA
+Reuse current local MapLibre/pvlib/environment code; inspect actual dependencies.
+MapLibre sky: https://maplibre.org/maplibre-gl-js/docs/examples/sky-fog-terrain/
+Three.js: https://threejs.org/docs/
+pvlib: https://pvlib-python.readthedocs.io/en/stable/
+Optional Open-Meteo: https://open-meteo.com/en/docs
+Terms: https://open-meteo.com/en/terms
+Open-Meteo source is AGPL-3.0-or-later, data CC BY 4.0; hosted free service is
+non-commercial under its terms. Commercial plan or compliant self-hosting has
+separate costs/obligations. Weather mode is currently simulated; optional data
+must show source/valid/fetched time and handle unavailable dates. Numerical
+shade remains a geometric model rather than a weather-corrected comfort metric.
+Feature links: L02, E01-E08.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N16,"MapLibre, pvlib environment",https://threejs.org/docs/,EXISTING ENVIRONMENT EXPERIENCE AND OPTIONAL WEATHER DATA,"N16 - EXISTING ENVIRONMENT EXPERIENCE AND OPTIONAL WEATHER DATA
+Reuse current local MapLibre/pvlib/environment code; inspect actual dependencies.
+MapLibre sky: https://maplibre.org/maplibre-gl-js/docs/examples/sky-fog-terrain/
+Three.js: https://threejs.org/docs/
+pvlib: https://pvlib-python.readthedocs.io/en/stable/
+Optional Open-Meteo: https://open-meteo.com/en/docs
+Terms: https://open-meteo.com/en/terms
+Open-Meteo source is AGPL-3.0-or-later, data CC BY 4.0; hosted free service is
+non-commercial under its terms. Commercial plan or compliant self-hosting has
+separate costs/obligations. Weather mode is currently simulated; optional data
+must show source/valid/fetched time and handle unavailable dates. Numerical
+shade remains a geometric model rather than a weather-corrected comfort metric.
+Feature links: L02, E01-E08.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N16,"MapLibre, pvlib environment",https://pvlib-python.readthedocs.io/en/stable/,EXISTING ENVIRONMENT EXPERIENCE AND OPTIONAL WEATHER DATA,"N16 - EXISTING ENVIRONMENT EXPERIENCE AND OPTIONAL WEATHER DATA
+Reuse current local MapLibre/pvlib/environment code; inspect actual dependencies.
+MapLibre sky: https://maplibre.org/maplibre-gl-js/docs/examples/sky-fog-terrain/
+Three.js: https://threejs.org/docs/
+pvlib: https://pvlib-python.readthedocs.io/en/stable/
+Optional Open-Meteo: https://open-meteo.com/en/docs
+Terms: https://open-meteo.com/en/terms
+Open-Meteo source is AGPL-3.0-or-later, data CC BY 4.0; hosted free service is
+non-commercial under its terms. Commercial plan or compliant self-hosting has
+separate costs/obligations. Weather mode is currently simulated; optional data
+must show source/valid/fetched time and handle unavailable dates. Numerical
+shade remains a geometric model rather than a weather-corrected comfort metric.
+Feature links: L02, E01-E08.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N16,"MapLibre, pvlib environment",https://open-meteo.com/en/docs,EXISTING ENVIRONMENT EXPERIENCE AND OPTIONAL WEATHER DATA,"N16 - EXISTING ENVIRONMENT EXPERIENCE AND OPTIONAL WEATHER DATA
+Reuse current local MapLibre/pvlib/environment code; inspect actual dependencies.
+MapLibre sky: https://maplibre.org/maplibre-gl-js/docs/examples/sky-fog-terrain/
+Three.js: https://threejs.org/docs/
+pvlib: https://pvlib-python.readthedocs.io/en/stable/
+Optional Open-Meteo: https://open-meteo.com/en/docs
+Terms: https://open-meteo.com/en/terms
+Open-Meteo source is AGPL-3.0-or-later, data CC BY 4.0; hosted free service is
+non-commercial under its terms. Commercial plan or compliant self-hosting has
+separate costs/obligations. Weather mode is currently simulated; optional data
+must show source/valid/fetched time and handle unavailable dates. Numerical
+shade remains a geometric model rather than a weather-corrected comfort metric.
+Feature links: L02, E01-E08.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N16,"MapLibre, pvlib environment",https://open-meteo.com/en/terms,EXISTING ENVIRONMENT EXPERIENCE AND OPTIONAL WEATHER DATA,"N16 - EXISTING ENVIRONMENT EXPERIENCE AND OPTIONAL WEATHER DATA
+Reuse current local MapLibre/pvlib/environment code; inspect actual dependencies.
+MapLibre sky: https://maplibre.org/maplibre-gl-js/docs/examples/sky-fog-terrain/
+Three.js: https://threejs.org/docs/
+pvlib: https://pvlib-python.readthedocs.io/en/stable/
+Optional Open-Meteo: https://open-meteo.com/en/docs
+Terms: https://open-meteo.com/en/terms
+Open-Meteo source is AGPL-3.0-or-later, data CC BY 4.0; hosted free service is
+non-commercial under its terms. Commercial plan or compliant self-hosting has
+separate costs/obligations. Weather mode is currently simulated; optional data
+must show source/valid/fetched time and handle unavailable dates. Numerical
+shade remains a geometric model rather than a weather-corrected comfort metric.
+Feature links: L02, E01-E08.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N17,IndexedDB / browser APIs,https://www.w3.org/TR/IndexedDB/,OPTIONAL OFFLINE FIELD CAPTURE [CONDITIONAL; BROWSER APIS],"N17 - OPTIONAL OFFLINE FIELD CAPTURE [CONDITIONAL; BROWSER APIS]
+IndexedDB specification: https://www.w3.org/TR/IndexedDB/
+Use: bounded local drafts/queues for authorised observations and explicit sync.
+Requires service-worker/cache design, schema migration, conflict handling,
+permissions/retention and physical field testing. No additional offline mapping
+provider licence is implied; do not cache/redistribute restricted map assets.
+Feature links: L29, S06.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N18,React Flow,https://github.com/xyflow/xyflow,OPTIONAL VISUAL WORKFLOW EDITOR [OPTIONAL; npm],"N18 - OPTIONAL VISUAL WORKFLOW EDITOR [OPTIONAL; npm]
+React Flow / xyflow core (MIT): https://github.com/xyflow/xyflow
+Docs: https://reactflow.dev/
+Use: visual approval-route editor only after a simple backend state machine works.
+Backend owns permissions/transitions/revisions; a node diagram does not enforce
+workflow policy. Optional paid examples/support are not required dependencies.
+Feature links: O16/O26. A simple form-based route builder is sufficient for D1.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N18,React Flow,https://reactflow.dev/,OPTIONAL VISUAL WORKFLOW EDITOR [OPTIONAL; npm],"N18 - OPTIONAL VISUAL WORKFLOW EDITOR [OPTIONAL; npm]
+React Flow / xyflow core (MIT): https://github.com/xyflow/xyflow
+Docs: https://reactflow.dev/
+Use: visual approval-route editor only after a simple backend state machine works.
+Backend owns permissions/transitions/revisions; a node diagram does not enforce
+workflow policy. Optional paid examples/support are not required dependencies.
+Feature links: O16/O26. A simple form-based route builder is sufficient for D1.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N19,"OpenTelemetry, Locust",https://github.com/open-telemetry/opentelemetry-python,"OPERATIONS, CAPACITY AND VERIFICATION [EXISTING + PROPOSED]","N19 - OPERATIONS, CAPACITY AND VERIFICATION [EXISTING + PROPOSED]
+OpenTelemetry Python (Apache-2.0):
+https://github.com/open-telemetry/opentelemetry-python
+Locust (MIT): https://github.com/locustio/locust
+Playwright (Apache-2.0): https://github.com/microsoft/playwright
+Use existing pytest/lint/typecheck/build suites (R16); add traces/metrics and
+representative load profiles as needed. Redact confidential prompts/files/prices
+from routine logs and restrict diagnostic access. Use a selected monitoring sink
+rather than install several systems. Verify hosted CI/deployment separately.
+Feature links: S06-S07/S10-S12, O27-O30, AC-01 through AC-10.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N19,"OpenTelemetry, Locust",https://github.com/locustio/locust,"OPERATIONS, CAPACITY AND VERIFICATION [EXISTING + PROPOSED]","N19 - OPERATIONS, CAPACITY AND VERIFICATION [EXISTING + PROPOSED]
+OpenTelemetry Python (Apache-2.0):
+https://github.com/open-telemetry/opentelemetry-python
+Locust (MIT): https://github.com/locustio/locust
+Playwright (Apache-2.0): https://github.com/microsoft/playwright
+Use existing pytest/lint/typecheck/build suites (R16); add traces/metrics and
+representative load profiles as needed. Redact confidential prompts/files/prices
+from routine logs and restrict diagnostic access. Use a selected monitoring sink
+rather than install several systems. Verify hosted CI/deployment separately.
+Feature links: S06-S07/S10-S12, O27-O30, AC-01 through AC-10.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N19,"OpenTelemetry, Locust",https://github.com/microsoft/playwright,"OPERATIONS, CAPACITY AND VERIFICATION [EXISTING + PROPOSED]","N19 - OPERATIONS, CAPACITY AND VERIFICATION [EXISTING + PROPOSED]
+OpenTelemetry Python (Apache-2.0):
+https://github.com/open-telemetry/opentelemetry-python
+Locust (MIT): https://github.com/locustio/locust
+Playwright (Apache-2.0): https://github.com/microsoft/playwright
+Use existing pytest/lint/typecheck/build suites (R16); add traces/metrics and
+representative load profiles as needed. Redact confidential prompts/files/prices
+from routine logs and restrict diagnostic access. Use a selected monitoring sink
+rather than install several systems. Verify hosted CI/deployment separately.
+Feature links: S06-S07/S10-S12, O27-O30, AC-01 through AC-10.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N20,i18next,https://github.com/i18next/i18next,OPTIONAL BILINGUAL INTERFACE TOOLING [PROPOSED; npm],"N20 - OPTIONAL BILINGUAL INTERFACE TOOLING [PROPOSED; npm]
+i18next (MIT): https://github.com/i18next/i18next
+Docs: https://www.i18next.com/
+Use: English/Malay dictionaries, formatting and interpolation with human-reviewed
+technical terms. Translate interface/templates independently from AI document
+translation; preserve original contract wording alongside any reviewed translation.
+Feature links: S08, all workspace forms and A10.
+
+RECOMMENDED ADOPTION ORDER
+1. Reuse existing stack; add no framework migration.
+2. TanStack grid/virtualisation and ECharts only where table/chart complexity needs it.
+3. Retained Studio outputs + manual owner intake/typed fields and deterministic scoring before AI.
+4. Choose one extraction route and durable workers when real file workload needs it.
+5. Add Ollama/model and pgvector/embedding only after retrieval/quality evaluation.
+6. Add terrain/GLB/building adapters, offline and optimisation in their gated stages.
+No requirement to install LangChain, a separate vector database, a game engine,
+commercial grid edition or a hosted LLM to deliver the D1 review pilot.
+
+PROFESSIONAL WORKFLOW REFERENCES - RESEARCHED 18 OCTOBER 2026
+These proprietary products inform feature choices. We do not copy proprietary
+code/assets or require their subscriptions to build InfraShader. Source-backed
+capabilities below are narrow examples; all proposed InfraShader designs and
+benefits in this catalogue remain our own planned requirements.
+
+I01 Vectorworks Landmark - planting/site/material workflow reference.
+https://www.vectorworks.net/en-US/landmark/capabilities
+Relevant inspiration: data-associated planting, site modelling and coordinated
+landscape documentation. InfraShader adapts selected concepts in L04/L09/L10;
+full Landmark/engineering parity is not promised.
+
+I02 Land F/X - planting and irrigation workflow reference.
+https://www.landfx.com/products
+https://www.landfx.com/docs/irrigation.html
+Relevant inspiration: specialised planting/irrigation work and reusable schedules;
+InfraShader's L09/L18 remain staged and require their own data/methods.
+
+I03 Procore - common bid forms and side-by-side comparison reference.
+https://www.procore.com/bid-management
+https://support.procore.com/products/online/user-guide/project-level/bidding/tutorials/level-bids-for-a-bid-form
+Relevant inspiration: bid forms and bid leveling. InfraShader O03/O07 propose a
+bounded owner-side scope/price comparison implementation, not Procore integration.
+
+I04 ArcGIS Urban - scenario dashboard/comparison reference.
+https://doc.esri.com/en/arcgis-urban/latest/help/help-create-scenario-comparison-report.html
+Relevant inspiration: scenario metrics and comparative reporting. InfraShader
+uses its own MapLibre/PostGIS data and N02 charts for O08/O18/O21.
+
+SOURCE QUALITY NOTES
+Official upstream/project documentation and model cards underpin the resource
+recommendations. No source guarantees our performance, AI accuracy, suitability
+for a Malaysian council or willingness to pay. Licensing and supported versions
+must be rechecked at implementation/release. Dynamic package 'latest' URLs are
+references, not instructions to replace pinned dependencies automatically.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N20,i18next,https://www.i18next.com/,OPTIONAL BILINGUAL INTERFACE TOOLING [PROPOSED; npm],"N20 - OPTIONAL BILINGUAL INTERFACE TOOLING [PROPOSED; npm]
+i18next (MIT): https://github.com/i18next/i18next
+Docs: https://www.i18next.com/
+Use: English/Malay dictionaries, formatting and interpolation with human-reviewed
+technical terms. Translate interface/templates independently from AI document
+translation; preserve original contract wording alongside any reviewed translation.
+Feature links: S08, all workspace forms and A10.
+
+RECOMMENDED ADOPTION ORDER
+1. Reuse existing stack; add no framework migration.
+2. TanStack grid/virtualisation and ECharts only where table/chart complexity needs it.
+3. Retained Studio outputs + manual owner intake/typed fields and deterministic scoring before AI.
+4. Choose one extraction route and durable workers when real file workload needs it.
+5. Add Ollama/model and pgvector/embedding only after retrieval/quality evaluation.
+6. Add terrain/GLB/building adapters, offline and optimisation in their gated stages.
+No requirement to install LangChain, a separate vector database, a game engine,
+commercial grid edition or a hosted LLM to deliver the D1 review pilot.
+
+PROFESSIONAL WORKFLOW REFERENCES - RESEARCHED 18 OCTOBER 2026
+These proprietary products inform feature choices. We do not copy proprietary
+code/assets or require their subscriptions to build InfraShader. Source-backed
+capabilities below are narrow examples; all proposed InfraShader designs and
+benefits in this catalogue remain our own planned requirements.
+
+I01 Vectorworks Landmark - planting/site/material workflow reference.
+https://www.vectorworks.net/en-US/landmark/capabilities
+Relevant inspiration: data-associated planting, site modelling and coordinated
+landscape documentation. InfraShader adapts selected concepts in L04/L09/L10;
+full Landmark/engineering parity is not promised.
+
+I02 Land F/X - planting and irrigation workflow reference.
+https://www.landfx.com/products
+https://www.landfx.com/docs/irrigation.html
+Relevant inspiration: specialised planting/irrigation work and reusable schedules;
+InfraShader's L09/L18 remain staged and require their own data/methods.
+
+I03 Procore - common bid forms and side-by-side comparison reference.
+https://www.procore.com/bid-management
+https://support.procore.com/products/online/user-guide/project-level/bidding/tutorials/level-bids-for-a-bid-form
+Relevant inspiration: bid forms and bid leveling. InfraShader O03/O07 propose a
+bounded owner-side scope/price comparison implementation, not Procore integration.
+
+I04 ArcGIS Urban - scenario dashboard/comparison reference.
+https://doc.esri.com/en/arcgis-urban/latest/help/help-create-scenario-comparison-report.html
+Relevant inspiration: scenario metrics and comparative reporting. InfraShader
+uses its own MapLibre/PostGIS data and N02 charts for O08/O18/O21.
+
+SOURCE QUALITY NOTES
+Official upstream/project documentation and model cards underpin the resource
+recommendations. No source guarantees our performance, AI accuracy, suitability
+for a Malaysian council or willingness to pay. Licensing and supported versions
+must be rechecked at implementation/release. Dynamic package 'latest' URLs are
+references, not instructions to replace pinned dependencies automatically.",Candidate/reference; verify manifests and locks before use,Not fetched; supplied source reference
+N21,"QGIS, GRASS GIS, GDAL and PostGIS references",https://docs.qgis.org/4.2/en/docs/about/foreword.html,OPTIONAL OPEN-SOURCE ROAD GEODATA REVIEW [CANDIDATE; NOT A ROAD DESIGN SOLVER],"N21 - OPEN-SOURCE GIS AND TERRAIN PROFILE REVIEW [CANDIDATE; NOT A ROAD DESIGN SOLVER]
+QGIS documentation: https://docs.qgis.org/4.2/en/docs/about/foreword.html
+QGIS licence: https://qgis.org/license/ (GPL >= 2; verify the actual distribution/integration obligations)
+GRASS GIS profile tool: https://grass.osgeo.org/grass-stable/manuals/r.profile.html
+GRASS GIS licence: https://grass.osgeo.org/about/license/ (GPL >= 2)
+GDAL docs/licence: https://gdal.org/en/stable/about.html (MIT-style)
+PostGIS measurements: https://postgis.net/docs/ST_Area.html and https://postgis.net/docs/manual-3.6/ST_Length.html
+Use for optional external GIS inspection, raster transect/profile review and source-data exchange. These tools do not supply a complete road corridor/pavement-design solver or engineering certification. No package/service is required for the first feature increment; preserve CRS, vertical datum, data-source rights and qualified review.
+Feature link: L31.",Candidate/reference; no new runtime dependency; verify licence before distribution/integration,Official project references opened 2026-11-12
+R04,Mapbox authorized map/runtime integration,https://docs.mapbox.com/map-styles/guides/standard-styles/,USER-AUTHORIZED MAPBOX REPLACEMENT 2026-11-12,docs/mapbox-migration.md; provider scenery is separate from project and analytical data.,Mapbox GL JS 3.34.2 installed and public token locally configured; live imagery gate blocked HTTP 429,Official documentation fetched 2026-11-12; provider response evidence recorded separately
+R04,Mapbox authorized map/runtime integration,https://docs.mapbox.com/api/maps/raster-tiles/,USER-AUTHORIZED MAPBOX REPLACEMENT 2026-11-12,docs/mapbox-migration.md; provider scenery is separate from project and analytical data.,Mapbox GL JS 3.34.2 installed and public token locally configured; live imagery gate blocked HTTP 429,Official documentation fetched 2026-11-12; provider response evidence recorded separately
+R11,Mapbox / Three.js custom layer,https://docs.mapbox.com/mapbox-gl-js/example/add-3d-model/,USER-AUTHORIZED MAPBOX REPLACEMENT 2026-11-12,docs/mapbox-migration.md; provider scenery is separate from project and analytical data.,Mapbox GL JS 3.34.2 installed and public token locally configured; live imagery gate blocked HTTP 429,Official documentation fetched 2026-11-12; provider response evidence recorded separately

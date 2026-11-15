@@ -63,6 +63,8 @@ npm run test:e2e
 npm run test:e2e:integration
 ```
 
+`npm test` runs Vitest through `apps/web/scripts/vitest.mjs`, which normalises the drive-letter case of the working directory. Calling `npx vitest` directly from a terminal that reports `c:\...` can load two copies of Vitest and fail every file that imports from `vitest`.
+
 The API test wrapper supplies the disposable local test database. For another database explicitly set TEST_DATABASE_URL to a disposable PostGIS database whose name ends `_test`. Tests migrate isolated schemas. Never use a customer database.
 
 Browser tests use installed Edge. Integration browser tests start a test-only signed identity provider and use real PostGIS; they do not verify Supabase Auth or Storage. Both browser configurations own their preview servers and stop them afterwards. Vite still warns about large lazy map/PDF chunks; build success is not a performance acceptance claim.
@@ -70,6 +72,8 @@ Browser tests use installed Edge. Integration browser tests start a test-only si
 ## Stop and recovery
 
 Stop API/web with Ctrl+C. Use `scripts/supabase.ps1 stop` for local Supabase and `scripts/local-db.ps1 stop` for portable PostgreSQL. Do not remove their volumes/data directories as a routine shutdown step.
+
+Production operation (environment templates, migration and health checklist, backups and restore drill) is described in [deploy/RUNBOOK.md](../deploy/RUNBOOK.md) and [deploy/CHECKLIST.md](../deploy/CHECKLIST.md). `.\scriptspi.ps1 backup --out <folder>` backs up the local database and private Storage together.
 
 Before live use, approve retention/export/deletion and support policies. Back up the application database, Supabase identity database and private file bytes together; restore to a separate environment and verify linked geometry, rates, estimates, evidence and issued snapshots. No recovery target is accepted until that drill passes. Deployment, hosted services and paid resources require separate user approval.
 
@@ -82,7 +86,7 @@ Run **Calculate all three scenarios**, then **Show baseline shade on map** (or t
 
 **Compare saved options** displays the same saved analysis across Baseline/A/B and available option estimates. **Save an option review** stores criteria, notes, preferred option and status independently of an issued document. **Reload review history** preserves entered notes when resolving a concurrent-review conflict. Changing the workspace or brief marks older reviews stale.
 
-Explore Map uses OpenFreeMap context and explicit-submit Photon place search. Preserve provider attribution; public service availability is not guaranteed. Set `VITE_MAP_STYLE_URL=offline` and `VITE_GEOCODER_URL=offline` in the ignored web environment file to disable public providers. These services receive viewport/query information; they do not receive project records. The ordinary test suite disables external map tiles; `npx playwright test --config playwright.providers.config.mjs` separately checks actual provider rendering/search.
+Explore Map uses Mapbox GL JS and Mapbox Standard, with Mapbox Satellite imagery under the same native 3D context. Set an authorized public `VITE_MAPBOX_ACCESS_TOKEN=pk....` in ignored `apps/web/.env.local`; never use secret tokens. Map layers controls imagery, trees and opt-in elevation. `VITE_MAPBOX_OFFLINE=true` selects the neutral coordinate fallback. Photon search remains separate (`VITE_GEOCODER_URL=offline` disables it). Preserve provider attribution/logo. Mapbox receives content viewport requests; Photon receives submitted search queries. No project text is sent to either basemap/search provider. The ordinary browser suite disables content; `npx playwright test --config playwright.mapbox.config.mjs` exercises live Standard with explicitly labelled synthetic satellite tiles while real satellite requests are externally rate limited (HTTP 429). See [contract and limits](mapbox-migration.md).
 
 
 ## Browse and revise rates

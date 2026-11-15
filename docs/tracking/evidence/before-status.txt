@@ -1,0 +1,75 @@
+ M DEVELOPMENT_MANUAL.txt
+ M apps/api/app/administration.py
+ M apps/api/app/bootstrap.py
+ M apps/api/app/calculations.py
+ M apps/api/app/evidence.py
+ M apps/api/app/explore.py
+ M apps/api/app/main.py
+ M apps/api/app/models.py
+ M apps/api/app/projects.py
+ M apps/api/app/reviews.py
+ M apps/api/app/schemas.py
+ M apps/api/app/workspace.py
+ M apps/api/tests/browser_server.py
+ M apps/api/tests/live_server.py
+ M apps/api/tests/test_database_integration.py
+ M apps/api/tests/test_projects.py
+ M apps/api/tests/test_workflow_integration.py
+ M apps/web/src/App.tsx
+ M apps/web/src/components/CalculationsPanel.tsx
+ M apps/web/src/components/CatalogueBrowser.tsx
+ M apps/web/src/components/EvidencePanel.tsx
+ M apps/web/src/components/ExploreSun.tsx
+ M apps/web/src/components/ExploreWorkspace.tsx
+ M apps/web/src/components/GeometryWorkspace.tsx
+ M apps/web/src/components/SettingsPage.tsx
+ M apps/web/src/components/SiteMap.tsx
+ M apps/web/src/domain/projects.ts
+ M apps/web/src/domain/settings.ts
+ M apps/web/src/services/api.ts
+ M apps/web/src/services/routes.ts
+ M apps/web/src/styles.css
+ M apps/web/vite.config.ts
+ M docs/completion-plan.md
+ M docs/decisions.md
+ M docs/requirements.md
+ M docs/technology-stack.md
+ M docs/validation.md
+ M tests/integration-browser/brief-settings.spec.mjs
+ M tests/integration-browser/catalogue.spec.mjs
+ M tests/integration-browser/navigation.spec.mjs
+ M tests/integration-browser/spatial.spec.mjs
+ M tests/integration-browser/teardown.mjs
+ M tests/integration-browser/workflow.spec.mjs
+ M tests/live-browser/auth-storage.spec.mjs
+ M tests/live-browser/teardown.mjs
+?? INFRASHADER_FULL_FEATURE_LIST_AND_STATUS.txt
+?? apps/api/app/access.py
+?? apps/api/app/onboarding.py
+?? apps/api/migrations/versions/0011_access_foundation.py
+?? apps/api/tests/test_access_foundation.py
+?? apps/api/tests/test_solar_day.py
+?? apps/web/report-preview.css
+?? apps/web/report-preview.html
+?? apps/web/report-preview.js
+?? apps/web/src/components/EnvironmentControls.tsx
+?? apps/web/src/components/MapEnvironment.tsx
+?? apps/web/src/components/OrganisationOnboarding.tsx
+?? apps/web/src/components/ProjectAccess.tsx
+?? apps/web/src/components/TeamInvitations.tsx
+?? apps/web/src/services/environment.test.ts
+?? apps/web/src/services/environment.ts
+?? apps/web/src/services/use-solar-day.ts
+?? apps/web/src/services/weather-layer.ts
+?? docs/architecture-review/
+?? docs/business-idea-report/
+?? docs/dependency-source-register.md
+?? docs/explorer-environment.md
+?? docs/organisation-access.md
+?? docs/tracking/
+?? playwright.access-fixture.config.mjs
+?? playwright.access.config.mjs
+?? playwright.environment-foundation.config.mjs
+?? playwright.environment.config.mjs
+?? tests/access-browser/
+?? tests/environment-browser/

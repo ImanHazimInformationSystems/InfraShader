@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>InfraShader architecture - plain-language review</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#eef3f6;color:#183142;font:17px/1.6 system-ui,sans-serif}main{max-width:980px;margin:auto;padding:48px 28px}h1{font-size:40px;line-height:1.15;margin:12px 0 20px}h2{font-size:24px;line-height:1.3}p{margin:10px 0}.tag{font-size:13px;letter-spacing:2px;font-weight:700;color:#246955}.intro{font-size:20px;max-width:780px}.diagram{margin:30px 0;padding:28px;background:white;border-radius:20px;border:1px solid #d4e0e6}.tier{padding:20px 24px;border-radius:12px;border-left:6px solid}.tier h2{margin:0 0 6px}.tier p{margin:0}.one{background:#eaf3ff;border-color:#387bd1}.two{background:#e7f5ee;border-color:#24845e}.three{background:#fff3df;border-color:#b77b1c}.arrow{text-align:center;padding:9px;font-size:15px;color:#526875}.arrow strong{font-size:22px;padding:0 12px}.caption{color:#526875;font-size:15px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.card{background:white;border:1px solid #d4e0e6;border-radius:12px;padding:22px}.card h2{margin-top:0}li{margin:8px 0}a{color:#185d9a}.note{border-left:4px solid #387bd1;padding-left:18px;margin:28px 0}footer{font-size:14px;color:#526875;margin-top:32px}@media(max-width:640px){main{padding:24px 16px}h1{font-size:32px}.grid{grid-template-columns:1fr}.diagram{padding:16px}.tier{padding:16px}}@media print{body{background:white}main{padding:0}.diagram,.card{break-inside:avoid}a{color:inherit}}
+</style>
+</head>
+<body><main>
+<div class="tag">INFRASHADER / PLAIN-LANGUAGE ARCHITECTURE</div>
+<h1>How InfraShader works</h1>
+<p class="intro">InfraShader has three main parts: the screen you use, the processing behind it, and the storage that keeps your work. These parts work together on your PC during local development.</p>
+<div class="diagram" role="img" aria-label="Three parts: the website sends requests to the application, which reads and saves information in storage. Saved information and results return to the website.">
+<section class="tier one"><h2>1. The screen you use</h2><p>Explore the map, choose a date and time, edit a site, compare options and view reports.</p><p><b>Runs in your web browser.</b></p></section>
+<div class="arrow">Your requests <strong>&#8595; &#8593;</strong> Results to display</div>
+<section class="tier two"><h2>2. The processing behind the screen</h2><p>Checks what you are allowed to access, calculates shade previews and costs, and manages project changes.</p><p><b>Runs in the InfraShader application service.</b></p></section>
+<div class="arrow">Save changes <strong>&#8595; &#8593;</strong> Load saved work</div>
+<section class="tier three"><h2>3. The place your work is saved</h2><p>Keeps project details, team permissions, prices, saved report data and private project photos.</p><p><b>Uses a database and private file storage.</b></p></section>
+<p class="caption">This is called a <b>three-tier architecture</b>. A tier means a main part of the system; it does not mean you need three computers.</p>
+</div>
+<div class="grid">
+<section class="card"><h2>Services that help it work</h2><ul><li><b>Sign-in service:</b> checks your account. InfraShader then checks which projects and actions you can access.</li><li><b>Map services:</b> supply the map, available building information and location search over the internet.</li></ul><p>During development, sign-in and private file storage run locally through Supabase.</p></section>
+<section class="card"><h2>Example: exploring shadows</h2><ol><li>You choose a place, date and time.</li><li>The browser reads available buildings from the map.</li><li>InfraShader calculates a shadow preview.</li><li>The browser draws the result on the map.</li></ol><p>Missing buildings or uncertain heights can limit the preview. Exploring does not automatically save a project.</p></section>
+<section class="card"><h2>Example: saving and reporting</h2><ol><li>You edit and save a project.</li><li>InfraShader checks your access and the information.</li><li>The database keeps the saved changes.</li><li>When you issue a report, InfraShader saves a fixed record of the allowed report data. Your browser turns that data into a PDF.</li></ol><p>The PDF file itself is not currently kept in a server-side PDF archive.</p></section>
+<section class="card"><h2>What runs where?</h2><p><b>On your PC:</b> the website, application service, project database, sign-in service and private file storage.</p><p><b>On the internet:</b> public map and location-search providers.</p><p>This describes the local development setup. It does not mean InfraShader has been deployed online or works fully offline.</p></section>
+</div>
+<section class="note"><h2>Why did the detailed version show five layers?</h2><p>The middle part has three jobs: <b>receive requests</b>, <b>apply the rules and calculations</b>, and <b>connect to storage and other services</b>. Counting those separately, plus the screen and storage, gives five layers. They still belong to the same three main parts shown above.</p></section>
+<section><h2>What this diagram does not mean</h2><p>It describes how the current software is organised; it is not a claim that every planned feature is finished. Cross-organisation submissions, formal approvals, live weather data and an archive of generated PDF files remain future additions. Shade accuracy still needs real-world validation. The animated weather display does not change the calculated shade or prices.</p></section>
+<footer>Prepared from the repository architecture review, 21 October 2026. Documentation only; application tests were not rerun for this simplified version.<br><a href="REVIEW.html">Open the detailed technical review</a></footer>
+</main></body></html>

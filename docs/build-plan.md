@@ -1,5 +1,7 @@
 # InfraShader earlier build checkpoint
 
+> **Current orientation (13 November 2026):** this file preserves older milestone history and environment notes. Do not use its October branch, migration, or MapLibre status as current. Start with [AI_HANDOFF.md](AI_HANDOFF.md), use [FEATURE_STATUS.md](FEATURE_STATUS.md) and `docs/tracking/*.csv` for current feature state, and use [validation.md](validation.md) plus linked evidence for the actual latest checks. The renderer was explicitly migrated to Mapbox on 12 November; see [mapbox-migration.md](mapbox-migration.md). No application checks were run as part of this handoff-documentation update.
+
 13 October continuation: migrations 0005-0010, F01-F08 implementation, recovered-form acceptance and current test evidence are recorded in the continuation documents. This older table is historical.
 
 Current work is maintained in [completion-plan.md](completion-plan.md); feature status is in [requirements.md](requirements.md).
@@ -36,3 +38,25 @@ Local PostgreSQL 17.11/PostGIS 3.6.2 runs from ignored `.local/tools` on 127.0.0
 Docker Desktop 4.94 and WSL 2.7.13 were installed with approval. Following the user restart/setup, the Linux engine and local Supabase were verified running on 12 October. Supabase is configured for separate local ports 54331-54334. No remote project is linked.
 
 See [validation.md](validation.md), [requirements.md](requirements.md), [decisions.md](decisions.md) and [technology-stack.md](technology-stack.md).
+
+
+## L01 completion checkpoint - 4 November 2026
+
+- Implemented the bounded L01 client/project/opportunity hub and its K01 CORE agreed-brief connection using the existing stack.
+- Local migration, persistence/permission/revision checks, browser workflows and output disclosure verified; see [evidence](tracking/evidence/l01-k01-2026-11-04.md).
+- Canonical tracker updated in place and validated. Implementation is separate from pilot policy/customer acceptance and live Auth/Storage qualification. No unrelated backlog, Excel export, remote write or deployment was authorised.
+
+
+## Ground Studio presentation checkpoint - 8 November 2026
+
+Map-first shell and provider-height context are implemented; focused offline/live-map and editor regression checks recorded in [evidence](tracking/evidence/studio-overhaul-2026-11-08.md). The selected map is explorable without manually modelling buildings. Terrain and preset objects retain a separate metric scene; L04 stays Partial for wider map-embedded integration. Canonical CSV and Markdown updated; no Excel export or deployment.
+
+
+## Geographic editor checkpoint - 8 November 2026
+
+Resolved the earlier separate-renderer requirement for supported Mercator site frames. Geographic terrain strokes, supported objects, undo/save/reload and context recovery verified; local scene remains fallback. Added bounded sourced-building context import. Broader terrain-draped layer parity, DEM, terrain-aware shade, field/device/pilot acceptance remain open. [Evidence](tracking/evidence/geographic-studio-2026-11-08.md).
+
+
+## Full proposed-product UI checkpoint - 11 November 2026
+
+Both workspace shells and all 84 roadmap UI placements are present, with connected tools linked separately from staged/ephemeral previews. Source priorities and domain implementation statuses are unchanged. Remaining domain features continue one at a time under their feature specifications and acceptance criteria; UI coverage does not close the MVP or staged release gates. See [coverage](UI_COVERAGE.md), [design](UI_DESIGN.md) and [actual checks](tracking/evidence/product-ui-2026-11-11.md).

@@ -1,0 +1,14 @@
+INFRASHADER - BUSINESS IDEA REPORT SCREENSHOTS
+Captured from the local application on 21 October 2026.
+
+Figure 1. Interactive map and shadow exploration.
+InfraShader displays available 3D map buildings with a date/time timeline, sun direction and estimated building shadows to support early site exploration.
+File: 01-explore-map-shadows.png (3200 x 2000 pixels)
+This is an approximate preview using available map data, not field-validated shade analysis. The visible coverage limitations remain part of the screenshot.
+
+Figure 2. Project overview and site brief.
+InfraShader brings the selected site, project problem, intended users and desired outcome into one workspace to support outdoor improvement planning.
+File: 02-project-overview.png (3200 x 2800 pixels)
+This screenshot uses sample information in Browser Demo; it does not demonstrate authenticated database persistence or completed calculations.
+
+Both images are actual application screenshots, not design mockups. Preserve the map-provider attribution when inserting or cropping them. The local API supplied the map's solar and shadow calculations. Full-service readiness reported setup pending; no real organisation data was used. No application code was changed.

@@ -116,6 +116,17 @@ Browser Demo is a separate browser-only project workflow. Use normal sign-in
 to test real saved projects, permissions and private evidence. The explorer's
 stateless preview can also run in Demo, but it still needs the local API.
 
+DAY/NIGHT AND WEATHER (18 OCTOBER UPDATE)
+   Use Play time / Pause time and the labelled playback speed to advance time.
+   Now uses the selected UTC offset; sunrise/noon/sunset shortcuts are available
+   where those events occur. At night, the map darkens and direct shadows disappear.
+   Open Environment to choose Clear, Partly Cloudy, Overcast, Light Rain,
+   Heavy Rain or Storm. These are simulated visuals, not live weather.
+   Advanced controls change cloud coverage, rain and wind. Pause/disable effects
+   or choose Low quality as needed. Reduced-motion preference stops animation.
+   Preview data & limits includes sun path, Face sun direction and rendering reload.
+   Full walkthrough and boundaries: docs/explorer-environment.md.
+
 ============================================================
 4. STOPPING THE PROJECT
 ============================================================
@@ -215,3 +226,14 @@ Browser:
 
 Stop API/frontend:
    Ctrl+C in both terminals.
+
+
+19 OCTOBER 2026 - ORGANISATION ACCESS UPDATE
+Before testing this update, run .\scripts\api.ps1 migrate (migration 0011).
+Docker Desktop must be unpaused for Supabase account verification and invitations.
+Sign in, then use Create or join organisation to choose Studio, Review or Both.
+Invite existing verified local accounts from Settings and members. Manually share
+the one-time invitation link; no external mail service is used. New members need
+an explicit Project access grant before they can open an existing project.
+Full Studio/Review/Both walkthrough: docs/organisation-access.md.
+Existing organisations retain legacy access explicitly; confirm workspaces in Settings.

@@ -1,0 +1,47 @@
+INFRASHADER REPORT UI PREVIEWS
+
+These replace the earlier AI-generated visual direction for this report.
+They reuse apps/web/src/styles.css, the existing sidebar/navigation structure,
+and the installed MapLibre renderer with the app's OpenFreeMap bright basemap.
+No photorealistic landscape imagery is used.
+
+RUN
+From the repository: npm run dev
+Design Studio: http://127.0.0.1:5173/report-preview.html
+Organisation Review: http://127.0.0.1:5173/report-preview.html?view=review
+Keep the development server running. Map tiles require internet access.
+This standalone development preview is not added to the main app routes or
+the production build entry points.
+
+REPORT IMAGES
+06-design-studio-maplibre.png
+Caption: Proposed Design Studio interface using an interactive map to view
+alternative site layouts alongside illustrative quantities and costs.
+
+07-organisation-review-maplibre.png
+Caption: Proposed Organisation Review interface comparing two layout options,
+sample budgets, review notes and a preferred-option selection.
+
+INTERACTIONS
+Map pan, zoom, reset (Studio), feature information popups; Studio Baseline/A/B
+switching and layer visibility; terrain tool selection and brush-size control;
+review notes/preferred option and explicit local-browser save.
+Sidebar links are preview placeholders. The workspace dropdown switches views.
+
+LIMITS
+Terrain tool controls do not modify elevations. Cut/fill, quantities and costs
+are labelled sample values, not calculated from drawn geometry. Proposed work
+is illustrative and not a surveyed layout. No real organisation project is
+read or modified. Local preview storage uses its own namespaced keys. No
+backend authorisation, submission exchange or formal approval is implied.
+Retain the visible map-provider attribution when reproducing the images.
+
+VERIFICATION
+Browser checks passed for Studio options, baseline, terrain selector, layers,
+zoom/reset, local option save, review preference and save/reload; no page errors.
+Both final images visually inspected. Frontend lint and typecheck passed;
+36 frontend tests passed; production build passed with existing bundle warning.
+The production build checks the main application, not this extra HTML entry.
+Backend Ruff/pytest and live service integration were not rerun: this change
+only adds a standalone UI preview and report captures, with no backend changes.
+Run capture checks: node docs/business-idea-report/check-maplibre-preview.cjs

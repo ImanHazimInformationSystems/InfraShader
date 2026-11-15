@@ -1,0 +1,917 @@
+INFRASHADER - FULL FEATURE CATALOGUE, RESOURCES AND BUILD STATUS
+Edition: 18 October 2026 | Base checkpoint: 7effa9c plus local E06/E07 changes
+Branch: build/core-spatial-completion
+
+CONTENTS
+1. Scope, status labels and product workflows
+2. Full product feature list: F01-F20
+3. Standard application features: D01-D10
+4. Later user requests: automatic explorer shadows and map layout
+5. IMPLEMENTED AND BUILT AS OF NOW - separate status register
+6. Screens, cross-cutting requirements and release gates
+7. Technology/open-source/resource directory
+8. Evidence, source documents and exclusions
+9. Original SRS requirement-name index
+
+=======================================================================
+1. SCOPE, STATUS LABELS AND PRODUCT WORKFLOWS
+=======================================================================
+This updated catalogue consolidates the original feature guide, SRS v0.3,
+stack specification v0.5, later user requests and repository evidence.
+It replaces the older feature guide as a readable consolidated inventory;
+it does not silently change the SRS or approve gated scope or release claims.
+There is no F00 in the source feature numbering: product features are F01-F20.
+F13 and F16-F20 are separate conditional/staged expansions.
+
+BUILT: implemented within the stated scope, with recorded software checks.
+BUILT / ACCEPTANCE OPEN: software exists, but external evidence remains.
+PARTIAL: implementation exists; named software or verification work remains.
+NOT BUILT / GATED: no working implementation; prerequisites remain.
+PROPOSED ENHANCEMENT: a possible extension, not a silently added core promise.
+Passing software tests does not establish site accuracy or release readiness.
+
+Two audiences share the ground-site workspace:
+- Developer project/landscape teams: compare options and issue a decision brief.
+- Outdoor design-and-build contractors: scope work, estimate, price and issue
+  a preliminary client proposal.
+Both new developments and existing-site improvements are in the product scope.
+Purpose changes questions/defaults/output; it never grants access permissions.
+
+Ground-site workflow:
+Sign in -> Explore Map or open project -> choose site -> brief/evidence ->
+boundary/targets/items -> Baseline plus A/B -> shade/quantities/estimate ->
+review -> developer brief OR contractor proposal -> PDF download.
+Exploration may precede project creation; Browser Demo is a separate draft mode.
+
+Planned building-surface workflow:
+Choose building-surface mode -> define/import approved surface -> place work ->
+quantities/options/estimate -> appropriate review/export. NOT BUILT.
+
+Resources below use R01-R18, resolved to official links in section 7.
+Most remaining core work reuses installed libraries. Optional tools are labelled.
+
+=======================================================================
+2. FULL PRODUCT FEATURE LIST
+=======================================================================
+
+F01 - STAKEHOLDER, PROJECT AND OUTCOME BRIEF
+Scope: project purpose, customer/internal sponsor, site/name/location, project
+type, intended users, problem/outcome, target zones/use times, timezone, budget
+range, priorities, constraints, known/unknown facts and visit observations.
+Edit/save the brief, show required fields/readiness and preserve revisions.
+Current: BUILT. Structured brief, budget bounds, facts, notes, readiness and
+history/restore exist for both purposes. Representative pilot acceptance open.
+Technology: React/TypeScript forms, Zod, FastAPI/Pydantic, PostgreSQL/SQLAlchemy;
+Supabase identity and backend membership checks. Resources: R01-R03, R07.
+Evidence: apps/api/app/projects.py; components/BriefForm.tsx,
+BriefReadiness.tsx and ProjectHistory.tsx under apps/web/src.
+
+F02 - SITE INFORMATION AND EVIDENCE
+Scope: private photos, captions/observations, target links, source and author,
+site notes, measured/sourced/estimated dimensions; view/edit/remove/restore.
+Photos support decisions; they do not automatically create surveyed dimensions.
+Current: BUILT / PARTIAL LIFECYCLE. Validated uploads, metadata, preview/download,
+tenant access, conflicts and reversible removal/restore exist. Permanent erasure
+and backup-retention implementation/policy remain unfinished.
+Technology: React gallery, FastAPI, Pillow image validation/re-encoding and
+metadata stripping, PostgreSQL metadata, private Supabase Storage. R01-R03,
+R07-R08. Evidence: app/evidence.py; components/EvidencePanel.tsx.
+
+F03 - EXPLORE MAP AND INTERACTIVE SITE MAP
+Scope: explore before creating a project; search, coordinates, map selection,
+pan/zoom, site extent, create/continue into site plan, layer controls, attribution,
+2D fallback and conditional 3D. Show unavailable provider/data states clearly.
+Current: BUILT / ACCEPTANCE OPEN. Includes automatic explorer shadows and
+fullscreen/collapsible controls from section 4. Production provider rights,
+capacity and coverage acceptance remain open. Visibility never changes quantities.
+Technology: MapLibre, React, OpenFreeMap vector tiles, Photon place search,
+GeoJSON and FastAPI. R01-R05. Evidence: SiteMap.tsx, ExploreWorkspace.tsx,
+PlaceSearch.tsx and services/map.ts under apps/web/src.
+
+F04 - DRAWING AND MEASURING WORK AREAS
+Scope: draw/edit polygons, lines and count objects for site/targets/work; numeric
+alternatives; area/length/count/fixed-price bases; source-labelled verified
+overrides; category, units, revision and existing/proposed state.
+Current: BUILT. Geometry validation, suitable metric projection, edit/remove,
+history/restore and up to 50 applied workspace undo/redo steps exist. Independent
+takeoff/survey acceptance remains separate. Fixed scope has quantity one.
+Technology: Terra Draw/MapLibre, Shapely, PyProj, FastAPI, PostGIS. R02-R06.
+Evidence: app/workspace.py; components/GeometryWorkspace.tsx and DrawingMap.tsx.
+
+F05 - BUILDINGS AND HEIGHTS
+Scope: building footprints, measured/sourced/estimated height, provenance,
+editing and sourced-height 3D. Missing height remains unknown.
+Current: BUILT. Known-height project extrusions and affected-analysis rejection
+for unknown height exist. Existing buildings are shared through Baseline.
+Automatic authoritative import of provider buildings into a saved project is
+not implemented and is not required by the original core footprint workflow.
+Technology: Terra Draw, MapLibre extrusion, FastAPI/Pydantic, PostGIS. R02-R05.
+Evidence: DrawingMap.tsx; app/workspace.py; tests/test_shade.py.
+
+F06 - EXISTING-SITE SOLAR AND SHADE ANALYSIS
+Scope: selected target, date/local time/timezone; sun position; building ground
+shadows; union overlapping shadows then clip to target; area/coverage; source,
+assumptions, input revision and engine version; stale/night/error/low-sun states.
+Current: BUILT / FIELD ACCEPTANCE OPEN. Restricted flat-ground opaque-building
+model works. Real site observations and agreed tolerance remain outstanding.
+Saved project analysis and automatic provider exploration are separate workflows.
+Technology: custom Python projection logic, pvlib, PyProj, Shapely, FastAPI and
+stored artifacts. R02-R03, R06. pybdshadow is an optional candidate, not installed
+or necessary for the current solver. Evidence: app/domain/shade.py.
+
+F07 - SIMPLE PROPOSED CANOPY
+Scope: add opaque elevated flat roof; enter height/dimensions/rotation; move,
+edit/remove; calculate roof-only projection and target coverage for options.
+Current: BUILT / FIELD ACCEPTANCE OPEN. Roof translation is distinct from a
+solid building sweep. Complex/sloped/transparent/tensile roofs unsupported.
+Structural safety/certification is outside this model.
+Technology: Terra Draw/MapLibre plus custom pvlib/PyProj/Shapely analysis. R04-R06.
+Three.js detailed roof/posts would be conditional, not an installed dependency.
+
+F08 - NO-BUILD BASELINE AND UP TO TWO PROPOSED OPTIONS
+Scope: shared existing site, independent proposed A/B scope, matched comparison
+of target/time, shade area/percentage-point changes, quantities, budgets and
+preferred option. Comparison must still work when shade is unavailable.
+Current: BUILT. Baseline changes/removal propagate to both options; selected
+target/time/revision filters stale results; reviews persist. Field/pilot gates
+still apply to claims. No unrestricted scenario count is promised.
+Technology: React comparisons, MapLibre overlays, FastAPI revision/scenario logic,
+PostgreSQL artifacts and Python analysis. R01-R06.
+Evidence: ScenarioComparison.tsx, ReviewPanel.tsx; app/workspace.py, reviews.py.
+
+F09 - ORGANISATION PRODUCT AND RATE CATALOGUE
+Scope: category/description/unit/rate/source/effective date, included-charge
+semantics; search/filter/page, add/version/edit, archive/restore and rate review.
+Historical issued values must not silently change when catalogue rates change.
+Current: PARTIAL acceptance. Listed catalogue functions and reload draft recovery
+are built; forced-session-expiry/multi-tab recovery acceptance remains open.
+Technology: React, FastAPI, PostgreSQL/NUMERIC, Decimal. R01-R03, R09.
+Evidence: CatalogueBrowser.tsx; app/calculations.py; tests/test_catalogue.py.
+
+F10 - QUANTITY-BASED PROJECT ESTIMATE
+Scope: bind selected scope to compatible rates; area/length/count/fixed basis,
+verified overrides, allowed wastage/labour/transport/fixed charges; source/date,
+subtotals and revision comparisons. Label missing/unpriced scope as partial.
+Link estimate lines back to geometry. Developer budget and contractor selling
+totals have distinct purposes and access boundaries.
+Current: BUILT / COMMERCIAL ACCEPTANCE OPEN. Itemised takeoffs, saved comparisons,
+map-item links and duplicate-charge controls exist. Independent takeoff/pricing
+review remains; pricing explanation completion is F11.
+Technology: React, FastAPI/Pydantic, Decimal, NUMERIC/artifacts. R01-R03, R09.
+Evidence: CalculationsPanel.tsx, EstimateComparison.tsx; app/calculations.py.
+
+F11 - MARKUP, MARGIN AND INTERNAL PROFIT
+Scope: choose markup, target margin or supported fixed selling total; explain
+cost basis/overheads/rounding and appropriately labelled profit; reject invalid
+inputs; restrict internal costs and omit them from audience exports.
+Current: PARTIAL. Arithmetic, permission boundaries and pricing modes exist;
+complete breakdown/explanations and commercial-policy approval remain.
+Markup = cost * (1 + fraction); margin price = cost / (1 - fraction).
+Technology: Python Decimal, PostgreSQL NUMERIC, FastAPI and React. R01-R03, R09.
+Evidence: app/domain/pricing.py; tests/test_pricing.py.
+
+F12 - CONTRACTOR CLIENT PROPOSAL AND PDF
+Scope: customer-facing narrative, brief, selected scope versus Baseline,
+quantities/price, diagrams/evidence, assumptions, issue readiness, version,
+preview, confirmed issuance, download/retry and manual sharing.
+Current: PARTIAL. Immutable data snapshots, issue safeguards, previews, PDFs,
+scope diagrams and evidence references are built. Actual issued PDF bytes are
+regenerated at download, not retained. File retention/hash/retrieval/restore,
+richer evidence visuals and broader font/layout acceptance remain.
+Numerical shade claims are omitted pending field validation. Internal cost and
+profit must not leak. Direct email/WhatsApp integration is outside MVP scope.
+Technology: React PDF renderer/Noto Sans, FastAPI snapshots, PostgreSQL;
+private Storage for the remaining retained-file workflow. R01-R03, R07, R10.
+Evidence: IssuedPdf.tsx, OutputPreview.tsx; services/pdf.tsx.
+
+F13 - BUILDING SURFACE PLANNER
+Current: NOT BUILT / GATED (G9).
+Stage A: separate building-surface project mode; manually confirmed flat rooftop,
+terrace or podium outline/elevation; obstacles/access/usable area; place work;
+surface-plane quantities/options/estimates and reuse both audience exports.
+Stage B: private IFC upload, controlled conversion, units/local origin, 3D
+inspection and human-confirmed receiving surface; provenance and model revision.
+Stage C: separately approved DXF references/more complex geometry after samples.
+Changing a surface invalidates dependent drafts; issued snapshots stay immutable.
+Top-down editing/manual fallback required. Elevated-surface shade is a separate
+feasibility task; do not reuse flat-ground coverage without validation.
+Candidates: Three.js, IfcOpenShell/IfcConvert, existing API/data/storage/geometry;
+ezdxf for approved DXF; web-ifc is an alternative import path, not also required.
+Resources: R02-R03, R06-R07, R11-R12.
+No structural load, wind, waterproofing, drainage or building-code certification.
+
+F14 - DEVELOPER OPTION REVIEW AND DECISION BRIEF
+Scope: criteria, Baseline/A/B comparison, scope/quantity/shade/budget sources,
+assumptions/exclusions, reviewer notes/status/preference, versioned internal PDF.
+Current: PARTIAL acceptance. Review history, preferred option, notes/criteria,
+current/partial/unavailable option budgets and distinct brief snapshots exist.
+Audience/usability acceptance and shared retained-PDF lifecycle remain open.
+This is a concept decision brief, not a procurement approval or professional plan.
+Technology: React, FastAPI, PostgreSQL snapshots, shared PDF infrastructure.
+Resources: R01-R03, R10. Evidence: ReviewPanel.tsx; app/reviews.py.
+
+F15 - BASIC OUTDOOR ELEMENTS AND SCOPE SCHEDULE
+Scope: supported trees/planting, paths/paving, seating, canopies and work categories;
+dimensions/counts, source, existing/proposed state and per-option schedules.
+Current: BUILT basic scope. Grouped object choices, category/count/visibility,
+optional sourced crown diameter and quantity schedule exist. Tree shade is
+excluded. Hiding items does not remove them from calculations or outputs.
+Detailed 3D assets are F19/F20, not evidence that basic object scope is absent.
+Technology: Terra Draw/MapLibre, workspace geometry, catalogue/estimate pipeline.
+Resources: R01-R06, R09. Evidence: GeometryWorkspace.tsx; app/workspace.py.
+Placement does not establish planting survival, drainage or construction suitability.
+
+F16 - ASSISTED OPTION EXPLANATION
+Current: NOT BUILT / CONDITIONAL AFTER CORE (G10).
+Scope: preview authorised source facts, draft comparison/proposal text, regenerate,
+edit/discard/approve, source links, revision invalidation and assisted-text audit.
+Start with deterministic templates. A model is optional after quality/need review.
+Reject invented numbers and unsupported claims; human approval before inclusion.
+Candidates: existing FastAPI/React templates; optional local Ollama/model adapter
+with typed input/output, permissions and licence/hardware review. R01-R03, R15.
+Not a chatbot, geometry generator, pricing engine or automatic issue function.
+
+F17 - EXISTING PLAN REFERENCE OVERLAY
+Current: NOT BUILT / CONDITIONAL (G10).
+Scope: supported image/PDF upload, preview, known-point/dimension calibration,
+alignment/scale, opacity/hide/show, trace supported items, source/revision and
+uncertainty. Replacing the plan marks affected traced items for review.
+Candidates: private Storage, FastAPI/Pillow, MapLibre image/raster overlay;
+PDF.js for admitted PDF preview; GDAL only if geospatial processing requires it.
+Resources: R04, R07-R08, R13. Requires representative files/privacy/rights checks.
+Reference only: no automatic CAD extraction or survey-grade accuracy claim.
+
+F18 - LOCAL TERRAIN SHAPING AND CONCEPT POND
+Current: NOT BUILT / GATED (G11).
+Scope: bounded local grid from explicit flat elevation or approved source;
+raise/lower/smooth/flatten brushes with radius/strength/falloff; precise numeric
+patch heights; contours/slope/height legend; before/after/reset/undo/redo;
+lower pond region, set horizontal water level, display outline/nominal depth.
+Maintain separate Baseline/option terrain revisions, datum/CRS/grid resolution,
+bounds and resource caps; update object-ground contact after edits.
+Terrain edits invalidate and block unsupported flat-ground headline shade.
+Quantities stay planimetric unless a separately validated surface model is added.
+Candidates: Three.js heightfield/raycast/water plane, MapLibre custom layer or
+synchronised viewer, Terra Draw, FastAPI, PostGIS, PyProj/Shapely, private grids;
+GDAL for approved elevation ingestion if needed. R02-R07, R11, R13.
+No cut/fill, water-flow/flood, pond-volume, drainage or soil-stability promise.
+
+F19 - EXPANDED PLACEABLE 3D OBJECT LIBRARY
+Current: NOT BUILT / GATED (G11).
+Scope: small licensed/dimensioned preset set: solar objects, furniture, toilet
+modules, bins, lights, bike racks, play items, planters and supported vegetation.
+Search/filter/preview, place instances, move/rotate/allowed scale, snap/align,
+duplicate/hide/lock/group where practical/delete; footprint/source/count/rate;
+category layers, numeric transforms, terrain anchoring/elevation adjustment,
+warnings and 2D fallback. Source asset dimensions/pivot/rights must be recorded.
+Candidates: Blender-authored low-poly GLB/primitives, Three.js GLTFLoader and
+TransformControls, MapLibre integration, existing workspace/estimate/storage.
+Resources: R03-R07, R09, R11, R14. No verified solar electricity output,
+tree-shade, utility compliance or clearance compliance inferred from a model.
+
+F20 - USER-OWNED CUSTOM OBJECT IMPORT AND PLACEMENT
+Current: NOT BUILT / GATED (G11).
+Scope: self-contained GLB intake to private organisation library, rights/name/
+category, preview, unit/axis/pivot/footprint confirmation, thumbnail; place/move/
+rotate/allowed scale/copy/delete/revise with separate immutable asset versions.
+Validate bytes/meshes/textures/extensions, permissions and resource limits on
+server and browser. No unrestricted remote URI fetching; preserve original hash,
+provenance, units/bounds and original file. Keep actionable errors/2D fallback.
+Human-confirmed quantity/rate is needed before estimating imported items.
+Candidates: Three.js GLTFLoader/TransformControls, FastAPI/Pydantic, private
+Supabase Storage/PostgreSQL and glTF validation. Blender can prepare files.
+Resources: R02-R03, R07, R11, R14. Native DWG is unsupported; OBJ, external-resource
+glTF, DXF and IFC object extraction require later sample-dependent adapters.
+
+=======================================================================
+3. STANDARD APPLICATION FEATURES
+=======================================================================
+
+D01 - IDENTITY AND SESSIONS [PARTIAL]
+Built: local sign-in/out, token refresh, password recovery, protected routes,
+provider email/password changes and backend JWT/membership verification.
+Remaining: full forced-expiry/multi-tab/account-switch recovery acceptance.
+Stack: Supabase Auth, React Router, FastAPI/PyJWT. R01-R03, R07.
+
+D02 - ORGANISATION MEMBERSHIP AND PERMISSIONS [PARTIAL]
+Built: organisation scope, administrator/member capabilities, existing-member
+role edits/revocation, audit, concurrent last-admin safeguards and operator setup.
+Remaining: invitation/acceptance/expiry/revocation and self-service onboarding.
+Stack: Supabase identity, FastAPI authorisation, PostgreSQL memberships. R02-R03,
+R07. Hiding buttons is not authorisation; project purpose is not a role.
+
+D03 - DASHBOARD AND NAVIGATION [BUILT; BROADER ACCEPTANCE OPEN]
+Built: Explore/New Project, saved project list, search/sort/stage filter,
+timestamps, protected project URLs, reload/Back and discard safeguards.
+Matrix retains a partial label but names no additional missing dashboard function.
+Stack: React Router, React, FastAPI listing and PostgreSQL. R01-R03.
+
+D04 - PROJECT RECORD CONTROLS [PARTIAL]
+Built: edit brief/name, save status, confirmed archive/restore, immutable brief
+and workspace history, guarded restore that creates a new revision.
+Remaining: permanent deletion and approved retention implementation.
+Stack: React, FastAPI transactions, PostgreSQL/Alembic. R01-R03.
+
+D05 - SETTINGS [PARTIAL]
+Built: profile, email/password changes, organisation name/defaults, metric/imperial
+display, timezone/default markup and permissions. Canonical metric/MYR values
+and issued data do not change silently with display preferences.
+Remaining: settings draft recovery and broader UX acceptance. General multi-
+currency conversion is not implemented or promised by the MYR starting scope.
+Stack: React, Supabase Auth, FastAPI and PostgreSQL settings. R01-R03, R07.
+
+D06 - SAVE STATES, REVISIONS AND SAFE EDITING [PARTIAL]
+Built: save/stale/conflict states, unsaved navigation guards, immutable issuance,
+history/restore, 50 applied-edit undo/redo and account-scoped tab draft recovery.
+Drafts expire after eight hours; changed server revision blocks automatic restore
+and allows JSON recovery. Catalogue/review/output draft recovery is implemented.
+Remaining: evidence/settings recovery; full forced-expiry/multi-tab checks.
+Stack: React state/storage, revision contracts, PostgreSQL transactions. R01-R03.
+Whole-workspace invalidation is deliberate, not a missing core optimisation.
+
+D07 - VALIDATION, FEEDBACK AND RECOVERY [PARTIAL]
+Built: structured errors, geometry/pricing checks, loading/empty/stale states,
+search timeout/retry/cancel and unavailable shade rather than a fake zero.
+Remaining: consistent field errors/input preservation/retry across all forms.
+Stack: Zod, React, Pydantic/FastAPI and Python checks. R01-R02, R16.
+
+D08 - RESPONSIVE AND ACCESSIBLE CONTROLS [PARTIAL ACCEPTANCE]
+Built: responsive desktop/tablet/phone paths, labels and numeric alternatives.
+Remaining: comprehensive keyboard, contrast, screen-reader, physical touch and
+browser matrix, plus fixes found by that testing. Browser emulation is not a
+physical-device or assistive-technology certification.
+Stack: semantic HTML/React/Tailwind, Playwright; axe-core optional. R01, R16.
+
+D09 - PRIVACY, FILE ACCESS AND DATA LIFECYCLE [PARTIAL]
+Built: private scoped uploads/downloads, denial checks, evidence restoration,
+support/data request queue and administrator responses.
+Remaining: actual export execution, account closure/permanent erasure, retention
+policy, coordinated application/Auth/file backup and isolated restore drill.
+Stack: FastAPI, PostgreSQL and private Supabase Storage/Auth; local scripts.
+Resources: R02-R03, R07, R17. A queue response is not completed data erasure.
+
+D10 - SUPPORT, HEALTH AND RELEASE BASICS [PARTIAL]
+Built: health/readiness, request identifiers, unavailable states, support queue,
+local scripts, dependency locks and test configurations.
+Remaining: monitoring/alerts, rate throttling, capacity tests, incident/support
+procedures, rollback and backup/recovery evidence; browser bundle optimisation.
+Stack: FastAPI/logging, existing checks/scripts; OpenTelemetry optional. R02,
+R16-R17. Hosted CI execution and deployment have not been verified.
+
+=======================================================================
+4. LATER USER REQUESTS AND CHANGES TO EXPLORE MAP
+=======================================================================
+These extend F03 and the F06-adjacent exploration experience. They do not replace
+the saved project analysis requirements or remove provenance/accuracy boundaries.
+
+E01 - Automatic shadows from available map buildings [BUILT, LIMITED PREVIEW]
+User intent: choose/explore a site and see shadows without manually modelling
+buildings, inspired by Shadowmap-style interaction.
+Implementation: read loaded provider footprints/heights; prioritise nearby parts;
+send bounded inputs to stateless POST /api/v1/explore/shadows; local sun/geometry
+calculation returns a ground overlay. No project save or manual building needed.
+Stack: MapLibre/OpenFreeMap + FastAPI/pvlib/PyProj/Shapely. R04, R06.
+Limits: zoom >=14; up to 500 parts, 10,000 total vertices, 128 vertices/ring and
+1,000 m provider height. Invalid/unsupported parts are omitted and counted.
+Loaded tile boundaries/height defaults can leave gaps; preview is approximate.
+
+E02 - Date/time slider and sun direction/elevation [BUILT]
+Date, time slider and explicit UTC offset drive recalculation; sun azimuth and
+elevation displayed. Default +8 suits Malaysia; elsewhere set site/date offset.
+Night and sun below supported elevation report unavailable daylight shadows.
+Automatic timezone/DST lookup is a PROPOSED ENHANCEMENT, not built.
+Stack: React controls + pvlib API; optional timezonefinder/zoneinfo. R01, R06, R18.
+
+E03 - Fullscreen exploration and collapsible controls [BUILT]
+Browser-window map; hide/show search, site-name and coordinate controls; Projects
+exit; controls collapse during two-corner site selection. Retain clear map view.
+This is viewport fullscreen, not a claim of native operating-system fullscreen.
+Stack: React/CSS/MapLibre. R01, R04.
+
+E04 - Provider 3D and useful search failure recovery [BUILT]
+Provider-height 3D is navigation/preview context. Keep 2D fallback and labels.
+Explicit-submit Photon search preserves query on timeout, offers retry/cancel,
+ignores late obsolete responses and retains map/coordinate alternatives.
+Phone-sized live-provider workflow passed after the search recovery changes.
+Stack: MapLibre, Photon, React request cancellation/state. R01, R04.
+
+E05 - Full Shadowmap-like coverage [NOT ACHIEVED; EXTENSIONS NEED SCOPE]
+Still absent/incomplete: coverage beyond loaded tiles; robust courtyard/complex
+multipart/seam assembly; roof/facade occlusion; terrain/tree shade; automatic
+timezone/DST; production-scale provider capacity/resilience.
+Possible resources: PostGIS/cache/ingestion and Shapely for building data;
+GDAL/GeoPandas/OSMnx where justified; Three.js and a validated occlusion pipeline
+for richer 3D; terrain sources and a separate terrain engine; tree assumptions
+and validation; timezonefinder for timezone lookup. R03, R06, R11, R13, R18.
+No library supplies missing accurate heights or validates field performance by
+itself. A Three.js visual shadow is not authoritative numerical shade coverage.
+
+E06 - Sun, sky and day/night simulation [BUILT; DEVICE ACCEPTANCE OPEN]
+One date/local-time/explicit-offset clock, 24-hour minute timeline, play/pause,
+labelled speed, offset-aware Now and approximate sunrise/noon/sunset shortcuts.
+Bounded pvlib daily samples use the same location/model as ground shadows.
+Daylight/civil twilight/night follow geometric elevation (0/-6 degree thresholds).
+Polar missing events are explicit. Native map sky/light and scene colours change
+with the sun; labels/boundaries remain visible. Geographic sun disc/direction and
+optional visible-sky path respond to camera bearing/pitch; no invented streetlights.
+Old shadows are hidden while updating; superseded requests are cancelled. Night
+reports No direct sunlight. Sun/path are not roof-aware occlusion calculations.
+Selected site transfers unchanged; time becomes reviewable new-brief context,
+not a silent overwrite of saved project analysis. Resources: R19, R21.
+
+E07 - Manual cloud, rain and storm simulation [BUILT; DEVICE ACCEPTANCE OPEN]
+Clear, Partly Cloudy, Overcast, Light Rain, Heavy Rain and Storm presets;
+cloud/rain/wind numeric and slider controls, direction, effects on/off,
+Low/Medium/High quality and animation pause. Procedural GPU clouds/rain follow
+camera/wind changes; reduced motion and hidden tabs suppress continuous motion.
+Clearly labelled Simulated weather. Visual intensity is not mm/hour or a forecast.
+Weather never changes numerical shade, quantities, estimates or saved decisions.
+No lightning/audio, paid resources or external assets. Resources: R19-R20.
+Physical weak-device and prolonged context-loss/soak acceptance remains open.
+
+E08 - Live weather-data integration [OPTIONAL; NOT BUILT]
+Not required by the E06/E07 task. No API subscription, weather service, or inactive
+Live Weather button added. Future provider terms/privacy/data-age handling would
+need a separate decision. Manual scenarios are not observations or forecasts.
+
+=======================================================================
+5. IMPLEMENTED AND BUILT AS OF NOW - STATUS REGISTER
+=======================================================================
+This section explicitly includes unfinished implementations. Do not read
+'built' as confirmation that every release gate or original visual mockup passes.
+
+F01  BUILT                  Brief, stakeholders, facts, budget, readiness/history.
+F02  BUILT / UNFINISHED      Private evidence; permanent erasure/retention open.
+F03  BUILT / ACCEPTANCE OPEN Map, search, layers, 3D, fullscreen; provider gates.
+F04  BUILT                  Drawing, projected quantities, overrides, undo/history.
+F05  BUILT                  Footprints, sourced heights and project extrusions.
+F06  BUILT / ACCEPTANCE OPEN Restricted saved ground shade; field gates open.
+F07  BUILT / ACCEPTANCE OPEN Flat opaque canopy model; field gates open.
+F08  BUILT                  Baseline/A/B, matched comparison and preference.
+F09  BUILT / UNFINISHED      Catalogue/version/archive; expiry/multi-tab acceptance.
+F10  BUILT / ACCEPTANCE OPEN Takeoffs/revision comparison; commercial validation.
+F11  PARTIALLY BUILT        Arithmetic/access; explanations/policy unfinished.
+F12  PARTIALLY BUILT        Preview/issue/PDF; retained bytes/visuals unfinished.
+F13  NOT BUILT / GATED      Building surface stages A/B/C.
+F14  BUILT / UNFINISHED      Review/history/brief; audience and file acceptance.
+F15  BUILT BASIC SCOPE      Object categories/counts/crowns; tree shade excluded.
+F16  NOT BUILT / GATED      Explanation assistant.
+F17  NOT BUILT / GATED      Reference plan overlay.
+F18  NOT BUILT / GATED      Terrain brushes/pond.
+F19  NOT BUILT / GATED      Expanded 3D preset library.
+F20  NOT BUILT / GATED      User GLB asset library/import.
+D01  PARTIALLY COMPLETE     Auth/recovery built; interruption acceptance open.
+D02  PARTIALLY BUILT        Member admin built; invitations absent.
+D03  BUILT FUNCTIONS       Dashboard/navigation; broader UX acceptance open.
+D04  PARTIALLY BUILT        Archive/history built; deletion/retention absent.
+D05  PARTIALLY COMPLETE     Settings built; recovery/UX unfinished.
+D06  PARTIALLY BUILT        Revision/drafts built; evidence/settings recovery open.
+D07  PARTIALLY COMPLETE     Error contracts built; consistent form recovery open.
+D08  PARTIALLY COMPLETE     Responsive controls built; full accessibility open.
+D09  PARTIALLY BUILT        Private data/requests built; export/erase/restore open.
+D10  PARTIALLY BUILT        Health/support/scripts built; operational work open.
+E01  BUILT WITH LIMITS      Automatic map-building ground-shadow preview.
+E02  BUILT                 Date/time slider, offset and solar angles.
+E03  BUILT                 Fullscreen browser-window map/collapsible controls.
+E04  BUILT                 Provider 3D and search retry/cancel recovery.
+E05  NOT COMPLETE          Broad coverage/advanced shading parity.
+E06  BUILT / ACCEPTANCE OPEN Sun/sky/day-night/time/events; physical-device gates.
+E07  BUILT / ACCEPTANCE OPEN Six manual GPU weather presets and controls.
+E08  NOT BUILT / OPTIONAL   Live weather-data integration; no service selected.
+
+Additional built foundation:
+- React/TypeScript/Vite app and Python/FastAPI modular API, npm/uv locks.
+- Real PostgreSQL/PostGIS persistence, SQLAlchemy/Psycopg and Alembic migrations.
+- Separate local Supabase Auth/private Storage; credentials kept server-side.
+- Browser Demo isolated from real service acceptance.
+- Backend ownership of permissions, geometry quantities, money and issuance.
+- Real DB, unit, browser, provider and local Supabase test suites.
+- Development startup/shutdown, laptop setup and remaining-feature text manuals.
+- Current code pushed to build/core-spatial-completion; no deployment claim.
+
+Unfinished work sequence recorded by the plan:
+Retained PDFs/evidence visuals and coordinated restore; evidence/settings drafts
+and interruption checks; pricing explanations; invites; privacy export/erasure
+under policy; error/accessibility/operations hardening; field/commercial/provider/
+pilot acceptance. Keep expansions conditional on their own gates.
+
+=======================================================================
+6. SCREENS, CROSS-CUTTING REQUIREMENTS AND GATES
+=======================================================================
+Screen/workspace inventory (existing features may share one page):
+01 Sign-in/recovery; 02 dashboard/projects; 03 Explore Map;
+04 project/brief creation; 05 overview/evidence/history;
+06 site drawing; 07 saved shade analysis; 08 basic objects/schedule;
+09 comparison; 10 catalogue; 11 estimate/pricing; 12 contractor proposal;
+13 developer review/brief; 14 settings/members; 15 shared save/error/empty states.
+Planned/gated: 16 building surfaces; 17 explanation panel; 18 plan overlay;
+19 terrain/pond; 20 extended objects; 21 My Objects/GLB import.
+
+UI/IF requirements: persistent project/option context, save/stale feedback,
+linked geometry selection, pre-project Explore, audience navigation, versioned
+protected API, structured validation, GeoJSON transfer, authorised files,
+provider degradation/attribution and audience-specific export payloads.
+Data/security: tenant ownership, transaction/revision consistency, provenance,
+controlled removal, JWT verification, server-side capabilities, secrets isolation,
+upload validation, bounded expensive operations, safe logs and action audit.
+Geography/money: WGS84 longitude/latitude transfer, suitable declared projected
+CRS for metric calculations, explicit source/height uncertainty, Decimal/NUMERIC
+for money. Show unavailable/stale/partial results; never substitute false zeros.
+
+Open acceptance gates:
+G1 scope/access/provider/commercial/retention decisions.
+G2 full security, session, tenant and file-access acceptance.
+G3 field shade observations and agreed model tolerances.
+G4 independent quantities/pricing review.
+G5 audience outputs, PDF content/fonts/layout and retained-file workflow.
+G6 accessibility, physical devices, browser compatibility and performance.
+G7 joint backup/restore, support, monitoring, capacity and rollback.
+G8 representative developer/contractor pilots.
+G9 building-surface stage/samples/rights.
+G10 explanation/reference-plan prerequisites.
+G11 terrain/assets/import rights, alignment, security and performance.
+These SRS gate numbers are distinct from milestone numbers in earlier documents.
+
+=======================================================================
+7. TECHNOLOGY / OPEN-SOURCE / RESOURCE DIRECTORY
+=======================================================================
+Official documentation and upstream repositories explain the tools. Our custom
+application code integrates them; an upstream tool is not a finished InfraShader
+feature. Installed dependencies come from manifests/locks, not latest web pages.
+Open-source library licences, model/asset licences, data rights and hosted-service
+terms are separate. Free software does not guarantee free hosting or unlimited
+public-provider usage. Docker Desktop has its own licence terms.
+
+R01 - EXISTING WEB / UI
+React: https://react.dev/
+TypeScript: https://www.typescriptlang.org/docs/
+Vite: https://vite.dev/guide/
+React Router: https://reactrouter.com/
+Tailwind: https://tailwindcss.com/docs
+Radix: https://www.radix-ui.com/primitives/docs/overview/introduction
+shadcn/ui reference: https://ui.shadcn.com/docs
+Lucide: https://lucide.dev/
+Zod: https://zod.dev/
+The current app uses an editable shadcn-style Radix/CVA button and semantic CSS;
+it is not a claim that the entire shadcn component library is implemented.
+
+R02 - EXISTING API / VALIDATION
+Python: https://docs.python.org/3.12/
+FastAPI: https://fastapi.tiangolo.com/
+Pydantic: https://docs.pydantic.dev/latest/
+Uvicorn: https://www.uvicorn.org/
+uv: https://docs.astral.sh/uv/
+
+R03 - EXISTING PERSISTENCE
+PostgreSQL: https://www.postgresql.org/docs/
+PostGIS: https://postgis.net/documentation/
+SQLAlchemy: https://docs.sqlalchemy.org/en/20/
+Psycopg: https://www.psycopg.org/psycopg3/docs/
+Alembic: https://alembic.sqlalchemy.org/en/latest/
+
+R04 - EXISTING MAP / DATA PROVIDERS
+MapLibre: https://maplibre.org/maplibre-gl-js/docs/
+OpenFreeMap: https://openfreemap.org/quick_start/
+OpenFreeMap source: https://github.com/hyperknot/openfreemap
+Photon search: https://github.com/komoot/photon
+OpenStreetMap attribution/data rights: https://www.openstreetmap.org/copyright
+Tiles provide context and estimated/render heights; they are not survey evidence.
+The public Photon service has usage/availability limits. Provider approval remains.
+
+R05 - EXISTING MAP EDITING
+Terra Draw: https://github.com/JamesLMilner/terra-draw
+MapLibre API: https://maplibre.org/maplibre-gl-js/docs/API/
+
+R06 - EXISTING SOLAR / GEOMETRY; OPTIONAL INGESTION ALTERNATIVES
+pvlib: https://pvlib-python.readthedocs.io/en/stable/
+Shapely: https://shapely.readthedocs.io/en/stable/
+PyProj: https://pyproj4.github.io/pyproj/stable/
+Custom ground/roof projection: apps/api/app/domain/shade.py
+Custom explorer adapter: apps/api/app/explore.py
+Optional, not required/installed for current engine:
+GeoPandas: https://geopandas.org/en/stable/
+OSMnx: https://osmnx.readthedocs.io/en/stable/
+pybdshadow: https://github.com/ni1o1/pybdshadow
+These optional tools do not resolve missing data or field-validation gates.
+
+R07 - EXISTING IDENTITY / PRIVATE FILES
+Supabase Auth: https://supabase.com/docs/guides/auth
+Storage: https://supabase.com/docs/guides/storage
+Local development: https://supabase.com/docs/guides/local-development
+Local Auth/Storage are separate from the application's PostGIS database.
+
+R08 - EXISTING IMAGE / UPLOAD HANDLING
+Pillow: https://pillow.readthedocs.io/en/stable/
+FastAPI uploads: https://fastapi.tiangolo.com/tutorial/request-files/
+
+R09 - EXISTING MONEY RULES
+Decimal: https://docs.python.org/3.12/library/decimal.html
+PostgreSQL numeric: https://www.postgresql.org/docs/current/datatype-numeric.html
+Business logic: apps/api/app/domain/pricing.py and docs/decisions.md ADR-008.
+Currency/rates/sources and commercial rules require human review.
+
+R10 - EXISTING PDF / FONTS
+React PDF renderer: https://react-pdf.org/
+Noto fonts: https://github.com/notofonts/noto-fonts
+pypdf validation: https://pypdf.readthedocs.io/en/stable/
+Bundled font licence: apps/web/public/fonts/OFL.txt.
+
+R11 - CANDIDATE 3D FOR GATED FEATURES (NOT CURRENT CORE DEPENDENCY)
+Three.js: https://threejs.org/docs/
+MapLibre custom layer:
+https://maplibre.org/maplibre-gl-js/docs/API/interfaces/CustomLayerInterface/
+GLTFLoader, TransformControls, geometry and raycasting support proposed display/
+placement workflows; authoritative shade needs separate validated calculations.
+
+R12 - CANDIDATE BUILDING IMPORT (GATED)
+IfcOpenShell: https://docs.ifcopenshell.org/
+IfcConvert: https://docs.ifcopenshell.org/ifcconvert.html
+IFC standard: https://standards.buildingsmart.org/IFC/RELEASE/IFC4_3/HTML/content/introduction.htm
+ezdxf: https://ezdxf.readthedocs.io/en/stable/
+Optional alternative web-ifc: https://github.com/ThatOpen/engine_web-ifc
+Select one viable import route after representative samples and licence review.
+
+R13 - CANDIDATE TERRAIN / REFERENCE-PLAN PROCESSING
+GDAL: https://gdal.org/en/stable/
+PDF.js: https://mozilla.github.io/pdf.js/
+Source elevation/plan rights, resolution, calibration and datum remain required.
+Neither tool alone supplies a terrain-shadow or drainage solver.
+
+R14 - CANDIDATE ASSET AUTHORING / OPEN EXCHANGE FORMAT
+Blender: https://www.blender.org/
+glTF 2.0 specification:
+https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html
+glTF Validator: https://github.com/KhronosGroup/glTF-Validator
+Asset rights and confirmed dimensions remain necessary even for valid files.
+
+R15 - OPTIONAL LOCAL MODEL, NOT A CORE REQUIREMENT
+Ollama: https://docs.ollama.com/
+Templates can use the existing Python stack without a model. Open-weight models
+have their own licences/hardware needs; no hosted model provider is selected.
+
+R16 - EXISTING CHECKS AND OPTIONAL ACCESSIBILITY ADDITION
+ESLint: https://eslint.org/docs/latest/
+Vitest: https://vitest.dev/guide/
+Playwright: https://playwright.dev/docs/intro
+Ruff: https://docs.astral.sh/ruff/
+pytest: https://docs.pytest.org/en/stable/
+Optional axe-core: https://github.com/dequelabs/axe-core
+Manual keyboard/screen-reader/physical touch checks complement automated checks.
+
+R17 - LOCAL RUNTIME / RECOVERY / OPTIONAL TELEMETRY
+Docker: https://docs.docker.com/desktop/
+WSL: https://learn.microsoft.com/windows/wsl/
+PostgreSQL backup: https://www.postgresql.org/docs/current/backup.html
+Optional OpenTelemetry: https://opentelemetry.io/docs/
+Current health/logging is not a complete monitoring/backup/alert deployment.
+
+R18 - OPTIONAL AUTOMATIC TIMEZONE
+timezonefinder: https://timezonefinder.readthedocs.io/en/latest/
+Python zoneinfo: https://docs.python.org/3.12/library/zoneinfo.html
+Coordinate lookup plus date-aware rules needs validation and a manual override.
+
+R19 - EXISTING MAPLIBRE SKY / LIGHT / CUSTOM-LAYER CAPABILITIES
+https://maplibre.org/maplibre-gl-js/docs/examples/sky-fog-terrain/
+https://maplibre.org/maplibre-style-spec/light/
+https://maplibre.org/maplibre-gl-js/docs/API/interfaces/CustomLayerInterface/
+Installed MapLibre 6.13 APIs/types checked; no package upgrade required.
+
+R20 - IMPLEMENTED PROCEDURAL GPU WEATHER
+Local source: apps/web/src/services/weather-layer.ts.
+Uses MapLibre's shared WebGL2 lifecycle, bounded cloud noise/rain strata and
+restored renderer state. No Three.js/texture/video/particle-DOM dependency added.
+Weather renderer is visual only and has no roof collision or numerical correction.
+
+R21 - EXISTING PVLIB DAILY SOLAR / EVENT DATA
+https://pvlib-python.readthedocs.io/en/latest/reference/solarposition.html
+Local source: apps/api/app/explore.py, POST /api/v1/explore/solar-day.
+1,441 minute samples per local day; approximate sunrise/set horizon -0.833 degrees;
+explicit offsets and missing events. No automatic timezone/DST or weather API.
+
+=======================================================================
+8. EVIDENCE, SOURCE DOCUMENTS AND EXCLUSIONS
+=======================================================================
+Primary local references on C:\Users\User\Desktop:
+- InfraShader_MVP_Feature_List_and_UI_Guide_revised.txt
+- InfraShader_Software_Requirements_Specification_v0.3.docx
+- InfraShader_Technology_Stack_and_Software_Tools_Specification_v0.5.docx
+- InfraShader_Codex_Fullstack_Build_Master_Prompt_v1.0.txt
+- InfraShader_Codex_Complete_Remaining_Build_Prompt_v1.0.txt
+- Infrashader_UI_Concept_v0.3.html (visual reference, not production code).
+Original requirements are interpreted with later explicit user changes; document
+instructions are not independent permission to deploy, spend or publish.
+
+Current repository evidence:
+docs/requirements.md; docs/completion-plan.md; docs/f01-f08-acceptance.md;
+docs/decisions.md; docs/validation.md; docs/technology-stack.md;
+apps/web/package.json; apps/api/pyproject.toml; package-lock.json; apps/api/uv.lock.
+Component references above are relative to apps/web/src/components unless stated;
+API app/test references are relative to apps/api.
+
+Current environment implementation checks (18 October):
+- Frontend lint/typecheck/build and 36 unit tests passed.
+- Backend Ruff/format and 173 pytest checks passed.
+- Browser layouts, solar/weather, provider, recovery and performance evidence:
+  see docs/validation.md and docs/explorer-environment.md for final results.
+
+Historical checks:
+- 16 October: backend Ruff/format and 168 PostGIS pytest checks passed;
+  frontend lint/typecheck/build and 32 unit tests passed.
+- 16 October: 27 responsive browser checks and one live phone provider workflow
+  passed, including automatic shadows, time/night, 3D and search recovery.
+- Earlier: six real-PostGIS browser workflows and two local Supabase Auth/Storage
+  workflows passed; those are earlier checkpoint evidence, not fresh runs.
+- Existing bundle-size, router POP and upstream provider warnings remain.
+Actual field accuracy, physical touch, full accessibility and operational recovery
+are not established by these results.
+
+This catalogue records the current local E06/E07 implementation and earlier
+scope/status; candidate technology choices require compatibility/licence
+review. No claims of complete city coverage or full Shadowmap parity are made.
+Excluded from current agreed MVP: temperature/comfort/carbon predictions,
+structural certification, complex roof analysis, full BIM/CAD authoring, native
+DWG, automatic image-to-survey conversion, hydrology/cut-fill/electrical design,
+live supplier inventory, public client portal, real-time coediting and direct
+email/WhatsApp delivery. Optional ideas must not appear as built features.
+
+=======================================================================
+9. ORIGINAL SRS REQUIREMENT-NAME INDEX
+=======================================================================
+The following index is extracted from SRS v0.3 for traceability. It is an inventory
+of requirement names, not a per-requirement acceptance certification. Detailed
+scope/status is in sections 2-6 and docs/requirements.md.
+
+UI-01  Persistent project context
+UI-02  State visibility
+UI-03  Linked selection
+IF-01  Protected service interface
+IF-02  Structured requests and errors
+IF-03  Geospatial transfer
+IF-04  File access contract
+IF-05  External map degradation
+IF-06  Provider attribution
+IF-07  Audience-specific export boundary
+UI-04  Explore Map without a project
+UI-05  Audience-specific navigation
+FR-01  Create scoped client and project
+FR-02  Outcome brief
+FR-03  Intended use time
+FR-04  Target designation
+FR-05  Site observations
+FR-06  Private site photographs
+FR-07  Evidence distinction
+FR-08  Map navigation and layers
+FR-09  Editable geometry
+FR-10  Canonical quantities
+FR-11  Verified override
+FR-12  Work categories
+FR-13  Building input
+FR-14  Building display
+FR-15  Explicit analysis request
+FR-16  Consistent solar position
+FR-17  Projected building shadows
+FR-18  Union and clipping
+FR-19  Coverage result
+FR-20  Unavailable analysis
+FR-21  Analysis provenance
+FR-22  Honest result labeling
+FR-23  Simple elevated roof
+FR-24  Roof shadow physics
+FR-25  Unsupported canopy feedback
+FR-26  Baseline and option limit
+FR-27  Comparable shade conditions
+FR-28  Scope comparison without shade
+FR-29  Selected option
+FR-30  Catalogue definition
+FR-31  Rate semantics
+FR-32  Included charges
+FR-33  Catalogue navigation
+FR-34  Archive and history
+FR-35  Rate refresh review
+FR-36  Estimate source binding
+FR-37  Compatible line basis
+FR-38  Allowances and additions
+FR-39  Manual line quantity
+FR-40  Indicative cost and selling totals
+FR-41  Estimate revision snapshot
+FR-42  Missing estimate data
+FR-43  Contractor pricing method selection
+FR-44  Markup arithmetic
+FR-45  Margin arithmetic
+FR-46  Pricing validation
+FR-47  Labelled profit basis
+FR-48  Internal pricing access and audience separation
+FR-49  Contractor proposal content
+FR-50  Issue readiness
+FR-51  Optional shade claims
+FR-52  Immutable issuance
+FR-53  Repeat issue protection
+FR-54  PDF layout and download
+FR-55  Export retry
+FR-56  Manual sharing
+FR-57  Purpose and stakeholder
+FR-58  Pre-project Explore Map
+FR-59  Transfer selected site
+FR-60  Conditional 3D and 2D fallback
+FR-61  Outdoor elements
+FR-62  Object schedule and status
+FR-63  Tree coverage boundary
+FR-64  Developer criteria review
+FR-65  Decision notes and preference
+FR-66  Developer brief readiness
+FR-67  Immutable decision brief
+FR-68  Audience data boundary
+APP-01  Session lifecycle
+APP-02  Active membership
+APP-03  Capabilities
+APP-04  Membership management
+APP-05  Denied access feedback
+APP-06  Dashboard and Explore Map entry
+APP-07  Project editing
+APP-08  Archive confirmation
+APP-09  User profile
+APP-10  Organisation settings
+APP-11  Display preferences
+APP-12  New project defaults
+APP-13  Reliable save feedback
+APP-14  Concurrent editing
+APP-15  Dependency freshness
+APP-16  Actionable validation
+APP-17  Private data lifecycle
+APP-18  Backup recovery
+APP-19  Support and outage
+APP-20  Request linked logs
+DATA-01  Ownership and references
+DATA-02  Transactional revision records
+DATA-03  Provenance preservation
+DATA-04  Controlled data removal
+SEC-01  Token validation
+SEC-02  Tenant isolation
+SEC-03  Transport and secrets
+SEC-04  Upload protection
+SEC-05  Bounded expensive operations
+SEC-06  Restricted output payloads
+SEC-07  Sensitive log exclusion
+SEC-08  Action accountability
+PERF-01  Measured response targets
+PERF-02  Published limit behaviour
+REL-01  Recoverable failures
+REL-02  Proven recovery
+QLT-01  Keyboard and labels
+QLT-02  Contrast and noncolour status
+QLT-03  Dragging alternatives
+QLT-04  Supported viewports
+QLT-05  Browser compatibility
+QLT-06  Reproducible releases
+QLT-07  Support documentation
+BLD-01  Separate project mode
+BLD-02  Manual approved surface
+BLD-03  Obstacles and access
+BLD-04  Surface work and quantities
+BLD-05  Reuse business workflow
+BLD-06  Surface change invalidation
+BLD-07  Building suitability boundary
+BLD-08  Private IFC intake
+BLD-09  Controlled model conversion
+BLD-10  Model inspection
+BLD-11  User confirmed receiving surface
+BLD-12  Model to surface trace
+BLD-13  Top down editing fallback
+BLD-14  DXF reference boundary
+AI-01  Verified input set
+AI-02  Calculated fact protection
+AI-03  Human approval and edit
+AI-04  Freshness and model choice
+PLN-01  Private reference intake
+PLN-02  Manual calibration
+PLN-03  Reference-only display
+PLN-04  Source replacement review
+TER-01  Explicit terrain frame and baseline
+TER-02  Brush and numeric editing
+TER-03  Concept pond and waterline
+TER-04  Revision and contact update
+TER-05  Edited-terrain analysis boundary
+TER-06  Quantity interpretation
+OBJ-01  Bounded licensed catalogue
+OBJ-02  Instance editing
+OBJ-03  Terrain anchoring and warnings
+OBJ-04  Schedule and calculation boundary
+AST-01  Validated private intake
+AST-02  Preview and confirmed geometry
+AST-03  Version and permission isolation
+AST-04  Estimate and analysis boundary
+AST-05  Failure and 2D fallback
+
+END OF UPDATED CATALOGUE
+
+
+19 OCTOBER 2026 - ORGANISATION ACCESS FOUNDATION ADDENDUM
+Implemented locally: verified-account organisation creation (Studio/Review/Both),
+secure manual invitation links, explicit member capabilities and project grants,
+team administration, role-aware workspace shells and validated saved preferences.
+Migration 0011 preserves prior effective access as explicit grants.
+Organisation Review is an assigned-project/review shell. Submission inboxes, scoring,
+formal approval workflows, procurement/compliance and cross-organisation disclosure
+are still NOT IMPLEMENTED. Existing explorer environment changes are preserved.
+This increment has not been pushed or deployed. See docs/organisation-access.md,
+docs/dependency-source-register.md and docs/validation.md for policy and evidence.

@@ -1,5 +1,29 @@
 # InfraShader remaining-build plan
 
+> **Historical plan:** several sections below describe October architecture and stages, including MapLibre and migrations now superseded by later work. For a new continuation, use [AI_HANDOFF.md](AI_HANDOFF.md) for the current repository snapshot, [FEATURE_STATUS.md](FEATURE_STATUS.md) and the canonical tracking CSVs for status, and [validation.md](validation.md) for dated verification. The 12 November Mapbox migration is documented in [mapbox-migration.md](mapbox-migration.md) and its evidence. Do not treat old next-work lists below as current backlog without checking the canonical tracker.
+
+> Tracking update, 26 October 2026: current audit/status is maintained in [FEATURE_STATUS.md](FEATURE_STATUS.md) and canonical `docs/tracking/*.csv`. This plan preserves dated implementation history; its older authority/status claims do not override the current reconciliation or catalogue scope decisions.
+
+## Organisation access increment - 19 October
+
+Backend capability intersection, migration 0011, verified onboarding, transactional invitations, explicit project grants and both workspace shells are implemented. Implementation and local verification are complete for this foundation increment: 184 backend tests, 36 frontend unit tests, three real Supabase browser flows, six project integration flows, and responsive/map regressions have passing evidence (including targeted reruns). See validation.md for failures corrected, exact results and remaining release gates. Preserve the preceding explorer environment work. See organisation-access.md for policy and local walkthroughs. No remote writes or staged expansion approval is implied.
+
+
+## E06/E07 explorer environment - 18 October
+
+1. Add bounded pvlib daily solar samples/events and one explicit-offset explorer clock.
+2. Native MapLibre sky/light and geographic sun direction; keep shadow requests debounced,
+   cancelled and hidden whenever their timestamp/location becomes obsolete.
+3. Procedural GPU cloud/rain presets with wind, quality, pause, reduced-motion and lifecycle cleanup.
+4. Preserve site transfer (time as reviewable brief context, never overwrite saved analysis).
+5. Run API/web checks, browser/provider regressions, inspect real screenshots and measure frame timing.
+Manual simulation only; E08 live weather is not included. Existing catalogue text is preserved.
+
+Implementation is present for all five steps; final verification is recorded in
+validation.md. Native MapLibre + custom WebGL2 avoids a new Three.js dependency.
+New time context is carried as editable brief text, with no saved-analysis override.
+Physical-device, prolonged GPU soak and scientific field gates remain open.
+
 13 October 2026. Branch `build/core-spatial-completion`. This is the authoritative continuation plan; [requirements.md](requirements.md) is the feature acceptance matrix. Earlier build-plan/validation records remain historical evidence.
 
 ## Authority and references
@@ -76,3 +100,8 @@ Final continuation: dedicated catalogue/review/output recovery, estimate compari
 Implemented automatic provider-tile building shadows, date/time slider, explicit UTC offset and sun azimuth/elevation, fullscreen map and collapsible site controls. Local stateless calculation is separate from persisted analysis. See ADR-013 and setup.md for bounds. Final verification is recorded in validation.md. This does not unlock terrain/BIM stages or claim complete Shadowmap parity.
 
 16 October follow-up: the previously failing live phone provider workflow now passes, including Photon search. Search timeout recovery, explicit retry/cancellation and obsolete-response protection are implemented and tested. The automatic-shadow/fullscreen explorer task is complete within ADR-013's documented preview scope; city-wide completeness, terrain/tree/roof/facade shading and automatic timezone detection remain outside that implementation.
+
+
+## Pricing and proposal checkpoint - 31 October 2026
+
+The requested CORE pricing-readiness/proposal slice is implemented; see [usage and boundaries](pricing-and-proposals.md) and [actual verification](tracking/evidence/pricing-proposals-2026-10-31.md). Broader L13/L14 supplier/BOQ and S04 coordinated recovery remain partial. This does not close the whole project or pilot acceptance gates.

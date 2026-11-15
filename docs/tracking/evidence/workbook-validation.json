@@ -1,0 +1,11 @@
+{
+  "workbook": "C:\\Users\\User\\Coding_Projects\\InfraShader\\outputs\\feature-audit-2026-10-28\\InfraShader_Feature_Implementation_Checklist_Revised.xlsx",
+  "sheets": 16,
+  "tables_with_filters": 14,
+  "source_cells_or_formulas_preserved": 3427,
+  "canonical_table_values_match": true,
+  "roadmap_total": 84,
+  "acceptance_rows": 963,
+  "formula_errors": 0,
+  "scope": "OOXML integrity + cell/formula/table reconciliation; not a native Excel desktop launch"
+}

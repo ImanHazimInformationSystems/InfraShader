@@ -1,0 +1,13 @@
+{
+  "review_date": "2026-11-12",
+  "sources": {
+    "catalogue-2026-10-18.txt": "43317dbc7f198603fb123f2fd0a625a5d1a6a8adee4fc2eb7d6170334d1e7010",
+    "original-checklist.xlsx": "576bb0d94282d270eed47e66b351d366a7208a0bb6d7ae7f8984c9a42a4fd747",
+    "user-roadwork-addendum-2026-11-12.md": "50e7f2a2250c18c0d258d8ceb859916e7f9a02c21f05729e86cac02e2eb77328",
+    "user-road-drawing-clarification-2026-11-12.md": "454597aada120b856a1e181fcb92ccf5e50ef7238afa75ef2b866c1b514bf988"
+  },
+  "roadmap_count": 85,
+  "feature_records": 129,
+  "acceptance_records": 1034,
+  "original_requirement_ids": 160
+}

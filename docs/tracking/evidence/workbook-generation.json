@@ -1,0 +1,25 @@
+{
+  "output": "outputs\\feature-audit-2026-10-28",
+  "rows": {
+    "Feature Register": 128,
+    "Acceptance Checklist": 963,
+    "Dependencies and Release Gates": 33,
+    "Reconciliation": 143,
+    "Resource Register": 167,
+    "Source Coverage": 210
+  },
+  "counts": {
+    "Not audited": 67,
+    "Implemented": 3,
+    "Partial": 14
+  },
+  "canonical_hashes": {
+    "feature-register.csv": "d9274105b914d967ec098d6c3b8cbc8734810a6a43237c7298870c61da0c3472",
+    "acceptance-checklist.csv": "ae74748ebdc927f623f44691e8af0ad18f5043da52b444dce713735b3a7a4959",
+    "release-gates.csv": "8a54e2936faf2d73c0baa442a46ec5d9534360d7b97d82256c46ccc296d3d27b",
+    "reconciliation.csv": "d717b975a47d8b4aaa32437f6027bbac7efd8a8da3b188e5c16659f5fd1d5631",
+    "resources.csv": "c2b99f5c835bcb68f64ef2a875300a386edc2bbeb833aee075c2a811f1fae625",
+    "source-coverage.csv": "2309abf4f42d6ad7195714489a7b6a37779729e245bda3a75d5546066c1074d7"
+  },
+  "formula_total": 84
+}
