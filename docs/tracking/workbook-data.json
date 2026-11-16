@@ -1968,9 +1968,9 @@
         "Acceptance status": "Not assessed",
         "Source section": "catalogue lines 789-810; original Shared Platform",
         "Specification link": "docs/features/S06.md",
-        "Relevant code paths": "apps/web/src/product/ProductWorkspace.tsx; apps/web/src/product/WorkspaceNavigation.tsx; apps/web/src/product/catalogue.json",
-        "Relevant tests/checks": "apps/api/tests/test_restore_drill.py; tests/product-ui-browser/workspaces.spec.mjs; apps/web/src/product/model.test.ts",
-        "Remaining gaps": "Optimistic revision conflicts (409) across records, draft recovery (geometry, issue form, owner offer editor), server-rejected session recovery, lazy-chunk failure recovery screen and joint DB + retained file + private photo restore drills passed locally. Monitoring/alerting, rate limiting of costly jobs, off-machine backup and RPO/RTO are operational gates. 2026-11-16: scripts/backup.py backs up the application database and the evidence bucket together (14 unit tests; one real local run). Not done: off-machine backups, a timed restore drill, a hosted environment. (evidence: docs/tracking/evidence/mvp-closeout-2026-11-16.md)",
+        "Relevant code paths": "apps/web/src/product/ProductWorkspace.tsx; apps/web/src/product/WorkspaceNavigation.tsx; apps/web/src/product/catalogue.json; render.yaml; deploy/start-api.sh; deploy/FREE_PILOT.md; apps/web/src/services/api-timeout.ts",
+        "Relevant tests/checks": "apps/api/tests/test_restore_drill.py; tests/product-ui-browser/workspaces.spec.mjs; apps/web/src/product/model.test.ts; apps/web/src/services/api-timeout.test.ts; docs/tracking/evidence/free-hosting-preparation-2026-11-16.md",
+        "Remaining gaps": "Optimistic revision conflicts (409) across records, draft recovery (geometry, issue form, owner offer editor), server-rejected session recovery, lazy-chunk failure recovery screen and joint DB + retained file + private photo restore drills passed locally. Monitoring/alerting, rate limiting of costly jobs, off-machine backup and RPO/RTO are operational gates. 2026-11-16: scripts/backup.py backs up the application database and the evidence bucket together (14 unit tests; one real local run). Not done: off-machine backups, a timed restore drill, a hosted environment. (evidence: docs/tracking/evidence/mvp-closeout-2026-11-16.md); 16 Nov user-authorised free hosting: configuration and local preflight prepared, Supabase Free organisation created; hosted database/project creation awaits user credential input. Hosted services, migrations and real workflow/restore verification remain unperformed. docs/tracking/evidence/free-hosting-preparation-2026-11-16.md",
         "Dependencies": "Demonstrate forced-expiry recovery, concurrency denial and an operational restore drill.",
         "Last reviewed date": "2026-11-16",
         "Evidence reference": "docs/tracking/evidence/live-auth-storage-restore-2026-11-13.md",
@@ -19035,6 +19035,20 @@
         "Remaining work": "Real Supabase Auth/Storage, sealed-bid (O29) and customer acceptance remain open.",
         "Source section": "User request: complete the contractor-to-owner proposal submission workflow, 15 November 2026",
         "Last reviewed date": "2026-11-15"
+      },
+      {
+        "Tracking ID": "TRK-S06-006",
+        "Original requirement ID": "",
+        "Feature IDs": "S06",
+        "Criterion origin": "User-authorised deployment 2026-11-16",
+        "Expected behaviour": "Free pilot configuration explicitly uses free API/static plans, committed production dependencies, platform port binding, bounded cold-start timeout and no implicit paid database; validation and local runtime imports pass. Hosted readiness remains a separate gate.",
+        "Verification method": "Render JSON schema, shell syntax, production-only runtime imports, frontend checks and local PostGIS regression.",
+        "Result": "Passed",
+        "Acceptance status": "Pending",
+        "Evidence": "docs/tracking/evidence/free-hosting-preparation-2026-11-16.md",
+        "Remaining work": "Complete hosted resource setup, real hosted workflow and backup/restore validation.",
+        "Source section": "User request: deploy using free Render and Supabase plan",
+        "Last reviewed date": "2026-11-16"
       }
     ],
     "Dependencies and Release Gates": [
@@ -24383,8 +24397,8 @@
     "Not audited": 39
   },
   "canonical_hashes": {
-    "feature-register.csv": "c5f8ef88f0dded55a6254ff7b5b7d65310d7369d6753ad2627d1e25d5f67f06c",
-    "acceptance-checklist.csv": "0f58b35852175a457c427def243129f8b09bf55af64d3fa3e008edf7f49f26c2",
+    "feature-register.csv": "ef407a2b87d229b20de5fa3667be06248fb0dd5daad4c9a76a9b14fd24ee2cb7",
+    "acceptance-checklist.csv": "c12102f050d130fcf3f649dcea0d4bd844030dc0abab436a3059e385fa011f94",
     "release-gates.csv": "fe4204f809cc630af069f91ccca0cba55d8d5593b31496f4bfb262469842305a",
     "reconciliation.csv": "ae2e36cc042dde7c677a554215f1c42e1604945b7f04c0cb0fe2443eb78c5fe1",
     "resources.csv": "1dcf5766bb1a455fbc9916e5035d1da54cb5bbc6224d847001cc363e9646beb3",

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { apiTimeout } from './api-timeout'
 import {
   projectListSchema,
   projectSchema,
@@ -32,7 +33,7 @@ export async function request<T>(
     try {
       response = await fetch(`${baseUrl}${path}`, {
         ...init,
-        signal: init.signal ?? AbortSignal.timeout(15000),
+        signal: init.signal ?? AbortSignal.timeout(apiTimeout(import.meta.env.VITE_API_TIMEOUT_MS)),
         headers: {
           ...(typeof init.body === 'string' ? { 'Content-Type': 'application/json' } : {}),
           ...(token ? { Authorization: `Bearer ${token}` } : {}),

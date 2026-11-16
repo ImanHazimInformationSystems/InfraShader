@@ -2,7 +2,7 @@
 
 **Snapshot date:** 16 November 2026 (Asia/Kuala_Lumpur)  
 **Repository observed:** `C:\Users\User\Coding_Projects\InfraShader`  
-**Branch / HEAD observed:** `build/l07-object-palette`. The accumulated work was committed locally in six area commits on top of `7effa9c` (see `git log`); nothing has been pushed.  
+**Branch / HEAD observed:** `build/l07-object-palette`. The accumulated application work and project documents were pushed to GitHub main and build/l07-object-palette at c444581 on 16 November. Inspect live git state for later changes.
 **Worktree observed:** after those commits, only deliberately uncommitted scratch and export folders remain (`tmp/`, `output/`, `outputs/`).
 
 This page is a concise entry point for a new AI or developer. It is not a new requirements document or status database. Always inspect the live repository and use the canonical sources below; do not treat this snapshot as newer evidence than the code, registers, or dated verification records.
@@ -118,3 +118,7 @@ No push, pull-request publication, deployment, paid service/resource, external m
 Refresh this page only when a new checkpoint materially changes repository identity/worktree, core architecture/provider, current run or verification instructions, project-wide scope interpretation, or the recommended reading order. Keep feature-by-feature status and evidence in their canonical files. Put actual commands and results in dated evidence and `validation.md`; never edit this snapshot to make an unperformed check look current.
 
 For sharing with another AI, provide this handoff plus only the requested feature spec, relevant canonical CSV rows, current evidence, and inspected source files. Exclude `.env*` values, tokens, keys, private uploads, `.local/` database files/configuration, user data, and unrelated uncommitted diffs.
+
+## Free pilot deployment in progress (16 November 2026)
+
+The user authorised the free Render + Supabase deployment. See [preparation evidence](tracking/evidence/free-hosting-preparation-2026-11-16.md) and [free pilot setup](../deploy/FREE_PILOT.md). Supabase Free organisation created; project creation/password is handed to the user. Configuration/local checks are not evidence of a live deployment. No local credentials/data should be copied to hosted services.

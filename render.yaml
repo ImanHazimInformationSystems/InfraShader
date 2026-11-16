@@ -1,0 +1,51 @@
+# Free pilot only. Hosted Supabase supplies database/Auth/Storage; no Render database.
+services:
+  - type: web
+    name: infrashader-api
+    runtime: python
+    plan: free
+    region: singapore
+    branch: main
+    autoDeployTrigger: off
+    buildCommand: pip install uv==0.13.0 && uv sync --project apps/api --frozen --no-dev
+    startCommand: bash deploy/start-api.sh
+    healthCheckPath: /api/v1/readiness
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.15
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: STORAGE_SERVICE_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: SUPABASE_JWT_AUDIENCE
+        value: authenticated
+      - key: MALLOC_ARENA_MAX
+        value: "2"
+  - type: web
+    name: infrashader-web
+    runtime: static
+    branch: main
+    autoDeployTrigger: off
+    buildCommand: npm ci && npm run build
+    staticPublishPath: apps/web/dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: VITE_API_BASE_URL
+        sync: false
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: VITE_MAPBOX_ACCESS_TOKEN
+        sync: false
+      - key: VITE_API_TIMEOUT_MS
+        value: "90000"

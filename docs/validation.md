@@ -1,5 +1,9 @@
 # Validation evidence
 
+## Free hosting preparation ? 16 November 2026
+
+User authorised the free pilot. Render configuration/schema and shell checks passed; production-only API/PDF imports passed; frontend 163 tests plus lint/typecheck/build; backend Ruff/format and 425 passed / 1 skipped. Hosted project credentials and actual deployment remain pending. See [evidence](tracking/evidence/free-hosting-preparation-2026-11-16.md).
+
 ## MVP software close-out — 16 November 2026
 
 Changed:
