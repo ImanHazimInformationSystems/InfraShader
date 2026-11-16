@@ -266,7 +266,7 @@ export default function WorkspaceNavigation(props: Props) {
           )}
         </nav>
         <div className="product-nav-bottom">
-          <span className="product-local-dot" /> {props.demo ? 'Browser Demo' : 'Local workspace'}
+          <span className="product-local-dot" /> {props.demo ? 'Browser Demo' : import.meta.env.VITE_DEPLOYMENT_MODE === 'pilot' ? 'Hosted pilot' : 'Local workspace'}
           <small>Sources before decisions.</small>
           <a
             href={productPath(workspace, 'help')}

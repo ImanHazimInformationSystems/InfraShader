@@ -1,5 +1,14 @@
 # Validation evidence
 
+## Free pilot infrastructure live — 16 November 2026
+
+Web and API are live on Render Free with new Supabase Free services. Hosted migration
+0021, non-superuser role/private schema, health/readiness, exact CORS, anonymous API
+denial, private Storage byte round trip/public denial and 1440/390 sign-in rendering
+passed. Checked 31 public assets for server credentials; none found. Real-account
+workflow and hosted backup/restore acceptance are still pending. See
+[hosted evidence](tracking/evidence/free-pilot-hosted-2026-11-16.md).
+
 ## Free hosting preparation ? 16 November 2026
 
 User authorised the free pilot. Render configuration/schema and shell checks passed; production-only API/PDF imports passed; frontend 163 tests plus lint/typecheck/build; backend Ruff/format and 425 passed / 1 skipped. Hosted project credentials and actual deployment remain pending. See [evidence](tracking/evidence/free-hosting-preparation-2026-11-16.md).

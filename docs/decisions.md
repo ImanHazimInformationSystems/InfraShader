@@ -1,5 +1,16 @@
 # Decisions
 
+## Controlled free hosted pilot (16 November 2026)
+
+The user explicitly authorised free Render/Supabase deployment. Use manual releases,
+one free API worker and a static web site; no paid disk/database/domain/mail plan.
+Keep new hosted data separate from local development. Use the actual Supabase
+session pooler, private application schema/non-superuser role and server-only Storage
+key. Mark the hosted UI as a pilot, not a production acceptance claim. Hosted
+infrastructure evidence does not replace real-account workflows, provider limits,
+backup/restore or customer acceptance. See
+[hosted evidence](tracking/evidence/free-pilot-hosted-2026-11-16.md).
+
 ## Contractor-to-owner submissions: explicit conservative defaults (15 November 2026)
 
 The user asked to complete S03/L25/O05. Where the catalogue leaves policy open, these explicit defaults apply until an owner policy feature exists:

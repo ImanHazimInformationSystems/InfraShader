@@ -15,6 +15,8 @@ The full product's UI placement/readiness is separately maintained in `ui-covera
 Start with [the feature summary](../FEATURE_STATUS.md), then open a feature's linked specification for its requirements, sources, implementation evidence and remaining work. Use VS Code's Markdown preview to read these pages.
 
 - `feature-register.csv`: current status, priority, code paths, tests, dependencies and evidence references.
+  `Deployment evidence` is required when deployment status is `Deployed`; link
+  dated evidence and retain any unverified workflow/operational gates.
 - `feature-specifications.csv`: detailed intended behaviour and source contracts.
 - `acceptance-checklist.csv`: stable requirement IDs, expected behaviour, results and remaining work.
 - `release-gates.csv`: technical prerequisites and acceptance gates.

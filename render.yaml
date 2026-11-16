@@ -49,3 +49,5 @@ services:
         sync: false
       - key: VITE_API_TIMEOUT_MS
         value: "90000"
+      - key: VITE_DEPLOYMENT_MODE
+        value: pilot

@@ -2369,7 +2369,7 @@ export default function App() {
             <span>
               InfraShader · {workspaceMode === 'review' ? 'Organisation Review' : 'Design Studio'}
             </span>
-            <span>Local build · No deployment</span>
+            <span>{import.meta.env.VITE_DEPLOYMENT_MODE === 'pilot' ? 'Hosted pilot · Validation in progress' : 'Local build · No deployment'}</span>
           </footer>
         </div>
       </div>

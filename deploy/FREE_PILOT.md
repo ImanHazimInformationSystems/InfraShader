@@ -1,7 +1,15 @@
 # Free pilot deployment
 
-The owner authorised a free hosted pilot on 16 November 2026. This file describes
-the prepared configuration; it does not claim the hosted services are live.
+The owner authorised a free hosted pilot on 16 November 2026. The web and API are
+live; real-account workflow and operational acceptance remain pending. See the
+[hosted evidence](../docs/tracking/evidence/free-pilot-hosted-2026-11-16.md).
+
+- Website: https://infrashader-web.onrender.com
+- API readiness: https://infrashader-api.onrender.com/api/v1/readiness
+- This hosted project starts fresh; local accounts and project data were not copied.
+- First access: create your own pilot Auth user in Supabase, sign in on the website,
+  then use **Create an organisation** and choose the intended workspace(s).
+  Do not use Browser Demo to validate hosted persistence.
 
 ## Services
 
@@ -50,6 +58,8 @@ Web public build settings:
 - `VITE_SUPABASE_PUBLISHABLE_KEY`: browser-safe publishable key.
 - `VITE_MAPBOX_ACCESS_TOKEN`: public Mapbox token, restricted to the actual site.
 - `VITE_API_TIMEOUT_MS=90000`: permits the sleeping free API to wake up.
+- `VITE_DEPLOYMENT_MODE=pilot`: labels this deployment honestly; local builds keep
+  their existing local labels unless this setting is explicitly supplied.
 
 The timeout is bounded to 15–120 seconds; invalid values use 15 seconds. Existing
 caller-provided abort signals still win. Writes are not automatically retried.
