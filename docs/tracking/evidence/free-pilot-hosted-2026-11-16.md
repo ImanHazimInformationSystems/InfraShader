@@ -11,8 +11,9 @@ establishes live infrastructure, not customer acceptance or production readiness
 - Supabase: new Free pilot project in Tokyo. No local projects, uploads, users or
   credentials were migrated. Existing local development remains separate.
 - Initial application release: `85b5244074ad3872151c490cc554e73c2f656ba3`.
-  The hosted-label follow-up is recorded in Git history and Render's deployment
-  records; documentation commits alone do not change the running application.
+  Web label follow-up `0dc490a6b0e6db71fd3e036e1c29938e7ecd52f6` also reached
+  live status. API remains on the initial application release with final secret
+  settings applied. Documentation commits alone do not change running code.
 
 ## Database and confidential configuration
 
@@ -50,6 +51,15 @@ establishes live infrastructure, not customer acceptance or production readiness
   Default Playwright Chromium was absent; used installed Edge instead.
 - Corrected old local-only footer/navigation labels with explicit
   `VITE_DEPLOYMENT_MODE=pilot`; local default and Browser Demo remain distinct.
+  After the release went live, both widths showed the hosted-pilot footer with
+  no page errors or horizontal overflow.
+- Additional **synthetic identity** check: created one temporary Auth user through
+  the admin API, with a reserved `.invalid` test email and no email sent. Admin
+  confirmation was a fixture setup step, not evidence of real email ownership.
+  Password login, refresh and signed API session all returned 200. Headless Edge
+  signed in through the hosted UI, reached organisation onboarding, and retained
+  the session after reload, with no page errors. No organisation/project was
+  created. Test Auth user and its local password fixture were removed afterward.
 - After the label change: frontend lint, typecheck and build passed; 41 Vitest
   files / 163 tests passed. Backend code was unchanged; prior local preflight
   remains 425 passed / 1 Storage-dependent skip. Hosted infrastructure checks
@@ -67,7 +77,7 @@ create their real pilot login. Account passwords and security-setting UI changes
 were handed off under the computer-use skill. Email provider restrictions remain;
 do not disable verification or claim email delivery works without checking it.
 
-Real-account browser login, project persistence, map provider coverage/token
+Real-person account/email verification, project persistence, map provider coverage/token
 restrictions, pricing/proposal issue and retained PDF, invitation/submission across
 organisations, application-level evidence denial, password recovery, hosted
 backup/restore and load limits have **not** passed at this checkpoint. Prior local

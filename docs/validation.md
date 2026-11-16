@@ -6,7 +6,10 @@ Web and API are live on Render Free with new Supabase Free services. Hosted migr
 0021, non-superuser role/private schema, health/readiness, exact CORS, anonymous API
 denial, private Storage byte round trip/public denial and 1440/390 sign-in rendering
 passed. Checked 31 public assets for server credentials; none found. Real-account
-workflow and hosted backup/restore acceptance are still pending. See
+workflow and hosted backup/restore acceptance are still pending. A temporary
+synthetic hosted Auth identity passed password login, refresh, API authentication
+and browser session restoration; the fixture account was removed. The final web
+pilot label was checked at both widths. See
 [hosted evidence](tracking/evidence/free-pilot-hosted-2026-11-16.md).
 
 ## Free hosting preparation ? 16 November 2026
