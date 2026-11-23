@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="InfraShader">
+  <!-- Original InfraShader mark (project-authored): silver leaf over a site line on maroon. -->
+  <rect width="64" height="64" rx="14" fill="#701f36"/>
+  <path d="M17 45C17 27 29 16 48 15c1 19-10 30-31 30Z" fill="#dfe2e7"/>
+  <path d="M19 44 39 24" fill="none" stroke="#701f36" stroke-width="3.2" stroke-linecap="round"/>
+  <path d="M13 51h38" fill="none" stroke="#b9bec7" stroke-width="3" stroke-linecap="round"/>
+</svg>

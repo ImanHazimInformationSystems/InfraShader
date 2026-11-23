@@ -88,7 +88,7 @@ server draft preview, supplier/source fields, reviewed bulk apply, per-layer roa
 |---|---|---|
 | 4.1 | One colour/spacing token set (baseline finding: `--brand-maroon` differs between `styles.css` #701f36 and `product/product.css` #72233d; no warning/danger tokens) | Not started |
 | 4.2 | Font evaluated in real tables/forms/panels/PDF (Manrope vs Inter); bundled WOFF2, licence notices, tabular numerals | Not started |
-| 4.3 | Favicon SVG + fallbacks, Apple touch icon, theme colour, social metadata, consistent titles | Not started |
+| 4.3 | Favicon SVG + fallbacks, Apple touch icon, theme colour, social metadata, consistent titles | Done ([evidence](tracking/evidence/refine-wp4-brand-assets-2026-11-23.md)); absolute og:image waits for an approved domain |
 | 4.4 | Sign-in: password visibility, real progress, cold-start explanation, error/retry/recovery, keyboard + password-manager compatible, reduced motion | Not started |
 | 4.5 | Baseline UI defect: selected-item map card overlaps a map caption at bottom-left (seen in `test-results/reliability/save-failed.png`) | Not started |
 

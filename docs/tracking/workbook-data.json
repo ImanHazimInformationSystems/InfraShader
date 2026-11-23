@@ -1879,11 +1879,11 @@
         "Acceptance status": "Not assessed",
         "Source section": "catalogue lines 675-697; original Shared Platform",
         "Specification link": "docs/features/S01.md",
-        "Relevant code paths": "apps/api/app/onboarding.py; apps/api/app/access.py; apps/api/app/models.py; apps/web/src/components/OrganisationOnboarding.tsx; apps/web/src/components/TeamInvitations.tsx; apps/web/src/styles.css; apps/web/src/components/ui/button.tsx; apps/web/src/studio.css; apps/web/src/components/StudioShell.tsx; apps/web/src/App.tsx; apps/web/src/main.tsx; apps/web/src/product/ProductWorkspace.tsx; apps/web/src/product/WorkspaceNavigation.tsx; apps/web/src/product/catalogue.json; apps/web/src/components/StartPage.tsx; apps/web/src/services/routes.ts; apps/api/app/examples.py; apps/api/app/example_pdf.py; apps/api/migrations/versions/0018_example_projects.py; apps/web/src/components/ExampleProjects.tsx; apps/web/src/components/ReviewGuide.tsx; apps/web/src/domain/review-guide.ts; apps/web/src/services/examples.ts; apps/api/app/design_preview.py; apps/api/migrations/versions/0019_three_studio_examples.py; apps/web/src/components/DesignPlan.tsx; apps/web/src/components/ReviewLayout.tsx; apps/web/src/domain/studies-guide.ts; apps/web/src/components/StudiesGuide.tsx; apps/web/src/components/studies.css",
-        "Relevant tests/checks": "apps/api/tests/test_access_foundation.py; tests/reference-browser/studio-shell.spec.mjs; tests/product-ui-browser/workspaces.spec.mjs; apps/web/src/product/model.test.ts; tests/access-browser/organisation.spec.mjs; tests/live-browser/auth-storage.spec.mjs; apps/api/tests/test_examples.py; apps/web/src/domain/review-guide.test.ts; tests/integration-browser/examples.spec.mjs; apps/web/src/domain/studies-guide.test.ts; tests/integration-browser/studies-guide.spec.mjs",
-        "Remaining gaps": "13 Nov 2026: real local Supabase identity paths rerun and passed (workspace resolution from membership/grants, protected deep links, server denial of ungranted workspace/project, review-only and administration-only accounts, revocation, rejected session). Team membership is not bidder intake; external submitter/evaluator roles beyond D1B are NEXT. Hosted Auth, physical devices and customer acceptance not assessed.; 14 Nov 2026: built-in Studio and Review example projects (real workflows, fictional parties) plus Review guide/tips/preferences added as onboarding aids; not in Browser Demo; no user testing of onboarding yet; v2 (14 Nov 2026): three flat-ground Studio examples A-C feed the review example; review folder lists reviews only; reviewers see the comparison first; 15 Nov 2026: Studies shown as steps with a plain next-step overview and Materials panel simplified (presentation only); fixed web schema rejecting issued snapshots with geometry-less fixed-price lines; no user testing 2026-11-16: the access suite (real local Supabase, cross-origin API) passed 5/5. Fixed a multi-organisation project deep link that stopped at 'Choose an organisation' (App.tsx selects the URL organisation). Hosted Supabase and real users have not been checked. (evidence: docs/tracking/evidence/mvp-closeout-2026-11-16.md)",
+        "Relevant code paths": "apps/api/app/onboarding.py; apps/api/app/access.py; apps/api/app/models.py; apps/web/src/components/OrganisationOnboarding.tsx; apps/web/src/components/TeamInvitations.tsx; apps/web/src/styles.css; apps/web/src/components/ui/button.tsx; apps/web/src/studio.css; apps/web/src/components/StudioShell.tsx; apps/web/src/App.tsx; apps/web/src/main.tsx; apps/web/src/product/ProductWorkspace.tsx; apps/web/src/product/WorkspaceNavigation.tsx; apps/web/src/product/catalogue.json; apps/web/src/components/StartPage.tsx; apps/web/src/services/routes.ts; apps/api/app/examples.py; apps/api/app/example_pdf.py; apps/api/migrations/versions/0018_example_projects.py; apps/web/src/components/ExampleProjects.tsx; apps/web/src/components/ReviewGuide.tsx; apps/web/src/domain/review-guide.ts; apps/web/src/services/examples.ts; apps/api/app/design_preview.py; apps/api/migrations/versions/0019_three_studio_examples.py; apps/web/src/components/DesignPlan.tsx; apps/web/src/components/ReviewLayout.tsx; apps/web/src/domain/studies-guide.ts; apps/web/src/components/StudiesGuide.tsx; apps/web/src/components/studies.css; apps/web/index.html; apps/web/public/favicon.svg; apps/web/public/site.webmanifest; scripts/render-brand-assets.mjs",
+        "Relevant tests/checks": "apps/api/tests/test_access_foundation.py; tests/reference-browser/studio-shell.spec.mjs; tests/product-ui-browser/workspaces.spec.mjs; apps/web/src/product/model.test.ts; tests/access-browser/organisation.spec.mjs; tests/live-browser/auth-storage.spec.mjs; apps/api/tests/test_examples.py; apps/web/src/domain/review-guide.test.ts; tests/integration-browser/examples.spec.mjs; apps/web/src/domain/studies-guide.test.ts; tests/integration-browser/studies-guide.spec.mjs; tests/integration-browser/brand.spec.mjs",
+        "Remaining gaps": "13 Nov 2026: real local Supabase identity paths rerun and passed (workspace resolution from membership/grants, protected deep links, server denial of ungranted workspace/project, review-only and administration-only accounts, revocation, rejected session). Team membership is not bidder intake; external submitter/evaluator roles beyond D1B are NEXT. Hosted Auth, physical devices and customer acceptance not assessed.; 14 Nov 2026: built-in Studio and Review example projects (real workflows, fictional parties) plus Review guide/tips/preferences added as onboarding aids; not in Browser Demo; no user testing of onboarding yet; v2 (14 Nov 2026): three flat-ground Studio examples A-C feed the review example; review folder lists reviews only; reviewers see the comparison first; 15 Nov 2026: Studies shown as steps with a plain next-step overview and Materials panel simplified (presentation only); fixed web schema rejecting issued snapshots with geometry-less fixed-price lines; no user testing 2026-11-16: the access suite (real local Supabase, cross-origin API) passed 5/5. Fixed a multi-organisation project deep link that stopped at 'Choose an organisation' (App.tsx selects the URL organisation). Hosted Supabase and real users have not been checked. (evidence: docs/tracking/evidence/mvp-closeout-2026-11-16.md); 23 Nov 2026 refinement WP4: original favicon/touch/manifest icons, maroon theme colour and sharing metadata added (docs/tracking/evidence/refine-wp4-brand-assets-2026-11-23.md). Token unification, font evaluation and sign-in polish remain; og:image is relative until a public domain is approved",
         "Dependencies": "Test contractor, reviewer and dual-capability accounts at UI and API boundaries.",
-        "Last reviewed date": "2026-11-16",
+        "Last reviewed date": "2026-11-23",
         "Evidence reference": "docs/tracking/evidence/studies-materials-simplification-2026-11-15.md",
         "Resource IDs": "R01, R02, R03, R07",
         "Owner": "",
@@ -18214,6 +18214,20 @@
         "Last reviewed date": "2026-11-12"
       },
       {
+        "Tracking ID": "TRK-S01-013",
+        "Original requirement ID": "",
+        "Feature IDs": "S01",
+        "Criterion origin": "User refinement brief 2026-11-23 (WP4)",
+        "Expected behaviour": "The web app ships an original maroon/silver favicon (SVG with PNG fallback), Apple touch icon, web manifest, maroon browser theme colour and sharing metadata; every referenced asset resolves from the production bundle.",
+        "Verification method": "tests/integration-browser/brand.spec.mjs against the production bundle; visual inspection of rendered icons and social card.",
+        "Result": "Passed",
+        "Acceptance status": "Pending",
+        "Evidence": "docs/tracking/evidence/refine-wp4-brand-assets-2026-11-23.md",
+        "Remaining work": "Absolute og:image URL once a public domain is approved; user review of positioning text.",
+        "Source section": "Refinement plan WP4 4.3",
+        "Last reviewed date": "2026-11-23"
+      },
+      {
         "Tracking ID": "TRK-L02-013",
         "Original requirement ID": "",
         "Feature IDs": "L02",
@@ -24610,8 +24624,8 @@
     "Not audited": 39
   },
   "canonical_hashes": {
-    "feature-register.csv": "5ae56f6beecf81c0144effc448c02aa1016566818b548ee29e6717f5b50e0e05",
-    "acceptance-checklist.csv": "561d8224262f2457549987917eb4066d0cfc81e348b42fb031ebc7a0d8fa19c6",
+    "feature-register.csv": "a6aeca811ff6bc55e73e2c125d0d04ed814acb560bb2a487091fa6d209de6cfd",
+    "acceptance-checklist.csv": "23b26ceeeb41a865eb34c365efe4b752d2448849ca79417c21d9ada116235d86",
     "release-gates.csv": "fe4204f809cc630af069f91ccca0cba55d8d5593b31496f4bfb262469842305a",
     "reconciliation.csv": "ae2e36cc042dde7c677a554215f1c42e1604945b7f04c0cb0fe2443eb78c5fe1",
     "resources.csv": "1dcf5766bb1a455fbc9916e5035d1da54cb5bbc6224d847001cc363e9646beb3",
