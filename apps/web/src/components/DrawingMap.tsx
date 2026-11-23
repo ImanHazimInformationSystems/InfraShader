@@ -320,6 +320,9 @@ export default function DrawingMap({
           })
           active.on('click', (event) => {
             if (latest.current.selectionBlocked) return
+            // An embedded 3D scene tool (move, terrain brush) handles this click itself.
+            const sceneTool = active.getCanvas().dataset.sceneTool
+            if (sceneTool && sceneTool !== 'navigate') return
             if (event.originalEvent.shiftKey && toggleSelection.current) {
               const hits = active.queryRenderedFeatures(event.point, {
                 layers: ['workspace-point', 'workspace-line', 'workspace-fill'],
@@ -416,6 +419,23 @@ export default function DrawingMap({
       drawing.selectFeature(selected.id)
       editing.current = true
     }
+    // Camera state (threeD, terrainEdited) is deliberately not a dependency: start() switches to
+    // the plan view, and re-running this effect then cleared Terra Draw back to select mode,
+    // silently cancelling every polygon started from the default 3D view (L04 defect).
+  }, [selected, ready, disabled])
+  useEffect(() => {
+    // Same eligibility as the editing effect above: only editable selections move the camera.
+    if (
+      !ready ||
+      !selected ||
+      disabled ||
+      selected.properties?.preset ||
+      selected.properties?.locked ||
+      (selected.geometry.type === 'Polygon' && selected.geometry.coordinates.length > 1)
+    )
+      return
+    const parsed = geometrySchema.safeParse(selected.geometry)
+    if (!parsed.success) return
     const coordinates =
       parsed.data.type === 'Point'
         ? [parsed.data.coordinates]

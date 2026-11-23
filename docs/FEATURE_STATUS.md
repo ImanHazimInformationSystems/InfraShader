@@ -2,7 +2,7 @@
 
 Generated from canonical CSV registers. Do not edit this summary directly.
 
-Latest tracking review: 2026-11-16. Implementation and acceptance remain separate; initial audit evidence is dated 26 October 2026.
+Latest tracking review: 2026-11-23. Implementation and acceptance remain separate; initial audit evidence is dated 26 October 2026.
 
 85 project roadmap features: the 84-feature 11 November 2026 PDF baseline plus the user-requested L31 roadwork addendum dated 12 November 2026. The source PDF remains an 84-feature historical baseline. The 38 overlapping baseline references (F/D/E) and six refinements (K) are not extra features. Resources, gates, SRS names and aliases are excluded. No completion percentage is asserted.
 

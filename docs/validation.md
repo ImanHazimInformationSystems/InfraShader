@@ -1,5 +1,29 @@
 # Validation evidence
 
+## Refinement WP1 reliability slice — 23 November 2026
+
+Changed:
+- readable cross-origin server errors with references;
+- pending-migration readiness and errors;
+- timeout, offline and gateway classification in the client;
+- studio Saving / Save failed / conflict states;
+- L04 polygon drawing fix (camera state reset Terra Draw);
+- embedded scene tool no longer also selects map features;
+- Pricing "Needs quantity" versus "Needs rate";
+- road-without-layers browser check.
+
+Actual results:
+- **Backend:** 430 passed / 1 skipped; Ruff clean.
+- **Frontend:** lint, typecheck and build clean; 170 tests.
+- **Integration browser:** 21 of 21.
+- **Browser Demo:** 30 of 30 (was 27 of 30).
+- **Reference:** 29 of 30; geographic-editor now passes. `scene-textures` timed out once in a shared
+  helper during the full run and passed when rerun alone. It is recorded as intermittent.
+- **Restore drill:** passed on 0021.
+- **Not run:** live and access suites (local Supabase/Docker not running).
+
+Nothing was deployed. [Evidence](tracking/evidence/refine-wp1-reliability-2026-11-23.md).
+
 ## Free pilot infrastructure live — 16 November 2026
 
 Web and API are live on Render Free with new Supabase Free services. Hosted migration

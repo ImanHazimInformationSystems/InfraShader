@@ -139,7 +139,7 @@ test('price a bench, reuse its rate, bulk-price matching trees and price road la
   await dialog.screenshot({ path: `${shots}/bulk-trees.png` })
   await dialog.getByRole('button', { name: 'Apply to 2 items' }).click()
   await expect(board.getByRole('listitem').filter({ hasText: 'Tabebuia 2' })).toContainText('RM 420.00', { timeout: 15000 })
-  await expect(board.getByRole('listitem').filter({ hasText: 'Palm' })).toContainText('Needs price')
+  await expect(board.getByRole('listitem').filter({ hasText: 'Palm' })).toContainText('Needs rate')
 
   // 4. Road layers: area × thickness = m³, one saved rate and one new supplier price-list rate.
   await board.getByRole('button', { name: 'Price Driveway' }).click()

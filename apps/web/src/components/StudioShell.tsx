@@ -300,7 +300,11 @@ export default function StudioShell({
               </ol>
             </nav>
           )}
-          <span className="studio-save-state" role="status">
+          <span
+            className="studio-save-state"
+            role="status"
+            data-tone={/^(Save failed|Not saved:)/.test(status) ? 'warning' : undefined}
+          >
             {status}
           </span>
           <button

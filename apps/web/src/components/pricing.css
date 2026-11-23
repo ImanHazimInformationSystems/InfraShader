@@ -158,6 +158,7 @@
 .price-card[data-state='priced'] {
   border-left-color: #2f7d4f;
 }
+.price-card[data-state='needs_quantity'],
 .price-card[data-state='needs_price'],
 .price-card[data-state='needs_spec'],
 .price-card[data-state='incomplete'] {
@@ -233,6 +234,7 @@
   background: #e5f3ea;
   color: #1f5c38;
 }
+.price-chip.is-needs_quantity,
 .price-chip.is-needs_price,
 .price-chip.is-needs_spec,
 .price-chip.is-incomplete {

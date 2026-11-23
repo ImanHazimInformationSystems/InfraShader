@@ -28,7 +28,8 @@ import {
   type WorkItem,
   type WorkspaceData,
 } from '../domain/workspace'
-import { request } from '../services/api'
+import { ApiError, request } from '../services/api'
+import { workspaceStatus, type SaveState } from '../domain/save-status'
 import DrawingMap from './DrawingMap'
 import SpatialEditor from './SpatialEditor'
 import TownLayout from './TownLayout'
@@ -181,6 +182,7 @@ export default function GeometryWorkspace({
     onDirty,
   ])
   const [pendingForm, setPendingForm] = useState(false)
+  const [saveState, setSaveState] = useState<SaveState>('idle')
   const [busy, setBusy] = useState(true)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
@@ -574,6 +576,7 @@ export default function GeometryWorkspace({
     if (!canEdit || project.archived || !data || pendingForm || constraintDirty || layoutDraftDirty) return
     setBusy(true)
     setError('')
+    setSaveState('saving')
     try {
       let result: SavedWorkspace
       if (demo) {
@@ -600,13 +603,20 @@ export default function GeometryWorkspace({
       if (recoveryKey) sessionStorage.removeItem(recoveryKey)
       setRecoverable(null)
       setDirty(false)
+      setSaveState('idle')
       setNotice(
         demo
           ? 'Draft saved only in Browser Demo. Metric validation and calculations require the real API.'
           : `Workspace revision ${result.revision} saved. Quantities were calculated by the API.`,
       )
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Save failed. Your draft is retained.')
+      if (mounted.current)
+        setSaveState(
+          reason instanceof ApiError && reason.code === 'revision_conflict' ? 'conflict' : 'failed',
+        )
+      setError(
+        `${reason instanceof Error ? reason.message : 'Save failed.'} Your unsaved changes are still in this tab.`,
+      )
     } finally {
       setBusy(false)
     }
@@ -800,15 +810,7 @@ export default function GeometryWorkspace({
         if (tool === 'trees') setSceneMode(false)
         if (!demo && data && (tool === 'terrain' || tool === 'objects')) setSceneMode(true)
       }}
-      status={
-        treeDirty
-          ? 'Unsaved tree decisions'
-          : dirty
-            ? 'Unsaved changes'
-            : saved.revision
-              ? `All changes saved (version ${saved.revision})`
-              : 'Not saved yet'
-      }
+      status={workspaceStatus({ saveState, treeDirty, dirty, revision: saved.revision })}
       onClose={onClose}
       onSave={() => void save()}
       saveDisabled={

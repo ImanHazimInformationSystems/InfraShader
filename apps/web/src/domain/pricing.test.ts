@@ -10,6 +10,7 @@ import {
   rateUsage,
   rateValidity,
   setItemPrice,
+  STATE_LABEL,
   type PriceRow,
 } from './pricing'
 import type { WorkItem, WorkspaceData } from './workspace'
@@ -211,8 +212,11 @@ describe('pricing home helpers', () => {
 
   it('derives plain states from API rows and never calls a partial item priced', () => {
     const bench = item()
-    expect(itemState(bench, []).state).toBe('needs_price')
+    // No API row means nothing was measured: the next action is quantity, not a rate.
+    expect(itemState(bench, []).state).toBe('needs_quantity')
+    expect(STATE_LABEL[itemState(bench, []).state]).toBe('Needs quantity')
     expect(itemState(bench, [row(bench.id)]).state).toBe('needs_price')
+    expect(STATE_LABEL.needs_price).toBe('Needs rate')
     expect(itemState(bench, [row(bench.id, { state: 'priced', total: '850.00' })]).state).toBe(
       'priced',
     )

@@ -20,6 +20,7 @@ import {
   Package,
   ReceiptText,
   Route,
+  Ruler,
   Shovel,
   TreeDeciduous,
   Undo2,
@@ -73,6 +74,7 @@ const groupIcon: Record<PriceGroup, typeof Package> = {
 const stateIcon: Record<ItemState, typeof Package> = {
   existing: CircleDashed,
   priced: CircleCheck,
+  needs_quantity: Ruler,
   needs_price: CircleAlert,
   needs_spec: CircleAlert,
   needs_review: CircleAlert,

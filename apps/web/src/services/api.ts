@@ -14,10 +14,47 @@ export class ApiError extends Error {
     public status: number,
     public code: string,
     public requestId?: string,
+    /** Parsed response body, when the server sent one (e.g. readiness checks on 503). */
+    public body?: unknown,
   ) {
     super(message)
     this.name = 'ApiError'
   }
+}
+
+/** Codes for failures where no HTTP response was read. Status is 0 for all of them. */
+export type TransportFailure = 'timeout' | 'offline' | 'aborted' | 'network_error'
+
+/**
+ * Explain a fetch that produced no readable response. A timeout is not the same as an
+ * unreachable server: a sleeping pilot host or a long calculation can exceed the limit.
+ */
+export function transportFailure(reason: unknown, callerAborted: boolean): ApiError {
+  const name = reason instanceof Error || reason instanceof DOMException ? reason.name : ''
+  if (callerAborted || name === 'AbortError')
+    return new ApiError('The request was cancelled.', 0, 'aborted')
+  if (name === 'TimeoutError')
+    return new ApiError(
+      'The server did not answer in time. It may be starting up or still working; wait a moment and retry. Unsaved work stays in this tab.',
+      0,
+      'timeout',
+    )
+  if (typeof navigator !== 'undefined' && navigator.onLine === false)
+    return new ApiError(
+      'This device appears to be offline. Reconnect, then retry. Unsaved work stays in this tab.',
+      0,
+      'offline',
+    )
+  return new ApiError(
+    'The API could not be reached. Check the connection and retry.',
+    0,
+    'network_error',
+  )
+}
+
+/** Short reference shown to users for server-side failures; logs hold the full request ID. */
+export function reference(requestId?: string) {
+  return requestId ? ` Reference: ${requestId.slice(0, 8)}.` : ''
 }
 export async function request<T>(
   path: string,
@@ -40,16 +77,14 @@ export async function request<T>(
           ...init.headers,
         },
       })
-    } catch {
-      if (idempotent && attempt === 0 && !init.signal?.aborted) {
+    } catch (reason) {
+      const failure = transportFailure(reason, Boolean(init.signal?.aborted))
+      // Retry a dropped socket once; a timeout already waited the full limit.
+      if (idempotent && attempt === 0 && failure.code === 'network_error') {
         await new Promise((resolve) => setTimeout(resolve, 400))
         continue
       }
-      throw new ApiError(
-        'The API could not be reached. Check the connection and retry.',
-        0,
-        'network_error',
-      )
+      throw failure
     }
   }
   const requestId = response.headers.get('X-Request-ID') ?? undefined
@@ -76,13 +111,22 @@ export async function request<T>(
           .map((item) => `${item.field.replace(/^body\./, '')}: ${item.message}`)
           .join('; ')
       : ''
+    const serverSide = response.status >= 500
+    const message = parsed.success
+      ? [parsed.data.error.message, detail].filter(Boolean).join(' ')
+      : serverSide
+        ? `The server or its gateway failed (HTTP ${response.status}). It may be restarting; retry shortly.`
+        : `The request failed (HTTP ${response.status}). Please retry.`
     throw new ApiError(
-      parsed.success
-        ? [parsed.data.error.message, detail].filter(Boolean).join(' ')
-        : 'The request failed. Please retry.',
+      `${message}${serverSide ? reference(requestId ?? parsed.data?.request_id) : ''}`,
       response.status,
-      parsed.success ? parsed.data.error.code : 'request_failed',
-      requestId,
+      parsed.success
+        ? parsed.data.error.code
+        : serverSide
+          ? 'upstream_unavailable'
+          : 'request_failed',
+      requestId ?? parsed.data?.request_id,
+      data,
     )
   }
   const parsed = schema.safeParse(data)

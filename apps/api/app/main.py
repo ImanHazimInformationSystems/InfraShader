@@ -33,6 +33,7 @@ from app.brief_checkpoint import router as brief_checkpoint_router
 from app.change_register import router as change_register_router
 from app.config import Settings, get_settings
 from app.db import database_session, engine_for
+from app.error_middleware import UnexpectedErrorMiddleware
 from app.errors import APIError
 from app.examples import router as examples_router
 from app.models import CatalogueRate
@@ -42,6 +43,7 @@ from app.owner_review import router as owner_review_router
 from app.plan_reference import PlanReference
 from app.project_deletion import router as project_deletion_router
 from app.project_hub import router as project_hub_router
+from app.schema_status import schema_status
 from app.schemas import ProjectCreate, ProjectList, ProjectResponse, ProjectUpdate, SessionResponse
 
 logger = logging.getLogger("infrashader.requests")
@@ -73,6 +75,8 @@ def explore_solar_day(data: explore.SolarDayInput):
         raise APIError(422, "solar_unavailable", str(error)) from error
 
 
+# Innermost first: unexpected errors become readable JSON inside CORS (see error_middleware).
+app.add_middleware(UnexpectedErrorMiddleware)
 app.add_middleware(BodyLimit)
 app.add_middleware(
     CORSMiddleware,
@@ -168,13 +172,22 @@ def readiness(
         "auth": "not_configured",
     }
     if settings.database_url:
+        connected = False
         try:
             with engine_for(settings.database_url).connect() as connection:
+                connected = True
                 connection.execute(text("SELECT postgis_version()"))
                 connection.execute(text("SELECT 1 FROM organisations LIMIT 1"))
             checks["database"] = "ready"
         except SQLAlchemyError:
             checks["database"] = "unavailable_or_unmigrated"
+        if connected:
+            # Pending migrations make individual features fail later; report them up front.
+            # "unknown" (scripts absent from a build) and "unrecognised" (database newer than
+            # this code) are informational; only pending migrations block readiness.
+            checks["schema"] = schema_status(engine_for(settings.database_url))
+            if checks["schema"] in {"behind", "empty"}:
+                checks["database"] = "migrations_pending"
     if settings.issuer:
         try:
             keys = verifier.jwks.get_signing_keys() if verifier.jwks else []
@@ -185,7 +198,7 @@ def readiness(
             )
         except jwt.PyJWTError:
             checks["auth"] = "unavailable"
-    ready = checks == {"database": "ready", "auth": "ready"}
+    ready = checks["database"] == "ready" and checks["auth"] == "ready"
     return JSONResponse(
         status_code=200 if ready else 503,
         content={"status": "ready" if ready else "unavailable", "checks": checks},

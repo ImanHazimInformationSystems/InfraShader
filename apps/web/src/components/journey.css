@@ -442,6 +442,15 @@
   max-width: 120px;
   line-height: 1.25;
 }
+/* A failed save must not read as branding: use a bordered alert pill, not maroon text. */
+.studio-header .studio-save-state[data-tone='warning'] {
+  color: #8f1d1d;
+  background: #fdecea;
+  border: 1px solid #e8a5a0;
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-weight: 650;
+}
 @media (max-width: 1400px) {
   .studio-header .studio-identity {
     flex-basis: 200px;

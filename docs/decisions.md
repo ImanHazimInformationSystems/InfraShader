@@ -1,5 +1,22 @@
 # Decisions
 
+## Customer-ready refinement: scope, IDs and error contract (23 November 2026)
+
+The user's refinement brief is executed in work packages on `refine/customer-ready` with local commits
+only ([plan](REFINEMENT_PLAN.md)). It does not authorise the whole historical backlog, deployment, live
+payments, external messages or external AI processing.
+- **New scope stays distinct.** The public website/onboarding and plans/billing are new. They are proposed
+  as refinement records **K07** and **K08**: not counted in the 85 roadmap features and added to the
+  register only when their slices start. Existing IDs are not repurposed.
+- **Error contract.** Unexpected server errors are converted *inside* CORS, so browsers on another origin
+  can read them. Users see a short request reference (first 8 characters); logs keep the full ID and the
+  exception type only. Database failures name pending migrations or statement timeouts without SQL text.
+- **Readiness.** Pending migrations (`schema` behind or empty) make readiness unavailable with
+  `database: migrations_pending`. A database newer than the code (`unrecognised`) or missing migration
+  scripts (`unknown`) is reported but does not block readiness.
+- **Client failures.** A timeout is reported as a slow or starting server and is not retried
+  automatically; only a dropped connection on a safe read is retried once.
+
 ## Controlled free hosted pilot (16 November 2026)
 
 The user explicitly authorised free Render/Supabase deployment. Use manual releases,

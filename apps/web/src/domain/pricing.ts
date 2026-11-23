@@ -117,6 +117,7 @@ export function priceGroup(item: WorkItem): PriceGroup {
 export type ItemState =
   | 'existing'
   | 'priced'
+  | 'needs_quantity'
   | 'needs_price'
   | 'needs_spec'
   | 'needs_review'
@@ -126,7 +127,9 @@ export type ItemState =
 export const STATE_LABEL: Record<ItemState, string> = {
   existing: 'Existing site',
   priced: 'Priced',
-  needs_price: 'Needs price',
+  // The API measures before anything can be priced; "rate" names the next action precisely.
+  needs_quantity: 'Needs quantity',
+  needs_price: 'Needs rate',
   needs_spec: 'Needs specification',
   needs_review: 'Needs review',
   incomplete: 'Incomplete',
@@ -155,10 +158,11 @@ export function itemState(item: WorkItem, rows: PriceRow[]): { state: ItemState;
       state: 'needs_spec',
       why: 'Describe the purchased stock (species, size, pot or root ball) before choosing a rate.',
     }
+  // The API returns price rows only for measured lines: no row means no quantity yet.
   if (!own.length)
     return {
-      state: 'needs_price',
-      why: 'No quantity yet. Save or check the drawing, then price it.',
+      state: 'needs_quantity',
+      why: 'No measured quantity yet. Save the design or check its drawing; the API measures it before it can be priced.',
     }
   if (own.some((row) => row.state === 'stale'))
     return {

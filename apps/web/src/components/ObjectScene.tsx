@@ -686,6 +686,10 @@ export default function ObjectScene({
       }
     }
     renderer.domElement.tabIndex = 0
+    // On the shared map canvas, an active scene tool owns the pointer: DrawingMap reads this and
+    // must not also select the map feature under a move/brush click (which switched panels).
+    // A second (navigate-only) scene can share the canvas, so only an active tool sets the flag.
+    if (embedded && tool !== 'navigate') renderer.domElement.dataset.sceneTool = tool
     const previousTouchAction = renderer.domElement.style.touchAction
     renderer.domElement.style.touchAction = 'none'
     renderer.domElement.addEventListener('pointerdown', down)
@@ -726,6 +730,7 @@ export default function ObjectScene({
           else handler.disable()
         })
         delete renderer.domElement.dataset.designTriangles
+        if (renderer.domElement.dataset.sceneTool === tool) delete renderer.domElement.dataset.sceneTool
       }
       renderer.domElement.style.touchAction = previousTouchAction
       alive = false

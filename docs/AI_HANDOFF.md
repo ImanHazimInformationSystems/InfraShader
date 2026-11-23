@@ -41,6 +41,13 @@ For Design Studio, the current Layout is where existing/proposed spatial items a
 
 ## Recent evidence and open gates
 
+- **23 November 2026 — customer-ready refinement in progress** on branch `refine/customer-ready` (local
+  commits only). Read [`REFINEMENT_CONTINUATION.md`](REFINEMENT_CONTINUATION.md) first, then
+  [`REFINEMENT_PLAN.md`](REFINEMENT_PLAN.md). First slice:
+  [WP1 reliability evidence](tracking/evidence/refine-wp1-reliability-2026-11-23.md). It fixes readable
+  cross-origin errors, pending-migration readiness, save states, the L04 polygon and object-move defects,
+  and Pricing quantity/rate states.
+
 - [`tracking/evidence/mvp-closeout-2026-11-16.md`](tracking/evidence/mvp-closeout-2026-11-16.md): MVP software close-out.
   - Covers terrain site-work and proposal area in Review, Mapbox 429/403 messages, the Vitest drive-letter fix (`npm test` → `apps/web/scripts/vitest.mjs`), the reference config `cwd` and spec updates, and the API CORS `DELETE` fix.
   - Adds the deployment package (`deploy/`), `scripts/backup.py`, the real-account submission spec and the S12 audit.

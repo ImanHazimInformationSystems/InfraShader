@@ -103,7 +103,9 @@ test('Geographic map terrain stroke, object contact, undo and persistence',async
   await expect(page.getByRole('button',{name:'Validate & save workspace',exact:true})).toBeDisabled()
   await mkdir('artifacts',{recursive:true})
   await canvas.screenshot({path:'artifacts/l04-geographic-terrain.png'})
-  await page.getByRole('button', { name: 'Map view', exact: true }).click()
+  // Since the 15 Nov journey, "Map view" exists only in List view; this test is already in map view.
+  const mapView = page.getByRole('button', { name: 'Map view', exact: true })
+  if (await mapView.isVisible()) await mapView.click()
   await expect(page.getByRole('region',{name:'Geometry drawing canvas',exact:true}).locator('canvas.mapboxgl-canvas')).toHaveAttribute('data-design-triangles', /[1-9]/)
   await page.screenshot({path:'artifacts/l04-geographic-studio-desktop.png',animations:'disabled'})
   await page.setViewportSize({width:390,height:844})

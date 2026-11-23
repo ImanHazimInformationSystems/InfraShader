@@ -69,7 +69,7 @@ import {
   type Project,
   type ProjectInput,
 } from './domain/projects'
-import { api, ApiError } from './services/api'
+import { api, ApiError, readinessSchema, reference } from './services/api'
 import { DemoStore, DEMO_ORGANISATION_ID } from './services/demo'
 import { supabase } from './services/auth'
 
@@ -110,8 +110,9 @@ const demoOrganisation: Organisation = {
 }
 
 function displayError(reason: unknown): string {
+  // Server-side failures already carry their short reference in the message.
   if (reason instanceof ApiError)
-    return `${reason.message}${reason.requestId ? ` Request: ${reason.requestId}` : ''}`
+    return `${reason.message}${reason.status < 500 ? reference(reason.requestId) : ''}`
   return reason instanceof Error ? reason.message : 'Something went wrong. Please retry.'
 }
 
@@ -178,6 +179,7 @@ export default function App() {
   const [notice, setNotice] = useState('')
   const [health, setHealth] = useState<'checking' | 'reachable' | 'unavailable'>('checking')
   const [ready, setReady] = useState(false)
+  const [setupNote, setSetupNote] = useState<'' | 'migrations' | 'waking'>('')
   const token = session?.access_token
   const organisation = demo ? demoOrganisation : organisations.find((item) => item.id === orgId)
   useEffect(() => {
@@ -307,13 +309,20 @@ export default function App() {
   const checkHealth = useCallback(async () => {
     setHealth('checking')
     setReady(false)
+    setSetupNote('')
     try {
       await api.health()
       setHealth('reachable')
       const result = await api.readiness()
       setReady(result.status === 'ready')
     } catch (reason) {
-      if (!(reason instanceof ApiError && reason.status === 503)) setHealth('unavailable')
+      if (!(reason instanceof ApiError && reason.status === 503)) {
+        setHealth('unavailable')
+        if (reason instanceof ApiError && reason.code === 'timeout') setSetupNote('waking')
+        return
+      }
+      const checks = readinessSchema.safeParse(reason.body).data?.checks ?? {}
+      setSetupNote(checks.database === 'migrations_pending' ? 'migrations' : '')
     }
   }, [])
   // This effect starts an external health request and its loading indicator.
@@ -1151,8 +1160,12 @@ export default function App() {
                   health === 'reachable'
                     ? ready
                       ? 'API and real services ready'
-                      : 'API reachable; real services require setup'
-                    : 'Local API not reachable'
+                      : setupNote === 'migrations'
+                        ? 'The database needs pending migrations before some features work. An operator must run scripts/api.ps1 migrate.'
+                        : 'API reachable; real services require setup'
+                    : setupNote === 'waking'
+                      ? 'The API did not answer in time. A sleeping host can take up to a minute to start; retry shortly.'
+                      : 'API not reachable'
                 }
               >
                 <i className={health === 'reachable' ? (ready ? 'ready' : 'partial') : ''} />
@@ -1161,8 +1174,12 @@ export default function App() {
                   : health === 'reachable'
                     ? ready
                       ? 'Services ready'
-                      : 'API reachable · setup pending'
-                    : 'API unavailable'}
+                      : setupNote === 'migrations'
+                        ? 'API reachable · migrations pending'
+                        : 'API reachable · setup pending'
+                    : setupNote === 'waking'
+                      ? 'API starting or slow'
+                      : 'API unavailable'}
               </span>
               <button
                 className="icon-button"
@@ -2369,7 +2386,11 @@ export default function App() {
             <span>
               InfraShader · {workspaceMode === 'review' ? 'Organisation Review' : 'Design Studio'}
             </span>
-            <span>{import.meta.env.VITE_DEPLOYMENT_MODE === 'pilot' ? 'Hosted pilot · Validation in progress' : 'Local build · No deployment'}</span>
+            <span>
+              {import.meta.env.VITE_DEPLOYMENT_MODE === 'pilot'
+                ? 'Hosted pilot · Validation in progress'
+                : 'Local build · No deployment'}
+            </span>
           </footer>
         </div>
       </div>
